@@ -1,4 +1,4 @@
-package sg.edu.appventure.examclock;
+package sg.edu.appventure.examclock.display;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -13,67 +13,60 @@ import java.util.Calendar;
 
 public class ClockController {
     private final Group parent;
+    private final Group clockFace;
     private final Group hour;
     private final Group minute;
     private final Group second;
     private final Calendar calendar;
-
-    private final Text[] clockLabels;
-    private final Line[] clockLines;
-    private Timeline timeline;
+    private final Timeline timeline;
     private final DigitalClock digitalClock;
 
-    public ClockController(Group parent, Group hour, Group minute, Group second) {
+    public ClockController(Group parent, Group clockFace, Group hour, Group minute, Group second) {
         this.hour = hour;
         this.minute = minute;
         this.second = second;
         this.parent = parent;
-        clockLabels = new Text[12];
-        clockLines = new Line[60];
+        this.clockFace = clockFace;
         calendar = Calendar.getInstance();
-        digitalClock = new DigitalClock(Color.WHITE, Color.TRANSPARENT, Color.LIGHTGREY);
+        digitalClock = new DigitalClock(Color.DODGERBLUE, Color.TRANSPARENT, Color.BLACK);
         digitalClock.setLayoutX(-digitalClock.width / 2);
         digitalClock.setLayoutY(60);
-        parent.getChildren().add(digitalClock);
-        updateClockLabels(parent, 200);
+        clockFace.getChildren().add(digitalClock);
+        createClockLabels();
+
+        timeline = new Timeline();
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
     }
 
-    private void updateClockLabels(Group parent, double radius) {
+    private void createClockLabels() {
         for (int i = 0; i < 60; i++) {
             if (i % 5 == 0) {
-                Text text;
-                if (clockLabels[i / 5] == null) {
-                    parent.getChildren().add(clockLabels[i / 5] = text = new Text());
-                    text.setText(String.valueOf((i == 0 ? 60 : i) / 5));
-                    text.getStyleClass().add("clock-element");
-                } else text = clockLabels[i / 5];
-                text.setFont(Font.font(18));
-                text.setX(160 * Math.sin(i * Math.PI / 30));
-                text.setY(-160 * Math.cos(i * Math.PI / 30));
+                Text text = new Text();
+                text.setText(String.valueOf((i == 0 ? 60 : i) / 5));
+                text.getStyleClass().add("clock-element");
+                text.setFont(Font.font(i % 15 == 0 ? 24 : 16));
+                text.setX(155 * Math.sin(i * Math.PI / 30));
+                text.setY(-155 * Math.cos(i * Math.PI / 30));
                 text.setX(text.getX() - text.getLayoutBounds().getWidth() / 2);
                 text.setY(text.getY() + text.getLayoutBounds().getHeight() / 4);
+                clockFace.getChildren().add(text);
             }
-            Line line;
-            if (clockLines[i] == null) {
-                parent.getChildren().add(line = clockLines[i] = new Line());
-                line.getStyleClass().add("clock-element");
-            } else line = clockLines[i];
+            Line line = new Line();
+            line.getStyleClass().add("clock-element");
             line.setEndX(200 * Math.sin(i * Math.PI / 30));
             line.setEndY(200 * Math.cos(i * Math.PI / 30));
+            line.setStrokeWidth(i % 15 == 0 ? 3 : i % 5 == 0 ? 2 : 1);
 
             double start = i % 15 == 0 ? 175.0 : i % 5 == 0 ? 185.0 : 190.0;
             line.setStartX(start * Math.sin(i * Math.PI / 30));
             line.setStartY(start * Math.cos(i * Math.PI / 30));
+            clockFace.getChildren().add(line);
         }
-        parent.setScaleX(radius / 200);
-        parent.setScaleY(radius / 200);
     }
 
     public void play() {
         if (timeline != null) timeline.stop();
-        timeline = new Timeline();
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
         timeline.play();
     }
 
@@ -111,7 +104,8 @@ public class ClockController {
 
     public void resize(double width, double height) {
         double radius = 0.95 * Math.min(width / 2 - 125.5, height / 2);
-        updateClockLabels(parent, radius);
+        parent.setScaleX(radius / 200);
+        parent.setScaleY(radius / 200);
         parent.setLayoutX(width / 2 - 125.5);
         parent.setLayoutY(height / 2);
     }

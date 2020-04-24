@@ -1,4 +1,4 @@
-package sg.edu.appventure.examclock;
+package sg.edu.appventure.examclock.display;
 
 import javafx.scene.Group;
 import javafx.scene.Parent;

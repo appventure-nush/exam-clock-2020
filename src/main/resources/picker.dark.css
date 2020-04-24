@@ -1,0 +1,37 @@
+.date-picker-list-view, .data-picker-list-cell {
+    -fx-background-color: rgb(20, 20, 20);
+    /*-fx-text-fill: white;*/
+    -fx-font-weight: bold;
+}
+
+.day-name-cell.date-cell, .week-number-cell.date-cell {
+    -fx-text-fill: rgb(100, 100, 100);
+}
+
+.date-cell {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.date-cell:selected, .date-cell:focused, .date-cell:hover {
+    -fx-text-fill: rgb(20, 20, 20);
+    -fx-font-weight: bold;
+}
+
+.date-picker-popup > * > * > * > .left-button .jfx-svg-glyph,
+.date-picker-popup > * > * > * > .right-button .jfx-svg-glyph {
+    -fx-background-color: rgb(20, 20, 20);
+}
+
+.date-picker-popup .calendar-grid .day-cell:hover,
+.data-picker-list-cell:hover {
+    -fx-cursor: hand;
+}
+
+.date-picker-popup > * > * > * > * > * > Circle {
+    -fx-fill: rgb(30, 30, 30);
+}
+
+.date-picker-popup > * > * > * > * > * > * > * > * > .label {
+    -fx-fill: white !important;
+    -fx-text-fill: white !important;
+}
