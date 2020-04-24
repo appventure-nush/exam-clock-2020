@@ -89,7 +89,7 @@ public class ClockController {
         int minutes = calendar.get(Calendar.MINUTE);
         int seconds = calendar.get(Calendar.SECOND);
         int millis = calendar.get(Calendar.MILLISECOND);
-        second.setRotate(360d * (seconds + interpolate(millis / 1000d)) / 60);
+        second.setRotate(360d * ((interpolate(seconds + millis / 1000d - .5) / 60 + 1) % 1));
         minute.setRotate(360d * (minutes + seconds / 60d + millis / 60000d) / 60);
         hour.setRotate(360d * (hours + minutes / 60d + seconds / 3600d) / 12);
         if (lastSecond != seconds) {
@@ -103,6 +103,8 @@ public class ClockController {
     private static final double scale = 1 / (1 - min);
 
     public static double interpolate(double value) {
+        if (value > 1) return Math.floor(value) + interpolate(value % 1);
+        if (value < 0) return Math.ceil(value) - interpolate(-(value % 1));
         if (value <= 0.5f) return ((float) Math.pow(2, speed * (value * 2 - 1)) - min) * scale / 2;
         return (2 - ((float) Math.pow(2, -speed * (value * 2 - 1)) - min) * scale) / 2;
     }

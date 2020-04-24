@@ -57,42 +57,42 @@ final class Digit extends Parent {
             new boolean[]{true, true, true, true, true, true, true},
             new boolean[]{true, true, true, true, true, false, true}};
     private final Polygon[] polygons = new Polygon[]{
-            new Polygon(2 * DIGIT_WIDTH / 54d, 0,
-                    52 * DIGIT_WIDTH / 54d, 0,
-                    42 * DIGIT_WIDTH / 54d, 10 * DIGIT_HEIGHT / 108d,
-                    12 * DIGIT_WIDTH / 54d, 10 * DIGIT_HEIGHT / 108d),
+            new Polygon(2 / 54d * DIGIT_WIDTH, 0,
+                    0.9629629629629629 * DIGIT_WIDTH, 0,
+                    42 / 54d * DIGIT_WIDTH, 10 / 108d * DIGIT_HEIGHT,
+                    12 / 54d * DIGIT_WIDTH, 10 / 108d * DIGIT_HEIGHT),
 
-            new Polygon(12 * DIGIT_WIDTH / 54d, 49 * DIGIT_HEIGHT / 108d,
-                    42 * DIGIT_WIDTH / 54d, 49 * DIGIT_HEIGHT / 108d,
-                    52 * DIGIT_WIDTH / 54d, 54 * DIGIT_HEIGHT / 108d,
-                    42 * DIGIT_WIDTH / 54d, 59 * DIGIT_HEIGHT / 108d,
-                    12f * DIGIT_WIDTH / 54d, 59f * DIGIT_HEIGHT / 108d,
-                    2f * DIGIT_WIDTH / 54d, 54f * DIGIT_HEIGHT / 108d),
+            new Polygon(12 / 54d * DIGIT_WIDTH, 49 / 108d * DIGIT_HEIGHT,
+                    42 / 54d * DIGIT_WIDTH, 49 / 108d * DIGIT_HEIGHT,
+                    52 / 54d * DIGIT_WIDTH, 54 / 108d * DIGIT_HEIGHT,
+                    42 / 54d * DIGIT_WIDTH, 59 / 108d * DIGIT_HEIGHT,
+                    12f / 54d * DIGIT_WIDTH, 59f / 108d * DIGIT_HEIGHT,
+                    2f / 54d * DIGIT_WIDTH, 54f / 108d * DIGIT_HEIGHT),
 
-            new Polygon(12 * DIGIT_WIDTH / 54d, 98 * DIGIT_HEIGHT / 108d,
-                    42 * DIGIT_WIDTH / 54d, 98 * DIGIT_HEIGHT / 108d,
-                    52 * DIGIT_WIDTH / 54d, 108 * DIGIT_HEIGHT / 108d,
-                    2 * DIGIT_WIDTH / 54d, 108 * DIGIT_HEIGHT / 108d),
+            new Polygon(12 / 54d * DIGIT_WIDTH, 98 / 108d * DIGIT_HEIGHT,
+                    42 / 54d * DIGIT_WIDTH, 98 / 108d * DIGIT_HEIGHT,
+                    52 / 54d * DIGIT_WIDTH, 108 / 108d * DIGIT_HEIGHT,
+                    2 / 54d * DIGIT_WIDTH, 108 / 108d * DIGIT_HEIGHT),
 
-            new Polygon(0 * DIGIT_WIDTH / 54d, 2 * DIGIT_HEIGHT / 108d,
-                    10 * DIGIT_WIDTH / 54d, 12 * DIGIT_HEIGHT / 108d,
-                    10 * DIGIT_WIDTH / 54d, 47 * DIGIT_HEIGHT / 108d,
-                    0, 52 * DIGIT_HEIGHT / 108d),
+            new Polygon(0 / 54d * DIGIT_WIDTH, 2 / 108d * DIGIT_HEIGHT,
+                    10 / 54d * DIGIT_WIDTH, 12 / 108d * DIGIT_HEIGHT,
+                    10 / 54d * DIGIT_WIDTH, 47 / 108d * DIGIT_HEIGHT,
+                    0, 52 / 108d * DIGIT_HEIGHT),
 
-            new Polygon(44 * DIGIT_WIDTH / 54d, 12 * DIGIT_HEIGHT / 108d,
-                    54 * DIGIT_WIDTH / 54d, 2 * DIGIT_HEIGHT / 108d,
-                    54 * DIGIT_WIDTH / 54d, 52 * DIGIT_HEIGHT / 108d,
-                    44 * DIGIT_WIDTH / 54d, 47 * DIGIT_HEIGHT / 108d),
+            new Polygon(44 / 54d * DIGIT_WIDTH, 12 / 108d * DIGIT_HEIGHT,
+                    54 / 54d * DIGIT_WIDTH, 2 / 108d * DIGIT_HEIGHT,
+                    54 / 54d * DIGIT_WIDTH, 52 / 108d * DIGIT_HEIGHT,
+                    44 / 54d * DIGIT_WIDTH, 47 / 108d * DIGIT_HEIGHT),
 
-            new Polygon(0 * DIGIT_WIDTH / 54d, 56 * DIGIT_HEIGHT / 108d,
-                    10 * DIGIT_WIDTH / 54d, 61 * DIGIT_HEIGHT / 108d,
-                    10 * DIGIT_WIDTH / 54d, 96 * DIGIT_HEIGHT / 108d,
-                    0, 106 * DIGIT_HEIGHT / 108d),
+            new Polygon(0 / 54d * DIGIT_WIDTH, 56 / 108d * DIGIT_HEIGHT,
+                    10 / 54d * DIGIT_WIDTH, 61 / 108d * DIGIT_HEIGHT,
+                    10 / 54d * DIGIT_WIDTH, 96 / 108d * DIGIT_HEIGHT,
+                    0, 106 / 108d * DIGIT_HEIGHT),
 
-            new Polygon(44 * DIGIT_WIDTH / 54d, 61 * DIGIT_HEIGHT / 108d,
-                    54 * DIGIT_WIDTH / 54d, 56 * DIGIT_HEIGHT / 108d,
-                    54 * DIGIT_WIDTH / 54d, 106 * DIGIT_HEIGHT / 108d,
-                    44 * DIGIT_WIDTH / 54d, 96 * DIGIT_HEIGHT / 108d)};
+            new Polygon(44 / 54d * DIGIT_WIDTH, 61 / 108d * DIGIT_HEIGHT,
+                    54 / 54d * DIGIT_WIDTH, 56 / 108d * DIGIT_HEIGHT,
+                    54 / 54d * DIGIT_WIDTH, 106 / 108d * DIGIT_HEIGHT,
+                    44 / 54d * DIGIT_WIDTH, 96 / 108d * DIGIT_HEIGHT)};
     private final Color onColor;
     private final Color offColor;
 
@@ -112,7 +112,7 @@ final class Digit extends Parent {
         if (num < 0 || num > 9) num = 0; // default to 0 for non-valid numbers
         for (int i = 0; i < 7; i++) {
             polygons[i].setFill(DIGIT_COMBINATIONS[num][i] ? onColor : offColor);
-            polygons[i].setStrokeWidth(DIGIT_COMBINATIONS[num][i] ? 1 : 0);
+            polygons[i].setStrokeWidth(DIGIT_COMBINATIONS[num][i] ? .4 : 0);
         }
     }
 }

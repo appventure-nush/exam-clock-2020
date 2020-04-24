@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.Glow?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
@@ -23,24 +25,40 @@
     <center>
         <Pane fx:id="clockRoot" BorderPane.alignment="CENTER">
             <Group fx:id="clockPane" layoutX="200.0" layoutY="200.0">
-                <Circle fx:id="clockFace" fill="WHITE" radius="200.0" stroke="BLACK" strokeWidth="2"
-                        strokeType="OUTSIDE"/>
+                <Circle fx:id="clockFace" fill="WHITE" radius="200.0" stroke="BLACK" strokeType="OUTSIDE"
+                        strokeWidth="2"/>
                 <Group fx:id="hourGroup">
                     <Circle fill="TRANSPARENT" radius="200.0" stroke="TRANSPARENT" strokeType="INSIDE"/>
                     <Polygon fx:id="hourHand" points="-6,12, 0,15, 6,12, 4,-100, 0,-105, -4,-100" strokeType="INSIDE"
-                             styleClass="clock-element"/>
+                             styleClass="clock-element">
+                        <effect>
+                            <DropShadow/>
+                        </effect>
+                    </Polygon>
                 </Group>
                 <Group fx:id="minuteGroup">
                     <Circle fill="TRANSPARENT" radius="200.0" stroke="TRANSPARENT" strokeType="INSIDE"
                             strokeWidth="0.0"/>
                     <Polygon fx:id="minuteHand" points="-5,20, 0,23, 5,20, 4,-150, 0,-155, -4,-150" strokeType="INSIDE"
-                             styleClass="clock-element"/>
+                             styleClass="clock-element">
+                        <effect>
+                            <DropShadow/>
+                        </effect>
+                    </Polygon>
                 </Group>
                 <Group fx:id="secondGroup">
                     <Circle fill="TRANSPARENT" radius="200.0" stroke="TRANSPARENT" strokeType="INSIDE"
                             strokeWidth="0.0"/>
                     <Polygon fx:id="secondHand" points="-2,30, 2,30, 1,-170, 0,-175, -1,-170" strokeType="INSIDE"
-                             styleClass="clock-element"/>
+                             styleClass="clock-element">
+                        <effect>
+                            <DropShadow height="10.0" radius="4.5" width="10.0">
+                                <input>
+                                    <Glow/>
+                                </input>
+                            </DropShadow>
+                        </effect>
+                    </Polygon>
                 </Group>
                 <Circle radius="5.0" strokeType="INSIDE" styleClass="clock-element-empty"/>
             </Group>
