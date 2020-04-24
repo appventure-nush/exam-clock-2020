@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sg.edu.appventure.examclock.MainController">
+    <center>
+        <Group fx:id="clockPane" BorderPane.alignment="CENTER">
+            <children>
+                <Circle fx:id="clockFace" fill="WHITE" radius="200.0" stroke="BLACK" strokeType="INSIDE"/>
+                <Group fx:id="hourGroup">
+                    <children>
+                        <Circle fx:id="clockFace1" fill="TRANSPARENT" radius="200.0" stroke="TRANSPARENT"
+                                strokeType="INSIDE"/>
+                        <Line fx:id="hourHand" endY="-100.0" strokeWidth="5.0"/>
+                    </children>
+                </Group>
+                <Group fx:id="minuteGroup">
+                    <children>
+                        <Circle fx:id="clockFace2" fill="TRANSPARENT" radius="200.0" stroke="TRANSPARENT"
+                                strokeType="INSIDE" strokeWidth="0.0"/>
+                        <Line fx:id="minuteHand" endY="-160.0" strokeWidth="3.0"/>
+                    </children>
+                </Group>
+                <Group fx:id="secondGroup">
+                    <children>
+                        <Circle fx:id="clockFace3" fill="TRANSPARENT" radius="200.0" stroke="TRANSPARENT"
+                                strokeType="INSIDE" strokeWidth="0.0"/>
+                        <Line fx:id="secondHand" endY="-180.0"/>
+                    </children>
+                </Group>
+            </children>
+        </Group>
+    </center>
+    <right>
+        <VBox BorderPane.alignment="CENTER">
+            <children>
+                <ToolBar>
+                    <items>
+                        <Button fx:id="addBtn" mnemonicParsing="false" text="Add"/>
+                        <Button fx:id="startBtn" mnemonicParsing="false" text="Start All"/>
+                        <Button fx:id="stopBtn" mnemonicParsing="false" text="Stop All"/>
+                        <Button fx:id="settingBtn" mnemonicParsing="false" text="Settings"/>
+                    </items>
+                </ToolBar>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0"/>
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </right>
+</BorderPane>
