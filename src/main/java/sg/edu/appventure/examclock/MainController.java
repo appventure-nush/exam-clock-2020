@@ -3,10 +3,16 @@ package sg.edu.appventure.examclock;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
 public class MainController {
+    @FXML
+    private BorderPane root;
+    @FXML
+    private Pane clockRoot;
     @FXML
     private Group clockPane;
     @FXML
@@ -38,10 +44,16 @@ public class MainController {
     @FXML
     private Button settingBtn;
 
+    private ClockController clockController;
+
     @FXML
     public void initialize() {
         System.out.println("initialize");
-        ClockController clockController = new ClockController(clockPane, hourGroup, minuteGroup, secondGroup);
+        clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup);
         clockController.start();
+    }
+
+    public void resize(double width, double height) {
+        clockController.resize(width, height);
     }
 }

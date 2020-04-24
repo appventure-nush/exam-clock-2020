@@ -10,16 +10,22 @@ import java.io.IOException;
 
 public class ExamClock extends Application {
 
+    private MainController controller;
+
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml_main.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_main.fxml"));
+        Parent root = loader.load();
+        controller = loader.getController();
         Scene scene = new Scene(root);
-
-        primaryStage.setTitle("Hello World!");
+        scene.widthProperty().addListener((observable, oldValue, newValue) -> controller.resize((Double) newValue, scene.getHeight()));
+        scene.heightProperty().addListener((observable, oldValue, newValue) -> controller.resize(scene.getWidth(), (Double) newValue));
+        scene.getStylesheets().add("/main.dark.css");
+        primaryStage.setTitle("Exam Clock");
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(event -> System.exit(0));
         primaryStage.show();
