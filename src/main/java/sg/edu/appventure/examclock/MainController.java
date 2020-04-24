@@ -6,7 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
 
 public class MainController {
     @FXML
@@ -18,23 +18,17 @@ public class MainController {
     @FXML
     private Circle clockFace;
     @FXML
-    private Circle clockFace1;
-    @FXML
-    private Circle clockFace2;
-    @FXML
-    private Circle clockFace3;
-    @FXML
     private Group hourGroup;
     @FXML
-    private Line hourHand;
+    private Polygon hourHand;
     @FXML
     private Group minuteGroup;
     @FXML
-    private Line minuteHand;
+    private Polygon minuteHand;
     @FXML
     private Group secondGroup;
     @FXML
-    private Line secondHand;
+    private Polygon secondHand;
     @FXML
     private Button addBtn;
     @FXML
@@ -49,8 +43,8 @@ public class MainController {
     @FXML
     public void initialize() {
         System.out.println("initialize");
-        clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup);
-        clockController.start();
+        clockController = new ClockController(clockPane, hourGroup, minuteGroup, secondGroup);
+        clockController.play();
     }
 
     public void resize(double width, double height) {

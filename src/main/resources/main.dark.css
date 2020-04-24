@@ -50,9 +50,19 @@
     -fx-background-color: -fx-mark-highlight-color, rgb(255, 255, 255);
 }
 
-#clockPane .clock-element {
+#secondHand {
+    -fx-stroke: derive(red, 20%);
+    -fx-fill: derive(red, 10%);
+}
+
+.clock-element {
     -fx-stroke: derive(-fx-foreground, 20%);
     -fx-fill: derive(-fx-foreground, 10%);
+}
+
+.clock-element-empty {
+    -fx-stroke: derive(-fx-foreground, 20%);
+    -fx-fill: derive(-fx-background, 10%);
 }
 
 #clockFace {
