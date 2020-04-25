@@ -7,9 +7,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.prefs.Preferences;
 
 public class ExamClock extends Application {
-
+    public static Preferences preferences;
     private MainController controller;
 
     public static void main(String[] args) {
@@ -18,6 +19,7 @@ public class ExamClock extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        preferences = Preferences.userNodeForPackage(ExamClock.class);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_main.fxml"));
         Parent root = loader.load();
         controller = loader.getController();

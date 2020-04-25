@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.InnerShadow?>
 <?import javafx.scene.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
@@ -16,10 +17,10 @@
                 <JFXButton fx:id="addBtn" mnemonicParsing="false" onAction="#add" text="Add"/>
                 <JFXButton fx:id="startBtn" mnemonicParsing="false" text="Start All"/>
                 <JFXButton fx:id="stopBtn" mnemonicParsing="false" text="Stop All"/>
-                <JFXButton fx:id="settingBtn" mnemonicParsing="false" text="Settings"/>
+                <JFXButton fx:id="settingBtn" mnemonicParsing="false" onAction="#showSettings" text="Settings"/>
             </ToolBar>
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0"/>
+                <JFXNodesList fx:id="examList" maxWidth="1.7976931348623157E308"/>
             </ScrollPane>
         </VBox>
     </right>
@@ -27,12 +28,11 @@
         <Pane fx:id="clockRoot" BorderPane.alignment="CENTER">
             <Group fx:id="clockPane" layoutX="200.0" layoutY="200.0">
                 <Group fx:id="clockFace">
-                    <Circle fx:id="clockDisc" fill="WHITE" radius="200.0" stroke="BLACK" strokeType="OUTSIDE"
-                            styleClass="clock-element-empty" strokeWidth="2">
-                        <effect>
-                            <DropShadow height="10" radius="5" width="10"/>
-                        </effect>
-                    </Circle>
+                    <Circle fx:id="clockDisc" radius="200.0" strokeType="OUTSIDE" strokeWidth="2"
+                            styleClass="clock-element-empty"/>
+                    <effect>
+                        <InnerShadow radius="20"/>
+                    </effect>
                 </Group>
                 <Group fx:id="hourGroup">
                     <Circle fill="TRANSPARENT" opacity="0.0" radius="200.0" smooth="false" stroke="TRANSPARENT"

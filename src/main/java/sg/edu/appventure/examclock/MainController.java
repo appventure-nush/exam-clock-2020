@@ -1,5 +1,6 @@
 package sg.edu.appventure.examclock;
 
+import com.jfoenix.controls.JFXNodesList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,6 +18,7 @@ import sg.edu.appventure.examclock.display.ClockController;
 import sg.edu.appventure.examclock.model.Exam;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MainController {
     @FXML
@@ -49,14 +51,22 @@ public class MainController {
     private Button stopBtn;
     @FXML
     private Button settingBtn;
+    @FXML
+    private JFXNodesList examList;
+
+    private ArrayList<Exam> exams;
 
     private ClockController clockController;
+    private PreferenceController preferenceController;
 
     @FXML
     public void initialize() {
         System.out.println("initialize");
+        exams = new ArrayList<>();
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup);
         clockController.play();
+        preferenceController = new PreferenceController(this);
+        preferenceController.initPreferences();
     }
 
     public void resize(double width, double height) {
@@ -85,5 +95,10 @@ public class MainController {
 
     public void addCallback(Exam exam) {
 
+    }
+
+    @FXML
+    public void showSettings(ActionEvent event) {
+        preferenceController.show(true);
     }
 }
