@@ -1,4 +1,5 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'java'
 }
 
@@ -13,6 +14,7 @@ dependencies {
     compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
     compile 'com.jfoenix:jfoenix:8.0.8'
     compile 'no.tornado:tornadofx-controls:1.0.4'
+    compile 'org.nanohttpd:nanohttpd:2.3.1'
     compile group: 'com.dlsc.preferencesfx', name: 'preferencesfx-core', version: '8.6.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

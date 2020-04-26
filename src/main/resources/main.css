@@ -1,0 +1,21 @@
+#secondGroup * {
+    -fx-stroke: #dd0000;
+    -fx-fill: #cc0000;
+}
+
+.clock-element {
+    -fx-stroke: derive(-fx-foreground, 20%);
+    -fx-fill: derive(-fx-foreground, 10%);
+}
+
+.clock-element-empty {
+    -fx-stroke: derive(-fx-foreground, 20%);
+    -fx-fill: derive(-fx-background, 20%);
+}
+
+#addBtn {
+    -jfx-button-type: RAISED;
+    -jfx-disable-visual-focus: true;
+    -fx-background-color: -fx-accent;
+    -fx-text-fill: white;
+}

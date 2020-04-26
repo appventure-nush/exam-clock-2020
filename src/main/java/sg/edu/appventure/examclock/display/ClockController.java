@@ -7,6 +7,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.util.Calendar;
@@ -66,12 +67,12 @@ public class ClockController {
     }
 
     public void play() {
-        if (timeline != null) timeline.stop();
+        timeline.stop();
         timeline.play();
     }
 
     public void stop() {
-        if (timeline != null) timeline.stop();
+        timeline.stop();
     }
 
     int lastSecond = 0;
@@ -108,5 +109,9 @@ public class ClockController {
         parent.setScaleY(radius / 200);
         parent.setLayoutX(width / 2 - 125.5);
         parent.setLayoutY(height / 2);
+    }
+
+    public void onClose(WindowEvent event) {
+        timeline.stop();
     }
 }

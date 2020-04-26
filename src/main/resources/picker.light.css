@@ -1,0 +1,14 @@
+.date-picker-list-view, .data-picker-list-cell {
+    -fx-background-color: -fx-background;
+    -fx-font-weight: bold;
+}
+
+.date-picker-popup > * > * > * > .left-button .jfx-svg-glyph,
+.date-picker-popup > * > * > * > .right-button .jfx-svg-glyph {
+    -fx-background-color: -fx-control-inner-background;
+}
+
+.date-picker-popup .calendar-grid .day-cell:hover,
+.data-picker-list-cell:hover {
+    -fx-cursor: hand;
+}

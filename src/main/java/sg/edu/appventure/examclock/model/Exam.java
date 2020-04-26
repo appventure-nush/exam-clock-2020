@@ -6,63 +6,35 @@ import java.time.LocalTime;
 public class Exam {
     private String code;
     private String name;
-    private LocalDate examDate;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private String examDate;
+    private String startTime;
+    private String endTime;
+
+    public Exam() {
+    }
 
     public Exam(String code, String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
         this.code = code;
         this.name = name;
-        this.examDate = examDate;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.examDate = examDate.toString();
+        this.startTime = startTime.toString();
+        this.endTime = endTime.toString();
     }
 
     public boolean isRunning() {
-        return examDate.isEqual(LocalDate.now()) && startTime.isBefore(LocalTime.now()) && endTime.isAfter(LocalTime.now());
+        return LocalDate.parse(examDate).isEqual(LocalDate.now()) && LocalTime.parse(startTime).isBefore(LocalTime.now()) && LocalTime.parse(endTime).isAfter(LocalTime.now());
     }
 
     public boolean hasEnded() {
-        return examDate.isBefore(LocalDate.now()) || examDate.isEqual(LocalDate.now()) && endTime.isBefore(LocalTime.now());
+        LocalDate date = LocalDate.parse(examDate);
+        return date.isBefore(LocalDate.now()) || date.isEqual(LocalDate.now()) && LocalTime.parse(endTime).isBefore(LocalTime.now());
     }
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDate getExamDate() {
-        return examDate;
-    }
-
-    public void setExamDate(LocalDate examDate) {
-        this.examDate = examDate;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
     }
 }
