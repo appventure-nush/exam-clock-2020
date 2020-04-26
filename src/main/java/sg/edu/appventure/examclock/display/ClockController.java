@@ -29,7 +29,7 @@ public class ClockController {
         this.parent = parent;
         this.clockFace = clockFace;
         calendar = Calendar.getInstance();
-        digitalClock = new DigitalClock(Color.DODGERBLUE, Color.TRANSPARENT, Color.BLACK);
+        digitalClock = new DigitalClock(Color.DODGERBLUE.brighter(), Color.TRANSPARENT, Color.DODGERBLUE);
         digitalClock.setLayoutX(-digitalClock.width / 2);
         digitalClock.setLayoutY(60);
         clockFace.getChildren().add(digitalClock);

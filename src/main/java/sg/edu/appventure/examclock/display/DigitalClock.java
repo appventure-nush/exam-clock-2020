@@ -5,21 +5,28 @@ import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 
 public class DigitalClock extends Parent {
     private final Digit[] digits;
     public final double width;
+    public final double height;
 
     public DigitalClock(Color onColor, Color offColor, Color borderColor) {
         digits = new Digit[7];
+        width = 6 * Digit.DIGIT_SPACE;
+        height = Digit.DIGIT_HEIGHT;
+        Rectangle bg = new Rectangle(width, height + 10);
+        bg.setLayoutY(-5);
+        bg.setFill(new Color(0, 0, 0, .5));
+        getChildren().add(bg);
         for (int i = 0; i < 6; i++) {
             Digit digit = new Digit(onColor, offColor, borderColor);
             digit.setLayoutX(i * Digit.DIGIT_SPACE + ((i + 1) % 2) * Digit.DIGIT_SPACE / 4);
             digits[i] = digit;
             getChildren().add(digit);
         }
-        width = 6 * Digit.DIGIT_SPACE;
         Group dots = new Group(
                 new Circle(Digit.DIGIT_SPACE + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 44 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9, onColor),
                 new Circle(Digit.DIGIT_SPACE + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 64 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9, onColor),
@@ -42,7 +49,7 @@ public class DigitalClock extends Parent {
  * Simple 7 segment LED style digit. It supports the numbers 0 through 9.
  */
 final class Digit extends Parent {
-    public static double DIGIT_SPACE = 30;
+    public static double DIGIT_SPACE = 40;
     public static double DIGIT_WIDTH = 0.675 * DIGIT_SPACE;
     public static double DIGIT_HEIGHT = 1.35 * DIGIT_SPACE;
     private static final boolean[][] DIGIT_COMBINATIONS = new boolean[][]{
