@@ -2,36 +2,47 @@ package sg.edu.appventure.examclock.display;
 
 import javafx.scene.Group;
 import javafx.scene.Parent;
-import javafx.scene.paint.Color;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
+import sg.edu.appventure.examclock.PreferenceController;
 
 public class DigitalClock extends Parent {
     private final Digit[] digits;
     public final double width;
     public final double height;
 
-    public DigitalClock(Color onColor, Color offColor, Color borderColor) {
+    public DigitalClock() {
         digits = new Digit[7];
         width = 6 * Digit.DIGIT_SPACE;
         height = Digit.DIGIT_HEIGHT;
         Rectangle bg = new Rectangle(width, height + 10);
         bg.setLayoutY(-5);
-        bg.setFill(new Color(0, 0, 0, .5));
         getChildren().add(bg);
+        bg.visibleProperty().bind(PreferenceController.digitalBackgroundProperty);
+        bg.fillProperty().bind(PreferenceController.digitalClockBackgroundColorProperty);
+        PreferenceController.digitalClockEffectsProperty.addListener((observable, oldValue, newValue) -> {
+            if (newValue) setEffect(new DropShadow());
+            else setEffect(null);
+        });
         for (int i = 0; i < 6; i++) {
-            Digit digit = new Digit(onColor, offColor, borderColor);
+            Digit digit = new Digit();
             digit.setLayoutX(i * Digit.DIGIT_SPACE + ((i + 1) % 2) * Digit.DIGIT_SPACE / 4);
             digits[i] = digit;
             getChildren().add(digit);
         }
         Group dots = new Group(
-                new Circle(Digit.DIGIT_SPACE + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 44 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9, onColor),
-                new Circle(Digit.DIGIT_SPACE + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 64 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9, onColor),
-                new Circle((Digit.DIGIT_SPACE * 3) + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 44 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9, onColor),
-                new Circle((Digit.DIGIT_SPACE * 3) + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 64 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9, onColor));
+                new Circle(Digit.DIGIT_SPACE + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 44 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9),
+                new Circle(Digit.DIGIT_SPACE + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 64 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9),
+                new Circle((Digit.DIGIT_SPACE * 3) + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 44 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9),
+                new Circle((Digit.DIGIT_SPACE * 3) + Digit.DIGIT_WIDTH + Digit.DIGIT_SPACE / 4, 64 * Digit.DIGIT_HEIGHT / 108, Digit.DIGIT_WIDTH / 9));
+        dots.getChildren().forEach(node -> {
+            Circle circle = (Circle) node;
+            circle.fillProperty().bind(PreferenceController.digitalClockDigitColorProperty);
+            circle.strokeProperty().bind(PreferenceController.digitalClockDigitBorderColorProperty);
+        });
         getChildren().add(dots);
     }
 
@@ -100,26 +111,20 @@ final class Digit extends Parent {
                     54 / 54d * DIGIT_WIDTH, 56 / 108d * DIGIT_HEIGHT,
                     54 / 54d * DIGIT_WIDTH, 106 / 108d * DIGIT_HEIGHT,
                     44 / 54d * DIGIT_WIDTH, 96 / 108d * DIGIT_HEIGHT)};
-    private final Color onColor;
-    private final Color offColor;
 
-    public Digit(Color onColor, Color offColor, Color borderColor) {
-        this.onColor = onColor;
-        this.offColor = offColor;
+    public Digit() {
         getChildren().addAll(polygons);
         showNumber(0);
         for (int i = 0; i < 7; i++) {
-            polygons[i].setStroke(borderColor);
+            polygons[i].strokeProperty().bind(PreferenceController.digitalClockDigitBorderColorProperty);
+            polygons[i].fillProperty().bind(PreferenceController.digitalClockDigitColorProperty);
             polygons[i].setStrokeType(StrokeType.INSIDE);
-            polygons[i].setStrokeWidth(0);
+            polygons[i].setStrokeWidth(.4);
         }
     }
 
     public void showNumber(Integer num) {
         if (num < 0 || num > 9) num = 0; // default to 0 for non-valid numbers
-        for (int i = 0; i < 7; i++) {
-            polygons[i].setFill(DIGIT_COMBINATIONS[num][i] ? onColor : offColor);
-            polygons[i].setStrokeWidth(DIGIT_COMBINATIONS[num][i] ? .4 : 0);
-        }
+        for (int i = 0; i < 7; i++) polygons[i].setVisible(DIGIT_COMBINATIONS[num][i]);
     }
 }

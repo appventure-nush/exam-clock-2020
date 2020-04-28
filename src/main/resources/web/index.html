@@ -10,6 +10,7 @@
         #exams {
             list-style-type: none;
             margin-top: 20px;
+            padding: 0;
         }
 
         .exam-box {
@@ -24,34 +25,98 @@
         .exam-action {
             padding: 0;
         }
+
+        #control-panel {
+            display: none;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="row">
-        <div class="col-md-2"></div>
-        <div class="btn-group btn-group-lg col-md-8" role="group" aria-label="Actions">
-            <button type="button" class="btn btn-success">Add</button>
-            <button type="button" class="btn btn-outline-warning">Start All</button>
-            <button type="button" class="btn btn-outline-danger">Stop All</button>
-            <button type="button" class="btn btn-outline-secondary">Toilet</button>
-        </div>
-        <div class="col-md-2"></div>
+    <div id="login-panel">
+        <h3>Login with secret QR code</h3>
+        <input type="file" id="file-selector"><br>
+        <span id="status"></span>
     </div>
-    <ul id="exams">
+    <div id="control-panel">
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="btn-group btn-group-lg col-md-8" role="group" aria-label="Actions">
+                <button type="button" class="btn btn-success">Add</button>
+                <button type="button" class="btn btn-outline-warning">Start All</button>
+                <button type="button" class="btn btn-outline-danger">Stop All</button>
+                <button type="button" class="btn btn-outline-secondary">Toilet</button>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+        <ul id="exams">
 
-    </ul>
+        </ul>
+    </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/ricmoo/aes-js/e27b99df/index.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.0.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script src="./base64.js"></script>
 <script>
+    async function encrypt(string, key) {
+        let encoded = new TextEncoder().encode(string);
+        let iv = crypto.getRandomValues(new Uint8Array(12));
+        let encrypted = await crypto.subtle.encrypt({"name": "AES-GCM", "iv": iv}, key, encoded);
+        encrypted = new Int8Array(encrypted);
+        const combined = new Int8Array(iv.length + encrypted.length);
+        combined.set(iv);
+        combined.set(encrypted, iv.length);
+        return combined;
+    }
+
+    async function decrypt(encrypted, iv, key) {
+        let decrypted = await crypto.subtle.decrypt({"name": "AES-GCM", "iv": iv}, key, encrypted);
+        return new TextDecoder().decode(decrypted);
+    }
+</script>
+<script type="module">
+    import QrScanner from "./qr-scanner.min.js";
+
+    QrScanner.WORKER_PATH = './qr-scanner-worker.min.js';
+    const fileSelector = document.getElementById('file-selector');
+    const status = document.getElementById('status');
+
+    fileSelector.addEventListener('change', () => {
+        const file = fileSelector.files[0];
+        if (!file) return;
+        QrScanner.scanImage(file).then(async result => {
+            let obj = JSON.parse(result);
+            localStorage.setItem("keyID", obj.id);
+            localStorage.setItem("remoteIP", obj.ip);
+            status.innerHTML = `ID: <code>${obj.id}</code><br>IP: <code>${obj.ip}</code>`;
+            localStorage.key = await crypto.subtle.importKey('jwk', obj.jwk, {
+                "name": "AES-GCM"
+            }, false, ['encrypt', 'decrypt']);
+            await verifyKey();
+        }).catch(e => console.log(status.textContent = e || 'No QR code found.'));
+    });
+
+    async function verifyKey() {
+        let encrypted = await encrypt(localStorage.keyID, localStorage.key);
+        let base64 = base64encode(encrypted);
+        $.post("http://" + localStorage.remoteIP, {
+            keyID: localStorage.keyID,
+            encrypted: base64
+        }, (e, t, n, r) => console.log(e, t, n, r));
+    }
+</script>
+<script>
+    async function sendData(string) {
+        let encrypted = await encrypt(string, localStorage.key);
+        let base64 = base64encode(encrypted);
+        $.post("http://" + localStorage.remoteIP, {
+            keyID: localStorage.keyID,
+            encrypted: base64
+        }, (e, t, n, r) => console.log(e, t, n, r));
+    }
+
     class Exam {
         constructor(code, name, date, start, end) {
             this.code = code;
@@ -74,14 +139,6 @@
         for (let exam of exams) {
             examList.innerHTML += exam.toHTML();
         }
-    }
-
-    function deleteExam(moduleCode) {
-
-    }
-
-    function editExam(moduleCode) {
-        console.log(document.querySelector(`li[data-code=${moduleCode}]`));
     }
 
     reloadExams();

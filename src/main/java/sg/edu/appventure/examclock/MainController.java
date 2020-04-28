@@ -2,6 +2,8 @@ package sg.edu.appventure.examclock;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXNodesList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,7 +24,6 @@ import sg.edu.appventure.examclock.display.ClockController;
 import sg.edu.appventure.examclock.model.Exam;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class MainController {
     @FXML
@@ -60,7 +61,7 @@ public class MainController {
     @FXML
     private JFXNodesList examList;
 
-    private ArrayList<Exam> exams;
+    public ObservableList<Exam> exams;
 
     private ClockController clockController;
     private PreferenceController preferenceController;
@@ -70,8 +71,8 @@ public class MainController {
     @FXML
     public void initialize() {
         System.out.println("initialize");
-        exams = new ArrayList<>();
-        clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup);
+        exams = FXCollections.observableArrayList();
+        clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         clockController.play();
         preferenceController = new PreferenceController(this);
         preferenceController.initPreferences();
@@ -135,7 +136,10 @@ public class MainController {
             close.setOnMouseClicked(event -> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
             JFXButton max = new JFXButton("", new Glyph("FontAwesome", FontAwesome.Glyph.SQUARE_ALT));
             max.setDisableVisualFocus(true);
-            max.setOnMouseClicked(event -> stage.setFullScreen(true));
+            max.setOnMouseClicked(event -> {
+                stage.setFullScreen(true);
+                stage.setMaximized(true);
+            });
             JFXButton min = new JFXButton("", new Glyph("FontAwesome", FontAwesome.Glyph.MINUS));
             min.setDisableVisualFocus(true);
             min.setOnMouseClicked(event -> stage.setIconified(true));

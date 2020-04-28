@@ -6,29 +6,41 @@ import com.dlsc.preferencesfx.model.Setting;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import javafx.beans.property.*;
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import com.google.zxing.WriterException;
+import com.jfoenix.controls.JFXButton;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Scene;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import sg.edu.appventure.examclock.connection.Encryption;
 import sg.edu.appventure.examclock.connection.WebServer;
-import sg.edu.appventure.examclock.model.Exam;
-import sg.edu.appventure.examclock.model.ExamResponse;
 
 import java.io.IOException;
 import java.net.*;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class PreferenceController {
+    private final HashMap<String, byte[]> keys;
     private PreferencesFx preferencesFx;
     private final MainController controller;
 
     public static final SimpleBooleanProperty nightMode = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty lanEnabledProperty = new SimpleBooleanProperty(false);
+    public static final SimpleBooleanProperty controlPanelEnabledProperty = new SimpleBooleanProperty(false);
     public static final SimpleIntegerProperty tcpPortProperty = new SimpleIntegerProperty(12345);
     public static final SimpleIntegerProperty udpPortProperty = new SimpleIntegerProperty(12346);
+    public static final SimpleIntegerProperty panelPortProperty = new SimpleIntegerProperty(8080);
     public static final SimpleStringProperty lanNameProperty = new SimpleStringProperty("Exam Clock");
 
     public static final SimpleBooleanProperty allowAddingProperty = new SimpleBooleanProperty(true);
@@ -36,16 +48,26 @@ public class PreferenceController {
     public static final SimpleBooleanProperty allowDeleteProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty allowToiletProperty = new SimpleBooleanProperty(true);
 
+    public static final SimpleObjectProperty<Color> secondHandColorProperty = new SimpleObjectProperty<>(Color.RED);
+    public static final SimpleBooleanProperty analogueShadowProperty = new SimpleBooleanProperty(true);
+
+    public static final SimpleBooleanProperty digitalAboveAnalogProperty = new SimpleBooleanProperty(false);
+    public static final SimpleBooleanProperty digitalBackgroundProperty = new SimpleBooleanProperty(true);
+    public static final SimpleBooleanProperty digitalClockEffectsProperty = new SimpleBooleanProperty(false);
+    public static final SimpleObjectProperty<Color> digitalClockDigitColorProperty = new SimpleObjectProperty<>(Color.DODGERBLUE.brighter());
+    public static final SimpleObjectProperty<Color> digitalClockDigitBorderColorProperty = new SimpleObjectProperty<>(Color.DODGERBLUE.brighter());
+    public static final SimpleObjectProperty<Color> digitalClockBackgroundColorProperty = new SimpleObjectProperty<>(new Color(0, 0, 0, .5));
+
     private final Server server;
-    private final WebServer webServer;
+    private WebServer webServer;
+
 
     public PreferenceController(MainController controller) {
         this.controller = controller;
         server = new Server();
-        server.getKryo().register(Exam.class);
-        server.getKryo().register(ExamResponse.class);
-
-        webServer = new WebServer(8080);
+        server.getKryo().register(byte[].class);
+        keys = new HashMap<>();
+        webServer = new WebServer(keys, controller.exams, panelPortProperty.get());
     }
 
     public void initPreferences() {
@@ -53,35 +75,66 @@ public class PreferenceController {
         preferencesFx = PreferencesFx.of(ExamClock.class,
                 Category.of("Display",
                         com.dlsc.preferencesfx.model.Group.of("General",
-                                Setting.of("Night Mode", nightMode),
-                                Setting.of("Font Size", new SimpleIntegerProperty(12), 6, 36),
-                                Setting.of("Scaling", new SimpleDoubleProperty(1))
+                                Setting.of("Night Mode", nightMode)
                         ),
-                        com.dlsc.preferencesfx.model.Group.of("Colors",
-                                Setting.of("Second Hand", new SimpleObjectProperty<>(Color.RED)),
-                                Setting.of("Minute Hand", new SimpleObjectProperty<>(Color.WHITE)),
-                                Setting.of("Hour Hand", new SimpleObjectProperty<>(Color.WHITE)),
-                                Setting.of("Clock Face", new SimpleObjectProperty<>(Color.WHITE))
+                        com.dlsc.preferencesfx.model.Group.of("Analogue Clock",
+                                Setting.of("Second Hand", secondHandColorProperty),
+                                Setting.of("Shadow effect", analogueShadowProperty)
                         ),
-                        com.dlsc.preferencesfx.model.Group.of("Others",
-                                Setting.of("Show digital clock above analogue", new SimpleBooleanProperty(false))
+                        com.dlsc.preferencesfx.model.Group.of("Digital Clock",
+                                Setting.of("Show above analogue", digitalAboveAnalogProperty),
+                                Setting.of("Show background", digitalBackgroundProperty),
+                                Setting.of("Shadow effect", digitalClockEffectsProperty),
+                                Setting.of("Digit Fill", digitalClockDigitColorProperty),
+                                Setting.of("Border Color", digitalClockDigitBorderColorProperty),
+                                Setting.of("Background", digitalClockBackgroundColorProperty)
                         )
                 ),
                 Category.of("Connection",
                         com.dlsc.preferencesfx.model.Group.of(
-                                Setting.of("Open to LAN", lanEnabledProperty)
+                                Setting.of("Open to LAN", lanEnabledProperty),
+                                Setting.of("Web Control Panel", controlPanelEnabledProperty)
                         ),
                         com.dlsc.preferencesfx.model.Group.of("Lan Display",
                                 Setting.of("Name", lanNameProperty),
                                 Setting.of("Port (TCP)", tcpPortProperty),
                                 Setting.of("Port (UDP)", udpPortProperty),
-                                Setting.of(new Label("Your controller can find this device via UDP port")),
-                                Setting.of(new HBox(new Label("Control Panel IP") {{
-                                    setMaxHeight(Double.POSITIVE_INFINITY);
-                                    setPrefWidth(95);
-                                    setAlignment(Pos.CENTER);
-                                }}, new TextField(getAddress() + ":8080") {{
-                                    setEditable(false);
+                                Setting.of("Port (Panel)", panelPortProperty),
+                                Setting.of(new HBox(new JFXButton("QR Code for Key") {{
+                                    setOnAction(e -> {
+                                        final Stage dialog = new Stage();
+                                        dialog.initModality(Modality.APPLICATION_MODAL);
+                                        dialog.initOwner(preferencesFx.getView().getScene().getWindow());
+                                        dialog.setScene(new Scene(new StackPane(new ImageView() {{
+                                            try {
+                                                byte[] key = Encryption.createKey();
+                                                String id = UUID.randomUUID().toString();
+                                                keys.put(id, key);
+                                                setImage(SwingFXUtils.toFXImage(Encryption.generateQRCode(id, key, getAddress() + ":" + panelPortProperty.get()), null));
+                                                setFitHeight(300);
+                                                setFitWidth(300);
+                                            } catch (WriterException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }})));
+                                        dialog.show();
+                                    });
+                                }}, new JFXButton("QR Code for Web") {{
+                                    setOnAction(e -> {
+                                        final Stage dialog = new Stage();
+                                        dialog.initModality(Modality.APPLICATION_MODAL);
+                                        dialog.initOwner(preferencesFx.getView().getScene().getWindow());
+                                        dialog.setScene(new Scene(new StackPane(new ImageView() {{
+                                            try {
+                                                setImage(SwingFXUtils.toFXImage(Encryption.generateQRCode("http://" + getAddress() + ":" + panelPortProperty.get()), null));
+                                                setFitHeight(300);
+                                                setFitWidth(300);
+                                            } catch (WriterException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }})));
+                                        dialog.show();
+                                    });
                                 }}))
                         ),
                         com.dlsc.preferencesfx.model.Group.of("Lan Permission",
@@ -93,6 +146,7 @@ public class PreferenceController {
                 )
         );
         preferencesFx.getView().getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
+        preferencesFx.buttonsVisibility(true);
     }
 
     public void attachListener() {
@@ -106,11 +160,8 @@ public class PreferenceController {
             }
 
             public void received(Connection connection, Object object) {
-                if (object instanceof Exam) {
-                    Exam exam = (Exam) object;
-                    System.out.println("Exam Received: " + exam.getName());
-                    ExamResponse response = new ExamResponse("Yes I got it, the exam code was " + exam.getCode());
-                    connection.sendTCP(response);
+                if (object instanceof byte[]) {
+                    System.out.println("Connection");
                 }
             }
         });
@@ -125,17 +176,22 @@ public class PreferenceController {
         lanEnabledProperty.addListener((observable, oldValue, newValue) -> {
             try {
                 if (newValue) {
-                    server.start();
-                    webServer.start();
                     server.bind(tcpPortProperty.get(), udpPortProperty.get());
-                } else {
-                    server.stop();
-                    webServer.stop();
-                }
+                    server.start();
+                } else server.stop();
                 System.out.println("Server is " + (newValue ? "" : "not ") + "running!");
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        });
+        controlPanelEnabledProperty.addListener((observable, oldValue, newValue) -> {
+            if (newValue) try {
+                webServer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            else webServer.stop();
+            System.out.println("Web Server is " + (newValue ? "" : "not ") + "running!");
         });
         tcpPortProperty.addListener((observable, oldValue, newValue) -> {
             try {
@@ -151,10 +207,21 @@ public class PreferenceController {
                 e.printStackTrace();
             }
         });
+        panelPortProperty.addListener((observable, oldValue, newValue) -> {
+            webServer.stop();
+            webServer = new WebServer(keys, controller.exams, (Integer) newValue);
+            if (controlPanelEnabledProperty.get()) try {
+                webServer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        attachDisplayListeners();
     }
 
-    public void apply() {
-        // TODO: Apply the properties to controls
+    private void attachDisplayListeners() {
+        // digitalAboveAnalogProperty done else where
     }
 
     public void show(boolean modal) {

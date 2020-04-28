@@ -28,3 +28,8 @@
 .scroll-bar > .decrement-button:pressed > .decrement-arrow {
     -fx-background-color: -fx-mark-highlight-color, -fx-foreground;
 }
+
+.toggle-switch:selected .thumb-area {
+    -fx-text-box-border: -fx-accent;
+    -fx-background-color: linear-gradient(to bottom, derive(-fx-text-box-border, -20%), derive(-fx-text-box-border, -30%)), linear-gradient(to bottom, derive(-fx-accent, 30%), -fx-accent);
+}

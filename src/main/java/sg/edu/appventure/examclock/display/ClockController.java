@@ -3,12 +3,16 @@ package sg.edu.appventure.examclock.display;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import sg.edu.appventure.examclock.PreferenceController;
 
 import java.util.Calendar;
 
@@ -22,22 +26,37 @@ public class ClockController {
     private final Timeline timeline;
     private final DigitalClock digitalClock;
 
-    public ClockController(Group parent, Group clockFace, Group hour, Group minute, Group second) {
+    public ClockController(Group parent, Group clockFace, Group hour, Group minute, Group second, Polygon hourHand, Polygon minuteHand, Polygon secondHand) {
         this.hour = hour;
         this.minute = minute;
         this.second = second;
         this.parent = parent;
         this.clockFace = clockFace;
         calendar = Calendar.getInstance();
-        digitalClock = new DigitalClock(Color.DODGERBLUE.brighter(), Color.TRANSPARENT, Color.DODGERBLUE);
+        digitalClock = new DigitalClock();
         digitalClock.setLayoutX(-digitalClock.width / 2);
         digitalClock.setLayoutY(60);
-        clockFace.getChildren().add(digitalClock);
+        parent.getChildren().add(1, digitalClock);
         createClockLabels();
 
         timeline = new Timeline();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
+
+        PreferenceController.digitalAboveAnalogProperty.addListener((observable, oldValue, newValue) -> {
+            parent.getChildren().remove(digitalClock);
+            if (newValue) parent.getChildren().add(digitalClock);
+            else parent.getChildren().add(1, digitalClock);
+        });
+        secondHand.fillProperty().bind(PreferenceController.secondHandColorProperty);
+        DropShadow dropShadow = new DropShadow(4, Color.BLACK);
+        InnerShadow innerShadow = new InnerShadow();
+        PreferenceController.analogueShadowProperty.addListener((observable, oldValue, newValue) -> {
+            clockFace.setEffect(newValue ? innerShadow : null);
+            hourHand.setEffect(newValue ? dropShadow : null);
+            minuteHand.setEffect(newValue ? dropShadow : null);
+            secondHand.setEffect(newValue ? dropShadow : null);
+        });
     }
 
     private void createClockLabels() {
