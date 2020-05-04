@@ -34,6 +34,7 @@ public class Base64 {
         int len = (tempLen / 4) * 3;
         if ((tempLen % 4) == 3) len += 2;
         if ((tempLen % 4) == 2) len += 1;
+        System.out.println("Len = " + len);
         byte[] out = new byte[len];
         int shift = 0;
         int accum = 0;

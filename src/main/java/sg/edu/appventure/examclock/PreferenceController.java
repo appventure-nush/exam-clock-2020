@@ -35,6 +35,7 @@ public class PreferenceController {
     private PreferencesFx preferencesFx;
     private final MainController controller;
 
+    public static final SimpleIntegerProperty fontScaleProperty = new SimpleIntegerProperty(12);
     public static final SimpleBooleanProperty nightMode = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty lanEnabledProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty controlPanelEnabledProperty = new SimpleBooleanProperty(false);
@@ -49,7 +50,7 @@ public class PreferenceController {
     public static final SimpleBooleanProperty allowToiletProperty = new SimpleBooleanProperty(true);
 
     public static final SimpleObjectProperty<Color> secondHandColorProperty = new SimpleObjectProperty<>(Color.RED);
-    public static final SimpleBooleanProperty analogueShadowProperty = new SimpleBooleanProperty(true);
+    public static final SimpleBooleanProperty analogueShadowProperty = new SimpleBooleanProperty(false);
 
     public static final SimpleBooleanProperty digitalAboveAnalogProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty digitalBackgroundProperty = new SimpleBooleanProperty(true);
@@ -67,7 +68,7 @@ public class PreferenceController {
         server = new Server();
         server.getKryo().register(byte[].class);
         keys = new HashMap<>();
-        webServer = new WebServer(keys, controller.exams, panelPortProperty.get());
+        webServer = new WebServer(controller, keys, controller.exams, panelPortProperty.get());
     }
 
     public void initPreferences() {
@@ -75,7 +76,8 @@ public class PreferenceController {
         preferencesFx = PreferencesFx.of(ExamClock.class,
                 Category.of("Display",
                         com.dlsc.preferencesfx.model.Group.of("General",
-                                Setting.of("Night Mode", nightMode)
+                                Setting.of("Night Mode", nightMode),
+                                Setting.of("Font Scale", fontScaleProperty, 8, 40)
                         ),
                         com.dlsc.preferencesfx.model.Group.of("Analogue Clock",
                                 Setting.of("Second Hand", secondHandColorProperty),
@@ -209,7 +211,7 @@ public class PreferenceController {
         });
         panelPortProperty.addListener((observable, oldValue, newValue) -> {
             webServer.stop();
-            webServer = new WebServer(keys, controller.exams, (Integer) newValue);
+            webServer = new WebServer(controller, keys, controller.exams, (Integer) newValue);
             if (controlPanelEnabledProperty.get()) try {
                 webServer.start();
             } catch (IOException e) {

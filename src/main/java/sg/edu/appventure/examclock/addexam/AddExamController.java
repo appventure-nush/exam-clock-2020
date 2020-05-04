@@ -9,7 +9,6 @@ import com.jfoenix.validation.base.ValidatorBase;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import sg.edu.appventure.examclock.MainController;
 import sg.edu.appventure.examclock.model.Exam;
@@ -37,7 +36,12 @@ public class AddExamController {
         RegexValidator regexValidator = new RegexValidator();
         regexValidator.setRegexPattern("^[A-Z]{2}[1-6]\\d{3}$");
         regexValidator.setMessage("Invalid module code!");
-        code_input.setValidators(regexValidator);
+        code_input.setValidators(regexValidator, new ValidatorBase("Duplicated module code!") {
+            @Override
+            protected void eval() {
+                hasErrors.set(mainController.exams.filtered(e -> e.getCode().equals(code_input.getText())).size() > 0);
+            }
+        });
         name_input.setValidators(new RequiredFieldValidator("Required"));
         date_input.setConverter(new StringConverter<LocalDate>() {
             private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy MMM dd");
@@ -66,7 +70,7 @@ public class AddExamController {
                 hasErrors.set(date_input.getValue().isEqual(LocalDate.now()) && start_time_input.getValue().isBefore(LocalTime.now()));
             }
         };
-        ValidatorBase endTimeValidator = new ValidatorBase("End must be after start") {
+        ValidatorBase endTimeValidator = new ValidatorBase("End must be after startTime") {
             @Override
             protected void eval() {
                 hasErrors.set(start_time_input.getValue().isAfter(end_time_input.getValue()));
@@ -101,14 +105,12 @@ public class AddExamController {
                 && end_time_input.validate()) {
             Exam exam = new Exam(code_input.getText(), name_input.getText(), date_input.getValue(), start_time_input.getValue(), end_time_input.getValue());
             mainController.addCallback(exam);
-            System.out.println("Yes");
         }
     }
 
     @FXML
     public void cancel(ActionEvent event) {
-        Stage stage = (Stage) form.getScene().getWindow();
-        stage.close();
+        mainController.addExamStage.hide();
     }
 
     public void setMainController(MainController mainController) {

@@ -1,7 +1,5 @@
 package sg.edu.appventure.examclock.display;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.scene.Group;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
@@ -10,8 +8,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.WindowEvent;
-import javafx.util.Duration;
 import sg.edu.appventure.examclock.PreferenceController;
 
 import java.util.Calendar;
@@ -23,7 +19,6 @@ public class ClockController {
     private final Group minute;
     private final Group second;
     private final Calendar calendar;
-    private final Timeline timeline;
     private final DigitalClock digitalClock;
 
     public ClockController(Group parent, Group clockFace, Group hour, Group minute, Group second, Polygon hourHand, Polygon minuteHand, Polygon secondHand) {
@@ -38,10 +33,6 @@ public class ClockController {
         digitalClock.setLayoutY(60);
         parent.getChildren().add(1, digitalClock);
         createClockLabels();
-
-        timeline = new Timeline();
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
 
         PreferenceController.digitalAboveAnalogProperty.addListener((observable, oldValue, newValue) -> {
             parent.getChildren().remove(digitalClock);
@@ -85,15 +76,6 @@ public class ClockController {
         }
     }
 
-    public void play() {
-        timeline.stop();
-        timeline.play();
-    }
-
-    public void stop() {
-        timeline.stop();
-    }
-
     int lastSecond = 0;
 
     public void refresh() {
@@ -123,14 +105,10 @@ public class ClockController {
     }
 
     public void resize(double width, double height) {
-        double radius = 0.95 * Math.min(width / 2 - 125.5, height / 2);
+        double radius = 0.95 * Math.min(width / 2, height / 2);
         parent.setScaleX(radius / 200);
         parent.setScaleY(radius / 200);
-        parent.setLayoutX(width / 2 - 125.5);
+        parent.setLayoutX(width / 2);
         parent.setLayoutY(height / 2);
-    }
-
-    public void onClose(WindowEvent event) {
-        timeline.stop();
     }
 }

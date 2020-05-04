@@ -27,10 +27,6 @@ public class Encryption {
     public static final int GCM_TAG_LENGTH = 16;
     private static final byte[] AAD = "ExamClock Encrypted Protocol".getBytes();
 
-    static {
-        System.out.println("AAD Length = " + AAD.length);
-    }
-
     public static byte[] createKey() {
         try {
             SecureRandom random = SecureRandom.getInstanceStrong();
@@ -97,7 +93,6 @@ public class Encryption {
         try {
             return JSONObjectUtils.parse(new String(bytes));
         } catch (ParseException e) {
-            e.printStackTrace();
             return null;
         }
     }

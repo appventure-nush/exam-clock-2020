@@ -13,9 +13,32 @@
     -fx-fill: derive(-fx-background, 20%);
 }
 
-#addBtn {
+.primary-raised {
     -jfx-button-type: RAISED;
     -jfx-disable-visual-focus: true;
     -fx-background-color: -fx-accent;
     -fx-text-fill: white;
+}
+
+.jfx-hamburger StackPane {
+    -fx-background-color: -fx-foreground;
+}
+
+.exam-code {
+    -fx-font-weight: bold;
+}
+
+.exam-name, .exam-code {
+    -fx-font-size: 1.2em;
+}
+
+.time-left {
+    -fx-font-family: monospace;
+    -fx-font-weight: bold;
+    -fx-font-size: 1.5em;
+    -fx-padding: 3px;
+}
+
+.window-buttons, #toolbar {
+    -fx-font-size: 14px;
 }
