@@ -13,15 +13,12 @@
     -fx-fill: derive(-fx-background, 20%);
 }
 
-.primary-raised {
-    -jfx-button-type: RAISED;
-    -jfx-disable-visual-focus: true;
-    -fx-background-color: -fx-accent;
-    -fx-text-fill: white;
-}
-
 .jfx-hamburger StackPane {
     -fx-background-color: -fx-foreground;
+}
+
+.exam-holder:started {
+    -fx-background-color: #00ff0022;
 }
 
 .exam-code {
@@ -41,4 +38,12 @@
 
 .window-buttons, #toolbar {
     -fx-font-size: 14px;
+}
+
+#toiletIconParent {
+    -fx-background-color: green;
+}
+
+#toiletIconParent.occupied {
+    -fx-background-color: red;
 }

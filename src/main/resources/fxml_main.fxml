@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.*?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
-<SplitPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-           xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
+<SplitPane fx:id="root" dividerPositions="0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+           minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="sg.edu.appventure.examclock.MainController">
     <Pane fx:id="clockRoot">
         <Group fx:id="clockPane" layoutX="400.0" layoutY="400.0">
@@ -26,8 +29,8 @@
             <Group fx:id="minuteGroup">
                 <Circle fill="TRANSPARENT" opacity="0.0" radius="200.0" smooth="false" stroke="TRANSPARENT"
                         strokeType="INSIDE" strokeWidth="0.0"/>
-                <Polygon fx:id="minuteHand" points="-3.3,20, 0,23, 3.3,20, 2,-150, 0,-155, -2,-150"
-                         strokeType="INSIDE" styleClass="clock-element"/>
+                <Polygon fx:id="minuteHand" points="-3.3,20, 0,23, 3.3,20, 2,-150, 0,-155, -2,-150" strokeType="INSIDE"
+                         styleClass="clock-element"/>
             </Group>
             <Group fx:id="secondGroup">
                 <Circle fill="TRANSPARENT" opacity="0.0" radius="200.0" smooth="false" stroke="TRANSPARENT"
@@ -38,10 +41,10 @@
             <Circle radius="5.0" strokeType="INSIDE" styleClass="clock-element-empty"/>
         </Group>
     </Pane>
-    <VBox fx:id="rightPane">
+    <VBox fx:id="rightPane" alignment="TOP_RIGHT">
         <ToolBar fx:id="toolbar">
-            <JFXButton fx:id="addBtn" mnemonicParsing="false" onAction="#addExamClicked" text="Add"
-                       styleClass="primary-raised"/>
+            <JFXButton fx:id="addBtn" mnemonicParsing="false" onAction="#addExamClicked" styleClass="primary-raised"
+                       text="Add"/>
             <JFXButton fx:id="startBtn" mnemonicParsing="false" text="Start All"/>
             <JFXButton fx:id="stopBtn" mnemonicParsing="false" text="Stop All"/>
             <JFXButton fx:id="settingBtn" mnemonicParsing="false" onAction="#showSettings" text="Settings"/>
@@ -49,5 +52,25 @@
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
             <VBox fx:id="examList"/>
         </ScrollPane>
+        <StackPane fx:id="toiletIconParent" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                   minWidth="-Infinity" VBox.vgrow="NEVER">
+            <children>
+                <ImageView fx:id="toiletIcon" cache="true" fitHeight="128.0" fitWidth="128.0" pickOnBounds="true"
+                           preserveRatio="true">
+                    <image>
+                        <Image url="@toilet.png"/>
+                    </image>
+                    <viewport>
+                        <Rectangle2D/>
+                    </viewport>
+                </ImageView>
+            </children>
+            <VBox.margin>
+                <Insets top="-152.0"/>
+            </VBox.margin>
+            <padding>
+                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0"/>
+            </padding>
+        </StackPane>
     </VBox>
 </SplitPane>

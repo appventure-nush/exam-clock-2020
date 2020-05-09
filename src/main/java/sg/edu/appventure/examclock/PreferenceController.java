@@ -15,7 +15,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -42,6 +41,7 @@ public class PreferenceController {
     public static final SimpleIntegerProperty tcpPortProperty = new SimpleIntegerProperty(12345);
     public static final SimpleIntegerProperty udpPortProperty = new SimpleIntegerProperty(12346);
     public static final SimpleIntegerProperty panelPortProperty = new SimpleIntegerProperty(8080);
+    public static final SimpleStringProperty panelAddressProperty = new SimpleStringProperty("loading...");
     public static final SimpleStringProperty lanNameProperty = new SimpleStringProperty("Exam Clock");
 
     public static final SimpleBooleanProperty allowAddingProperty = new SimpleBooleanProperty(true);
@@ -73,6 +73,8 @@ public class PreferenceController {
 
     public void initPreferences() {
         attachListener();
+        panelAddressProperty.set("http://" + getAddress() + ":" + panelPortProperty.get());
+        panelPortProperty.addListener((observable, oldValue, newValue) -> panelAddressProperty.set("http://" + getAddress() + ":" + panelPortProperty.get()));
         preferencesFx = PreferencesFx.of(ExamClock.class,
                 Category.of("Display",
                         com.dlsc.preferencesfx.model.Group.of("General",
@@ -102,7 +104,9 @@ public class PreferenceController {
                                 Setting.of("Port (TCP)", tcpPortProperty),
                                 Setting.of("Port (UDP)", udpPortProperty),
                                 Setting.of("Port (Panel)", panelPortProperty),
-                                Setting.of(new HBox(new JFXButton("QR Code for Key") {{
+                                Setting.of("Panel IP", panelAddressProperty),
+                                Setting.of(new JFXButton("QR Code for Key") {{
+                                    getStyleClass().add("primary-raised");
                                     setOnAction(e -> {
                                         final Stage dialog = new Stage();
                                         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -113,31 +117,15 @@ public class PreferenceController {
                                                 String id = UUID.randomUUID().toString();
                                                 keys.put(id, key);
                                                 setImage(SwingFXUtils.toFXImage(Encryption.generateQRCode(id, key, getAddress() + ":" + panelPortProperty.get()), null));
-                                                setFitHeight(300);
-                                                setFitWidth(300);
+                                                setFitHeight(512);
+                                                setFitWidth(512);
                                             } catch (WriterException e) {
                                                 e.printStackTrace();
                                             }
                                         }})));
                                         dialog.show();
                                     });
-                                }}, new JFXButton("QR Code for Web") {{
-                                    setOnAction(e -> {
-                                        final Stage dialog = new Stage();
-                                        dialog.initModality(Modality.APPLICATION_MODAL);
-                                        dialog.initOwner(preferencesFx.getView().getScene().getWindow());
-                                        dialog.setScene(new Scene(new StackPane(new ImageView() {{
-                                            try {
-                                                setImage(SwingFXUtils.toFXImage(Encryption.generateQRCode("http://" + getAddress() + ":" + panelPortProperty.get()), null));
-                                                setFitHeight(300);
-                                                setFitWidth(300);
-                                            } catch (WriterException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }})));
-                                        dialog.show();
-                                    });
-                                }}))
+                                }})
                         ),
                         com.dlsc.preferencesfx.model.Group.of("Lan Permission",
                                 Setting.of("Add", allowAddingProperty),

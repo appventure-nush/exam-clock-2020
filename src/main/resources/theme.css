@@ -37,3 +37,10 @@
 .elevated {
     -fx-background-color: -fx-control-inner-background;
 }
+
+.primary-raised {
+    -jfx-button-type: RAISED;
+    -jfx-disable-visual-focus: true;
+    -fx-background-color: -fx-accent;
+    -fx-text-fill: white;
+}

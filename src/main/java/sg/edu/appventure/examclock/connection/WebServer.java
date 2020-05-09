@@ -130,7 +130,10 @@ public class WebServer extends NanoHTTPD {
                                 return newJSONResponse(key, response);
                             }
                             case "toilet": {
-
+                                Platform.runLater(() -> controller.toiletOccupied.set(!controller.toiletOccupied.get()));
+                                JSONObject response = new JSONObject();
+                                response.put("occupied", !controller.toiletOccupied.get());
+                                return newJSONResponse(key, response);
                             }
                         }
                         JSONObject response = new JSONObject();

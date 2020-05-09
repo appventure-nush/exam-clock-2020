@@ -4,6 +4,9 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.controls.JFXNodesList;
 import com.jfoenix.transitions.hamburger.HamburgerBasicCloseTransition;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
+import javafx.css.PseudoClass;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -22,6 +25,8 @@ import java.time.temporal.ChronoUnit;
 
 public class ExamHolder extends HBox {
 
+    private static final PseudoClass STARTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("started");
+
     private final Label examCode;
     private final Label examName;
     private final Label examDate;
@@ -34,6 +39,7 @@ public class ExamHolder extends HBox {
     private Exam exam;
     private final MainController controller;
     private final JFXNodesList list;
+    private final BooleanProperty started;
 
     public ExamHolder(MainController controller) {
         this.controller = controller;
@@ -106,10 +112,24 @@ public class ExamHolder extends HBox {
         timeLeft.setMaxHeight(Double.MAX_VALUE);
         getChildren().add(timeLeft);
 
+        getStyleClass().add("exam-holder");
         setMaxWidth(Double.MAX_VALUE);
         setSpacing(5);
         setPadding(new Insets(2, 4, 2, 4));
         setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        started = new BooleanPropertyBase(false) {
+            public void invalidated() {
+                pseudoClassStateChanged(STARTED_PSEUDO_CLASS, get());
+            }
+
+            public Object getBean() {
+                return ExamHolder.this;
+            }
+
+            public String getName() {
+                return "started";
+            }
+        };
     }
 
     public ExamHolder(MainController controller, Exam exam) {
@@ -133,13 +153,19 @@ public class ExamHolder extends HBox {
     public void update(LocalDate today, LocalTime now) {
         if (today.isEqual(date)) {
             if (now.isBefore(start)) {
-                timeLeft.setText(String.format("%02d", ChronoUnit.HOURS.between(start, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(start, end) % 60));
+                timeLeft.setText(String.format("%02d", ChronoUnit.HOURS.between(start, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(start, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(start, end) % 60));
+                started.set(false);
             } else if (now.isAfter(end)) {
-                timeLeft.setText("0:00:00");
+                timeLeft.setText("00:00:00");
+                started.set(false);
             } else {
                 timeLeft.setText(String.format("%02d", ChronoUnit.HOURS.between(now, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(now, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(now, end) % 60));
+                started.set(true);
             }
-        } else timeLeft.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
+        } else {
+            timeLeft.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
+            started.set(false);
+        }
     }
 
     public Exam getExam() {

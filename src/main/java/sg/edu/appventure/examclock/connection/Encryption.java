@@ -78,7 +78,7 @@ public class Encryption {
     }
 
     public static BufferedImage generateQRCode(String uuid, byte[] key, String ip) throws WriterException {
-        return MatrixToImageWriter.toBufferedImage(new QRCodeWriter().encode(new QRCodeContent(uuid, key, ip).toString(), BarcodeFormat.QR_CODE, 500, 500));
+        return MatrixToImageWriter.toBufferedImage(new QRCodeWriter().encode(new QRCodeContent(uuid, key, ip).toString(), BarcodeFormat.QR_CODE, 512, 512));
     }
 
     public static BufferedImage generateQRCode(String string) throws WriterException {

@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXButton;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -14,6 +15,10 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.ColorInput;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -71,8 +76,13 @@ public class MainController {
     private JFXButton settingBtn;
     @FXML
     private VBox examList;
+    @FXML
+    private ImageView toiletIcon;
+    @FXML
+    private StackPane toiletIconParent;
 
     public ObservableList<Exam> exams;
+    public SimpleBooleanProperty toiletOccupied = new SimpleBooleanProperty(false);
 
     private ClockController clockController;
     private PreferenceController preferenceController;
@@ -113,8 +123,23 @@ public class MainController {
 
         clockRoot.widthProperty().addListener((observable, oldValue, newValue) -> resize(clockRoot.getWidth(), clockRoot.getHeight()));
         clockRoot.heightProperty().addListener((observable, oldValue, newValue) -> resize(clockRoot.getWidth(), clockRoot.getHeight()));
+
+        toiletOccupied.addListener((observable, oldValue, newValue) -> {
+            if (newValue) toiletIconParent.getStyleClass().add("occupied");
+            else toiletIconParent.getStyleClass().remove("occupied");
+        });
+        toiletIcon.setOnMouseClicked(e -> toiletOccupied.set(!toiletOccupied.get()));
+        Blend blendEffect = new Blend(BlendMode.DIFFERENCE);
+        ColorInput input = new ColorInput();
+        blendEffect.setTopInput(input);
+        toiletIcon.setEffect(blendEffect);
+        PreferenceController.nightMode.addListener((observable, oldValue, newValue) -> {
+            if (newValue) toiletIcon.setEffect(blendEffect);
+            else toiletIcon.setEffect(null);
+        });
+
         try {
-            initAddStage();
+            initAddExamStage();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -123,9 +148,7 @@ public class MainController {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
 
-        debug:
         addCallback(new Exam("MA2020", "Math", LocalDate.now(), LocalTime.now().plusHours(0), LocalTime.now().plusHours(2)));
-
         startBtn.setOnAction(e -> startAllExams());
         stopBtn.setOnAction(e -> stopAllExams());
         play();
@@ -150,7 +173,7 @@ public class MainController {
         addExamStage.show();
     }
 
-    private void initAddStage() throws IOException {
+    private void initAddExamStage() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml_add_exam.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         AddExamController addExamController = fxmlLoader.getController();
@@ -188,7 +211,7 @@ public class MainController {
     public void startAllExams() {
         exams.forEach(exam -> {
             long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            LocalTime newStartTime = LocalTime.now().withNano(0);
+            LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
             exam.startTime = newStartTime.toString();
             exam.endTime = newStartTime.plusSeconds(seconds).toString();
         });
