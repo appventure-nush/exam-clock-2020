@@ -29,6 +29,11 @@ public class WebServer extends NanoHTTPD {
         this.keys = keys;
         this.exams = exams;
         verified_keys = new ArrayList<>();
+//        try {
+//            makeSecure(NanoHTTPD.makeSSLSocketFactory("/keystore.jks", "password".toCharArray()), null);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override

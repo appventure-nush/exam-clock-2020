@@ -362,6 +362,8 @@
         });
     } catch (err) {
         console.error(err);
+        localStorage.removeItem("keyID");
+        localStorage.removeItem("keyJWK");
     }
 </script>
 <script>
