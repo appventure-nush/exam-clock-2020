@@ -10,15 +10,21 @@
 4. You can customise the display in "Settings"
 
 ### Web Panel
-1. Open settings
-2. Go to "Connection" section
-3. Enter the url from "Panel IP" into your device
-4. Click on "QR Code for Key" button, and take a photo of the QR code
-5. When in the panel, click on "Upload QR Code Image" and upload the QR code
-6. You should see detailed information of the key popping up automatically
-   - Note that if you are using chrome, this may not work coz chrome disables crypto.subtle on `http` networks
-   - In the future the web panel may be hosted else where to ensure `https` connection and that fake web panels are not sent to the user
-7. Click "Verify me"
-8. If all goes well, you now have access to the panel's full functionality
+1. Click `Connection`
+2. Select a key type
+   - `Administrator` have all permissions
+   - `Toilet Controller` can only toggle toilet occupancy status
+   - `Read Only` can only read exams, and cannot make changes
+3. Click `Create`
+4. Click `Details`
+5. Click `Show QR Code`
+6. Goto https://appventure-nush.github.io/exam-clock-2020-web/
+7. Allow insecure content on your browser
+   - Chrome
+   > Follow https://support.google.com/chrome/answer/114662 \
+   > And change "Insecure Content" to `Allow`
+8. Upload a photo of the QR Code
+9. Click `Verify me`
+10. If all goes well, you now have access to the panel
 
 ### [Releases](https://github.com/appventure-nush/exam-clock-2020/releases/tag/v1.0-beta)
