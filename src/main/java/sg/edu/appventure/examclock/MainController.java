@@ -125,7 +125,11 @@ public class MainController {
                 });
                 for (int i = c.getFrom(); i < c.getTo(); i++) {
                     if (holderPool.empty()) examList.getChildren().add(i, new ExamHolder(this, c.getList().get(i)));
-                    else examList.getChildren().add(i, holderPool.pop().setExam(c.getList().get(i)));
+                    else {
+                        ExamHolder element = holderPool.pop().setExam(c.getList().get(i));
+                        examList.getChildren().add(i, element);
+                        element.reset();
+                    }
                 }
             }
             JSONArray array = new JSONArray();
