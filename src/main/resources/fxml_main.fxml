@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.geometry.Rectangle2D?>
 <?import javafx.scene.control.ScrollPane?>
@@ -48,6 +48,7 @@
             <JFXButton fx:id="startBtn" mnemonicParsing="false" text="Start All"/>
             <JFXButton fx:id="stopBtn" mnemonicParsing="false" text="Stop All"/>
             <JFXButton fx:id="settingBtn" mnemonicParsing="false" onAction="#showSettings" text="Settings"/>
+            <JFXButton fx:id="connectionBtn" mnemonicParsing="false" onAction="#showConnection" text="Connection"/>
         </ToolBar>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
             <VBox fx:id="examList"/>

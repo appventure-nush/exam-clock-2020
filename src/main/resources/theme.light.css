@@ -12,4 +12,5 @@
     -fx-dark-text-color: rgb(190, 50, 50);
     -fx-selection-bar-non-focused: rgb(210, 210, 210);
     -fx-accent: #3f51b5;
+    -fx-error: rgb(170, 50, 50);
 }

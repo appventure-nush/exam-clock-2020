@@ -11,7 +11,6 @@ repositories {
 }
 
 dependencies {
-    compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
     compile 'com.jfoenix:jfoenix:8.0.8'
     compile 'no.tornado:tornadofx-controls:1.0.4'
     compile 'org.nanohttpd:nanohttpd:2.3.1'

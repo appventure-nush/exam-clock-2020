@@ -9,6 +9,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import net.minidev.json.JSONObject;
+import sg.edu.appventure.examclock.model.Key;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
@@ -77,16 +78,8 @@ public class Encryption {
         return null;
     }
 
-    public static BufferedImage generateQRCode(String uuid, byte[] key, String ip) throws WriterException {
-        return MatrixToImageWriter.toBufferedImage(new QRCodeWriter().encode(new QRCodeContent(uuid, key, ip).toString(), BarcodeFormat.QR_CODE, 512, 512));
-    }
-
-    public static BufferedImage generateQRCode(String string) throws WriterException {
-        return MatrixToImageWriter.toBufferedImage(new QRCodeWriter().encode(string, BarcodeFormat.QR_CODE, 500, 500));
-    }
-
-    public static byte[] toBytes(JSONObject object) {
-        return object.toJSONString().getBytes();
+    public static BufferedImage generateQRCode(Key key, String ip) throws WriterException {
+        return MatrixToImageWriter.toBufferedImage(new QRCodeWriter().encode(new QRCodeContent(key, ip).toString(), BarcodeFormat.QR_CODE, 512, 512));
     }
 
     public static JSONObject toJSONObject(byte[] bytes) {
@@ -98,14 +91,15 @@ public class Encryption {
     }
 
     private static class QRCodeContent extends JSONObject {
-        public QRCodeContent(String keyID, byte[] keyBytes, String ip) {
-            SecretKey key = new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES");
-            JWK jwk = new OctetSequenceKey.Builder(key)
-                    .keyID(keyID)
+        public QRCodeContent(Key key, String ip) {
+            SecretKey secretKey = new SecretKeySpec(key.key, 0, key.key.length, "AES");
+            JWK jwk = new OctetSequenceKey.Builder(secretKey)
+                    .keyID(key.id)
                     .algorithm(EncryptionMethod.A128GCM) // indicate the intended key alg (optional)
                     .build();
             put("ip", ip);
-            put("id", keyID);
+            put("id", key.id);
+            put("type", key.type.toString());
             put("jwk", jwk.toJSONObject());
         }
     }

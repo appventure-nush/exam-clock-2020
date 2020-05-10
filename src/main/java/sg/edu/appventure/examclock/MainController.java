@@ -14,25 +14,24 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.ToolBar;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.ColorInput;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
 import sg.edu.appventure.examclock.addexam.AddExamController;
 import sg.edu.appventure.examclock.display.ClockController;
 import sg.edu.appventure.examclock.model.Exam;
 import sg.edu.appventure.examclock.model.ExamHolder;
+import sg.edu.appventure.examclock.model.Key;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -87,18 +86,20 @@ public class MainController {
     private ClockController clockController;
     private PreferenceController preferenceController;
     public Stage stage;
-    public Stage fullScreenStage;
     public Stage addExamStage;
-    private WindowButtons windowButtons;
+    private Stage connectStage;
 
     private Stack<ExamHolder> holderPool;
 
     private Timeline timeline;
 
+    public ObservableList<Key> keys;
+
     @FXML
     public void initialize() {
         System.out.println("initialize");
         exams = FXCollections.observableArrayList();
+        keys = FXCollections.observableArrayList();
         exams.addListener((ListChangeListener<Exam>) c -> {
             while (c.next()) {
                 List<? extends Exam> removed = c.getRemoved();
@@ -119,7 +120,6 @@ public class MainController {
         preferenceController = new PreferenceController(this);
         PreferenceController.fontScaleProperty.addListener((observable, oldValue, newValue) -> root.setStyle("-fx-font-size: " + newValue + "px;"));
         preferenceController.initPreferences();
-        rightPane.getChildren().add(0, windowButtons = new WindowButtons());
 
         clockRoot.widthProperty().addListener((observable, oldValue, newValue) -> resize(clockRoot.getWidth(), clockRoot.getHeight()));
         clockRoot.heightProperty().addListener((observable, oldValue, newValue) -> resize(clockRoot.getWidth(), clockRoot.getHeight()));
@@ -140,10 +140,10 @@ public class MainController {
 
         try {
             initAddExamStage();
+            initConnectionStage();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        fullScreenStage = new Stage();
         timeline = new Timeline();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
@@ -183,29 +183,30 @@ public class MainController {
         scene.getStylesheets().add("/theme.css");
         scene.getStylesheets().add(PreferenceController.nightMode.get() ? "theme.dark.css" : "/theme.light.css");
         scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/picker.dark.css" : "/picker.light.css");
-        addExamStage.setTitle("Exam Clock");
+        addExamStage.setTitle("Add Exam");
         addExamStage.initModality(Modality.APPLICATION_MODAL);
         addExamStage.setScene(scene);
+    }
+
+    private void initConnectionStage() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml_connect.fxml"));
+        Scene scene = new Scene(fxmlLoader.load());
+        ConnectionController connectionController = fxmlLoader.getController();
+        connectionController.setMainController(this);
+        connectStage = new Stage();
+        scene.getStylesheets().add("/main.css");
+        scene.getStylesheets().add("/theme.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "theme.dark.css" : "/theme.light.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/picker.dark.css" : "/picker.light.css");
+        connectStage.setTitle("Connection");
+        connectStage.setResizable(false);
+        connectStage.initModality(Modality.APPLICATION_MODAL);
+        connectStage.setScene(scene);
     }
 
     public void addCallback(Exam exam) {
         exams.add(exam);
         addExamStage.hide();
-    }
-
-    @FXML
-    public void showSettings(ActionEvent event) {
-        preferenceController.show(true);
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
-        windowButtons.setStage(stage, fullScreenStage);
-    }
-
-    public void onClose(WindowEvent event) {
-        timeline.stop();
-        preferenceController.onClose(event);
     }
 
     public void startAllExams() {
@@ -228,61 +229,23 @@ public class MainController {
         examList.getChildren().forEach(node -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam()));
     }
 
-    static class WindowButtons extends ToolBar {
+    @FXML
+    public void showSettings(ActionEvent event) {
+        preferenceController.show(true);
+    }
 
-        private Stage stage;
-        private Stage fullscreen;
-        private double xOffset;
-        private double yOffset;
+    @FXML
+    public void showConnection(ActionEvent event) {
+        connectStage.show();
+    }
 
-        boolean isFullscreen = false;
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
-        public WindowButtons() {
-            getStyleClass().add("window-buttons");
-            JFXButton close = new JFXButton("", new Glyph("FontAwesome", FontAwesome.Glyph.CLOSE));
-            close.setDisableVisualFocus(true);
-            close.setOnMouseClicked(event -> stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST)));
-            JFXButton max = new JFXButton("", new Glyph("FontAwesome", FontAwesome.Glyph.SQUARE_ALT));
-            max.setDisableVisualFocus(true);
-            max.setOnMouseClicked(event -> {
-                isFullscreen = !isFullscreen;
-                if (isFullscreen) {
-                    stage.hide();
-                    fullscreen.setScene(stage.getScene());
-                    fullscreen.setFullScreen(true);
-                    fullscreen.show();
-                } else {
-                    fullscreen.setFullScreen(false);
-                    fullscreen.hide();
-                    stage.setScene(fullscreen.getScene());
-                    stage.show();
-                }
-            });
-            JFXButton min = new JFXButton("", new Glyph("FontAwesome", FontAwesome.Glyph.MINUS));
-            min.setDisableVisualFocus(true);
-            min.setOnMouseClicked(event -> stage.setIconified(true));
-            setOnMousePressed(event -> {
-                xOffset = stage.getX() - event.getScreenX();
-                yOffset = stage.getY() - event.getScreenY();
-            });
-            setOnMouseDragged(event -> {
-                stage.setX(event.getScreenX() + xOffset);
-                stage.setY(event.getScreenY() + yOffset);
-            });
-            Region region = new Region();
-            region.setMaxWidth(Double.MAX_VALUE);
-            HBox.setHgrow(region, Priority.ALWAYS);
-            getItems().addAll(region, min, max, close);
-            setPrefHeight(24);
-            setMaxHeight(24);
-            setHeight(24);
-            setBackground(new Background(new BackgroundFill(Color.RED, new CornerRadii(1), null)));
-        }
-
-        public void setStage(Stage stage, Stage fullscreen) {
-            this.stage = stage;
-            this.fullscreen = fullscreen;
-        }
+    public void onClose(WindowEvent event) {
+        stop();
+        preferenceController.onClose(event);
     }
 
     public void play() {

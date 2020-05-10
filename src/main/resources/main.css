@@ -41,9 +41,14 @@
 }
 
 #toiletIconParent {
+    -fx-background-radius: 30px;
     -fx-background-color: green;
 }
 
 #toiletIconParent.occupied {
     -fx-background-color: red;
+}
+
+#keyRaw {
+    -fx-font-family: "monospace";
 }
