@@ -17,12 +17,16 @@ public class Exam {
     public Exam() {
     }
 
-    public Exam(String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
-        this.id = createID();
+    public Exam(String id, String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
+        this.id = id;
         this.name = name;
         this.examDate = examDate.toString();
         this.startTime = startTime.withNano(0).withSecond(0).toString();
         this.endTime = endTime.withNano(0).withSecond(0).toString();
+    }
+
+    public Exam(String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
+        this(createID(), name, examDate, startTime, endTime);
     }
 
     public boolean isRunning() {

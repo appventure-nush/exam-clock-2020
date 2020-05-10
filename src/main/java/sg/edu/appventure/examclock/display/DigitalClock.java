@@ -47,6 +47,7 @@ public class DigitalClock extends Parent {
     }
 
     public void refreshClocks(int hours, int minutes, int seconds) {
+        if (PreferenceController.use12HourFormatProperty.get() && hours > 12) hours -= 12;
         digits[0].showNumber(hours / 10);
         digits[1].showNumber(hours % 10);
         digits[2].showNumber(minutes / 10);

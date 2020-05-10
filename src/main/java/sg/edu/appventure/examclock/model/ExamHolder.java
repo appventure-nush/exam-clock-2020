@@ -14,6 +14,7 @@ import javafx.scene.text.Font;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import sg.edu.appventure.examclock.MainController;
+import sg.edu.appventure.examclock.PreferenceController;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,6 +22,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class ExamHolder extends HBox {
+    private static final DateTimeFormatter FORMAT_12_HOURS = DateTimeFormatter.ofPattern("hh:mm:ss a");
+    private static final DateTimeFormatter FORMAT_24_HOURS = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter FORMAT_12_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("hh:mm a");
+    private static final DateTimeFormatter FORMAT_24_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("HH:mm");
     private final Label examName;
     private final Label examDate;
     private final Label examStartTime;
@@ -50,7 +55,6 @@ public class ExamHolder extends HBox {
             hamburger.setAnimation(animation);
             hamburger.setMaxWidth(14);
             hamburger.setMaxHeight(12);
-            animation.setRate(-1);
 
             JFXButton menuButton = new JFXButton();
             menuButton.setFont(Font.font(14));
@@ -120,8 +124,6 @@ public class ExamHolder extends HBox {
         this.exam = exam;
         examName.setText(exam.getName());
         examDate.setText(exam.getDate().equals(LocalDate.now().toString()) ? "" : exam.getDate());
-        examStartTime.setText(exam.getStartTime());
-        examEndTime.setText(exam.getEndTime());
         date = LocalDate.parse(exam.getDate());
         start = LocalTime.parse(exam.getStartTime());
         end = LocalTime.parse(exam.getEndTime());
@@ -146,6 +148,14 @@ public class ExamHolder extends HBox {
             timeLeft.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
             getStyleClass().removeAll("started", "ended");
         }
+        if (start.getSecond() == 0)
+            examStartTime.setText(start.format(PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS));
+        else
+            examStartTime.setText(start.format(PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
+        if (end.getSecond() == 0)
+            examEndTime.setText(end.format(PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS));
+        else
+            examEndTime.setText(end.format(PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
     }
 
     public Exam getExam() {

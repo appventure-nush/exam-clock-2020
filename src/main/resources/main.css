@@ -42,7 +42,7 @@
 }
 
 #toiletIconParent {
-    -fx-background-radius: 30px;
+    -fx-background-radius: 8px;
     -fx-background-color: green;
 }
 

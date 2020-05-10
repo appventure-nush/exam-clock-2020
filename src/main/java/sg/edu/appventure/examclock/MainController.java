@@ -23,22 +23,30 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 import sg.edu.appventure.examclock.addexam.AddExamController;
 import sg.edu.appventure.examclock.display.ClockController;
 import sg.edu.appventure.examclock.model.Exam;
 import sg.edu.appventure.examclock.model.ExamHolder;
 import sg.edu.appventure.examclock.model.Key;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Stack;
+import java.util.prefs.Preferences;
 
 public class MainController {
     @FXML
@@ -96,11 +104,16 @@ public class MainController {
     public ObservableList<Key> keys;
     private AddExamController addExamController;
 
+    private Preferences examPreferences;
+    private FileChooser fileChooser;
+
     @FXML
     public void initialize() {
         System.out.println("initialize");
         exams = FXCollections.observableArrayList();
         keys = FXCollections.observableArrayList();
+        examPreferences = Preferences.userNodeForPackage(MainController.class);
+        holderPool = new Stack<>();
         exams.addListener((ListChangeListener<Exam>) c -> {
             while (c.next()) {
                 List<? extends Exam> removed = c.getRemoved();
@@ -115,8 +128,18 @@ public class MainController {
                     else examList.getChildren().add(i, holderPool.pop().setExam(c.getList().get(i)));
                 }
             }
+            JSONArray array = new JSONArray();
+            array.addAll(exams);
+            examPreferences.put("exams", array.toJSONString());
         });
-        holderPool = new Stack<>();
+        String examsStr = examPreferences.get("exams", null);
+        if (examsStr != null) {
+            JSONArray root = (JSONArray) JSONValue.parse(examsStr);
+            for (Object o : root) {
+                JSONObject exam = (JSONObject) o;
+                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime"))));
+            }
+        }
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         preferenceController = new PreferenceController(this);
         PreferenceController.fontScaleProperty.addListener((observable, oldValue, newValue) -> root.setStyle("-fx-font-size: " + newValue + "px;"));
@@ -148,8 +171,9 @@ public class MainController {
         timeline = new Timeline();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
-
-        addCallback(new Exam("MA2020 Math", LocalDate.now(), LocalTime.now().plusHours(0), LocalTime.now().plusHours(2)));
+        fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+        fileChooser.getExtensionFilters().add(extFilter);
         startBtn.setOnAction(e -> startAllExams());
         stopBtn.setOnAction(e -> stopAllExams());
         play();
@@ -246,6 +270,35 @@ public class MainController {
     @FXML
     public void showConnection(ActionEvent event) {
         connectStage.show();
+    }
+
+    @FXML
+    public void importExams(ActionEvent actionEvent) {
+        File file = fileChooser.showOpenDialog(stage);
+        if (file == null) return;
+        try {
+            String str = new String(Files.readAllBytes(Paths.get(file.toURI())));
+            System.out.println("Read from File\n" + str);
+            JSONArray root = (JSONArray) JSONValue.parse(str);
+            exams.clear();
+            for (Object o : root) {
+                JSONObject exam = (JSONObject) o;
+                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime"))));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void exportExams(ActionEvent actionEvent) {
+        File file = fileChooser.showSaveDialog(stage);
+        if (file == null) return;
+        try {
+            Files.write(Paths.get(file.toURI()), JSONArray.toJSONString(exams).getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setStage(Stage stage) {

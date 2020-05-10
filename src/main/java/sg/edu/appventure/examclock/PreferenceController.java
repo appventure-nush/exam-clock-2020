@@ -34,6 +34,7 @@ public class PreferenceController {
     public static final SimpleObjectProperty<Color> secondHandColorProperty = new SimpleObjectProperty<>(Color.RED);
     public static final SimpleBooleanProperty analogueShadowProperty = new SimpleBooleanProperty(false);
 
+    public static final SimpleBooleanProperty use12HourFormatProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty digitalAboveAnalogProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty digitalBackgroundProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty digitalClockEffectsProperty = new SimpleBooleanProperty(false);
@@ -56,7 +57,8 @@ public class PreferenceController {
                 Category.of("Display",
                         com.dlsc.preferencesfx.model.Group.of("General",
                                 Setting.of("Night Mode", nightMode),
-                                Setting.of("Font Scale", fontScaleProperty, 8, 40)
+                                Setting.of("Font Scale", fontScaleProperty, 8, 40),
+                                Setting.of("Use 12 Hour Format", use12HourFormatProperty)
                         ),
                         com.dlsc.preferencesfx.model.Group.of("Analogue Clock",
                                 Setting.of("Second Hand", secondHandColorProperty),

@@ -47,8 +47,10 @@
                        text="Add"/>
             <JFXButton fx:id="startBtn" mnemonicParsing="false" text="Start All"/>
             <JFXButton fx:id="stopBtn" mnemonicParsing="false" text="Stop All"/>
-            <JFXButton fx:id="settingBtn" mnemonicParsing="false" onAction="#showSettings" text="Settings"/>
             <JFXButton fx:id="connectionBtn" mnemonicParsing="false" onAction="#showConnection" text="Connection"/>
+            <JFXButton fx:id="settingBtn" mnemonicParsing="false" onAction="#showSettings" text="Settings"/>
+            <JFXButton mnemonicParsing="false" onAction="#importExams" text="Import"/>
+            <JFXButton mnemonicParsing="false" onAction="#exportExams" text="Export"/>
         </ToolBar>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
             <VBox fx:id="examList"/>
