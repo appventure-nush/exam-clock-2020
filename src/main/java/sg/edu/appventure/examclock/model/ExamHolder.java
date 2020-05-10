@@ -41,10 +41,11 @@ public class ExamHolder extends HBox {
     public ExamHolder(MainController controller) {
         VBox infoPane = new VBox();
         infoPane.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(infoPane, Priority.ALWAYS);
+        HBox.setHgrow(infoPane, Priority.SOMETIMES);
         examName = new Label();
         examName.getStyleClass().add("exam-name");
         examName.setMaxWidth(Double.MAX_VALUE);
+        examName.setWrapText(true);
         HBox.setHgrow(examName, Priority.ALWAYS);
         list = new JFXNodesList();
         list.setSpacing(10);
@@ -106,6 +107,7 @@ public class ExamHolder extends HBox {
         timeLeft = new Label();
         timeLeft.getStyleClass().addAll("time-left", "elevated");
         timeLeft.setMaxHeight(Double.MAX_VALUE);
+        timeLeft.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
         getChildren().add(timeLeft);
 
         getStyleClass().add("exam-holder");

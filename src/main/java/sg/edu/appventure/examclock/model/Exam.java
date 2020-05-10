@@ -30,7 +30,7 @@ public class Exam {
     }
 
     private static String createID() {
-        byte[] bytes = new byte[6 * 8];
+        byte[] bytes = new byte[3];
         new Random().nextBytes(bytes);
         return new String(Base64.encode(bytes));
     }

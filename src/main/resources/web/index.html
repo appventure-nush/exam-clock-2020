@@ -72,12 +72,12 @@
                 </div>
             </div>
             <div class="row">
-                <div class="btn-group col-md-8" role="group" aria-label="Actions" id="admin-actions">
+                <div class="btn-group col-md-6" role="group" aria-label="Actions" id="admin-actions">
                     <button type="button" class="btn btn-success" id="add">Add</button>
                     <button type="button" class="btn btn-outline-warning" id="start">Start All</button>
                     <button type="button" class="btn btn-outline-danger" id="stop">Stop All</button>
                 </div>
-                <div class="btn-group col-md-4" role="group" aria-label="Actions">
+                <div class="btn-group col-md-6" role="group" aria-label="Actions">
                     <button type="button" class="btn btn-outline-success" id="toilet">Toilet</button>
                     <button type="button" class="btn btn-outline-info" id="refresh">Refresh</button>
                     <button type="button" class="btn btn-outline-danger" id="logout">Exit</button>
@@ -239,7 +239,20 @@
         }
 
         toHTML() {
-            return `<li data-id="${this.id}"><div class="exam-box row"><div class="exam-info col-sm-10"><h3><code>${this.id}</code> ${this.name}</h3>Exam on <code>${this.examDate}</code><br>From <code>${this.startTime}</code> to <code>${this.endTime}</code></div><div class="exam-action col-sm-2 btn-group-vertical"><button onclick="editExam('${this.id}')" type="button" class="btn btn-secondary">Edit</button><button onclick="deleteExam('${this.id}')" type="button" class="btn btn-secondary">Delete</button></div></div></li>`;
+            return `
+<li data-id="${this.id}">
+<div class="exam-box row">
+<div class="exam-info col-sm-10">
+<h3><code>${this.id}</code> ${this.name}</h3>
+Exam on <code>${this.examDate}</code><br>
+From <code>${this.startTime}</code> to <code>${this.endTime}</code>
+</div>
+<div class="exam-action col-sm-2 btn-group-vertical">
+<button onclick="editExam('${this.id}')" type="button" class="btn btn-secondary">Edit</button>
+<button onclick="deleteExam('${this.id}')" type="button" class="btn btn-secondary">Delete</button>
+</div>
+</div>
+</li>`;
         }
     }
 
@@ -365,7 +378,6 @@
 </script>
 <script>
     var exams = [];
-    var inputMC = document.getElementById("inputMC");
     var inputEN = document.getElementById("inputEN");
     var inputDT = document.getElementById("inputDT");
     var inputST = document.getElementById("inputST");
@@ -374,7 +386,7 @@
     document.getElementById("add").onclick = e => {
         sendData(JSON.stringify({
             method: ADD_EXAM,
-            exam: new Exam(inputEN.value, inputDT.value, inputST.value, inputET.value)
+            exam: new Exam("", inputEN.value, inputDT.value, inputST.value, inputET.value)
         })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
     };
     document.getElementById("start").onclick = e => {
@@ -409,13 +421,12 @@
     function deleteExam(id) {
         sendData(JSON.stringify({
             method: DELETE_EXAM,
-            module_code: id
+            id: id
         })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
     }
 
     function editExam(id) {
-        var exam = exams.find(e => e.code === id);
-        inputMC.value = exam.code;
+        var exam = exams.find(e => e.id === id);
         inputEN.value = exam.name;
         inputDT.value = exam.examDate;
         inputST.value = exam.startTime;
