@@ -4,9 +4,6 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.controls.JFXNodesList;
 import com.jfoenix.transitions.hamburger.HamburgerBasicCloseTransition;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.BooleanPropertyBase;
-import javafx.css.PseudoClass;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -24,10 +21,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class ExamHolder extends HBox {
-
-    private static final PseudoClass STARTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("started");
-
-    private final Label examCode;
     private final Label examName;
     private final Label examDate;
     private final Label examStartTime;
@@ -37,18 +30,13 @@ public class ExamHolder extends HBox {
     private LocalTime start;
     private LocalTime end;
     private Exam exam;
-    private final MainController controller;
     private final JFXNodesList list;
-    private final BooleanProperty started;
+    private final HamburgerBasicCloseTransition animation;
 
     public ExamHolder(MainController controller) {
-        this.controller = controller;
         VBox infoPane = new VBox();
         infoPane.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(infoPane, Priority.ALWAYS);
-
-        examCode = new Label();
-        examCode.getStyleClass().add("exam-code");
         examName = new Label();
         examName.getStyleClass().add("exam-name");
         examName.setMaxWidth(Double.MAX_VALUE);
@@ -58,7 +46,7 @@ public class ExamHolder extends HBox {
 
         {
             JFXHamburger hamburger = new JFXHamburger();
-            HamburgerBasicCloseTransition animation = new HamburgerBasicCloseTransition(hamburger);
+            animation = new HamburgerBasicCloseTransition(hamburger);
             hamburger.setAnimation(animation);
             hamburger.setMaxWidth(14);
             hamburger.setMaxHeight(12);
@@ -87,10 +75,14 @@ public class ExamHolder extends HBox {
             editButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.EDIT));
             editButton.getStyleClass().addAll("primary-raised", "animated-option-button");
             list.addAnimatedNode(editButton);
+            editButton.setOnAction(e -> {
+                controller.exams.remove(exam);
+                controller.showAddExamStage(exam);
+            });
             list.setRotate(90);
         }
 
-        infoPane.getChildren().add(new HBox(examCode, examName, list) {{
+        infoPane.getChildren().add(new HBox(examName, list) {{
             setSpacing(5);
         }});
 
@@ -117,19 +109,6 @@ public class ExamHolder extends HBox {
         setSpacing(5);
         setPadding(new Insets(2, 4, 2, 4));
         setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-        started = new BooleanPropertyBase(false) {
-            public void invalidated() {
-                pseudoClassStateChanged(STARTED_PSEUDO_CLASS, get());
-            }
-
-            public Object getBean() {
-                return ExamHolder.this;
-            }
-
-            public String getName() {
-                return "started";
-            }
-        };
     }
 
     public ExamHolder(MainController controller, Exam exam) {
@@ -139,7 +118,6 @@ public class ExamHolder extends HBox {
 
     public ExamHolder setExam(Exam exam) {
         this.exam = exam;
-        examCode.setText(exam.getCode());
         examName.setText(exam.getName());
         examDate.setText(exam.getDate().equals(LocalDate.now().toString()) ? "" : exam.getDate());
         examStartTime.setText(exam.getStartTime());
@@ -154,17 +132,19 @@ public class ExamHolder extends HBox {
         if (today.isEqual(date)) {
             if (now.isBefore(start)) {
                 timeLeft.setText(String.format("%02d", ChronoUnit.HOURS.between(start, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(start, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(start, end) % 60));
-                started.set(false);
+                getStyleClass().removeAll("started", "ended");
             } else if (now.isAfter(end)) {
                 timeLeft.setText("00:00:00");
-                started.set(false);
+                getStyleClass().removeAll("started", "ended");
+                getStyleClass().add("ended");
             } else {
                 timeLeft.setText(String.format("%02d", ChronoUnit.HOURS.between(now, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(now, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(now, end) % 60));
-                started.set(true);
+                getStyleClass().removeAll("started", "ended");
+                getStyleClass().add("started");
             }
         } else {
             timeLeft.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
-            started.set(false);
+            getStyleClass().removeAll("started", "ended");
         }
     }
 
@@ -174,6 +154,8 @@ public class ExamHolder extends HBox {
 
     public ExamHolder reset() {
         list.animateList(false);
+        animation.setRate(-1);
+        animation.play();
         return this;
     }
 }

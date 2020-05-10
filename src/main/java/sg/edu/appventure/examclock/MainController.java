@@ -94,6 +94,7 @@ public class MainController {
     private Timeline timeline;
 
     public ObservableList<Key> keys;
+    private AddExamController addExamController;
 
     @FXML
     public void initialize() {
@@ -148,7 +149,7 @@ public class MainController {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
 
-        addCallback(new Exam("MA2020", "Math", LocalDate.now(), LocalTime.now().plusHours(0), LocalTime.now().plusHours(2)));
+        addCallback(new Exam("MA2020 Math", LocalDate.now(), LocalTime.now().plusHours(0), LocalTime.now().plusHours(2)));
         startBtn.setOnAction(e -> startAllExams());
         stopBtn.setOnAction(e -> stopAllExams());
         play();
@@ -173,10 +174,18 @@ public class MainController {
         addExamStage.show();
     }
 
+    public void showAddExamStage(Exam exam) {
+        addExamController.name_input.setText(exam.name);
+        addExamController.date_input.setValue(LocalDate.parse(exam.examDate));
+        addExamController.start_time_input.setValue(LocalTime.parse(exam.startTime));
+        addExamController.end_time_input.setValue(LocalTime.parse(exam.endTime));
+        addExamStage.show();
+    }
+
     private void initAddExamStage() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml_add_exam.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        AddExamController addExamController = fxmlLoader.getController();
+        addExamController = fxmlLoader.getController();
         addExamController.setMainController(this);
         addExamStage = new Stage();
         scene.getStylesheets().add("/main.css");

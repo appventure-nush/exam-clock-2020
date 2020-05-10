@@ -3,7 +3,6 @@ package sg.edu.appventure.examclock.addexam;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXTimePicker;
-import com.jfoenix.validation.RegexValidator;
 import com.jfoenix.validation.RequiredFieldValidator;
 import com.jfoenix.validation.base.ValidatorBase;
 import javafx.event.ActionEvent;
@@ -15,12 +14,10 @@ import sg.edu.appventure.examclock.model.Exam;
 import tornadofx.control.Form;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class AddExamController {
-    public JFXTextField code_input;
     public JFXTextField name_input;
     public JFXDatePicker date_input;
     public JFXTimePicker start_time_input;
@@ -33,15 +30,6 @@ public class AddExamController {
 
     @FXML
     public void initialize() {
-        RegexValidator regexValidator = new RegexValidator();
-        regexValidator.setRegexPattern("^[A-Z]{2}[1-6]\\d{3}$");
-        regexValidator.setMessage("Invalid module code!");
-        code_input.setValidators(regexValidator, new ValidatorBase("Duplicated module code!") {
-            @Override
-            protected void eval() {
-                hasErrors.set(mainController.exams.filtered(e -> e.getCode().equals(code_input.getText())).size() > 0);
-            }
-        });
         name_input.setValidators(new RequiredFieldValidator("Required"));
         date_input.setConverter(new StringConverter<LocalDate>() {
             private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy MMM dd");
@@ -64,19 +52,13 @@ public class AddExamController {
             }
         };
         date_input.setValidators(new RequiredFieldValidator("Required"), dateValidator);
-        ValidatorBase startTimeValidator = new ValidatorBase("Start is before current time") {
-            @Override
-            protected void eval() {
-                hasErrors.set(date_input.getValue().isEqual(LocalDate.now()) && start_time_input.getValue().isBefore(LocalTime.now()));
-            }
-        };
         ValidatorBase endTimeValidator = new ValidatorBase("End must be after startTime") {
             @Override
             protected void eval() {
                 hasErrors.set(start_time_input.getValue().isAfter(end_time_input.getValue()));
             }
         };
-        start_time_input.setValidators(new RequiredFieldValidator("Required"), startTimeValidator);
+        start_time_input.setValidators(new RequiredFieldValidator("Required"));
         end_time_input.setValidators(new RequiredFieldValidator("Required"), endTimeValidator);
 
         start_time_input.valueProperty().addListener((observable, oldValue, newValue) -> end_time_input.setValue(newValue.plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
@@ -98,12 +80,11 @@ public class AddExamController {
 
     @FXML
     public void add(ActionEvent event) {
-        if (code_input.validate()
-                && name_input.validate()
+        if (name_input.validate()
                 && date_input.validate()
                 && start_time_input.validate()
                 && end_time_input.validate()) {
-            Exam exam = new Exam(code_input.getText(), name_input.getText(), date_input.getValue(), start_time_input.getValue(), end_time_input.getValue());
+            Exam exam = new Exam(name_input.getText(), date_input.getValue(), start_time_input.getValue(), end_time_input.getValue());
             mainController.addCallback(exam);
         }
     }

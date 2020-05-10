@@ -99,10 +99,7 @@ public class WebServer extends NanoHTTPD {
                                         if (key.type != Key.KeyType.ADMIN)
                                             return newErrorJSONResponse(keyBytes, Response.Status.BAD_REQUEST, "no-permission");
                                         JSONObject exam = JSONObjectUtils.getJSONObject(request, "exam");
-                                        Exam newExam = new Exam(exam.getAsString("code"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime")));
-                                        if (exams.filtered(e -> e.getCode().equals(newExam.getCode())).size() > 0) {
-                                            return newErrorJSONResponse(keyBytes, Response.Status.BAD_REQUEST, "duplicated exam");
-                                        }
+                                        Exam newExam = new Exam(exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime")));
                                         Platform.runLater(() -> exams.add(newExam));
                                         JSONObject response = new JSONObject();
                                         ArrayList<Exam> temp = new ArrayList<>(exams);
@@ -116,10 +113,10 @@ public class WebServer extends NanoHTTPD {
                                 case "delete": {
                                     if (key.type != Key.KeyType.ADMIN)
                                         return newErrorJSONResponse(keyBytes, Response.Status.BAD_REQUEST, "no-permission");
-                                    String code = request.getAsString("module_code");
-                                    Platform.runLater(() -> exams.removeIf(e -> e.getCode().equals(code)));
+                                    String id = request.getAsString("exam_id");
+                                    Platform.runLater(() -> exams.removeIf(e -> e.getID().equals(id)));
                                     ArrayList<Exam> temp = new ArrayList<>(exams);
-                                    temp.removeIf(e -> e.getCode().equals(code));
+                                    temp.removeIf(e -> e.getID().equals(id));
                                     JSONObject response = new JSONObject();
                                     response.put("exams", temp);
                                     return newJSONResponse(keyBytes, response);

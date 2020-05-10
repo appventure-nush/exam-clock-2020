@@ -1,18 +1,14 @@
 package sg.edu.appventure.examclock.model;
 
+import sg.edu.appventure.examclock.connection.Base64;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
-import java.util.regex.Pattern;
+import java.util.Random;
 
 public class Exam {
-    private static final Pattern MODULE_CODE_PATTERN = Pattern.compile("^[A-Z]{2}[1-6]\\d{3}$");
-
-    public static boolean validateModuleCode(String code) {
-        return MODULE_CODE_PATTERN.matcher(code).matches();
-    }
-
-    public String code;
+    public String id;
     public String name;
     public String examDate;
     public String startTime;
@@ -21,9 +17,8 @@ public class Exam {
     public Exam() {
     }
 
-    public Exam(String code, String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
-        if (!validateModuleCode(code)) throw new RuntimeException("Invalid Module Code!");
-        this.code = code;
+    public Exam(String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
+        this.id = createID();
         this.name = name;
         this.examDate = examDate.toString();
         this.startTime = startTime.withNano(0).withSecond(0).toString();
@@ -39,8 +34,8 @@ public class Exam {
         return date.isBefore(LocalDate.now()) || date.isEqual(LocalDate.now()) && LocalTime.parse(endTime).isBefore(LocalTime.now());
     }
 
-    public String getCode() {
-        return code;
+    public String getID() {
+        return id;
     }
 
     public String getName() {
@@ -72,7 +67,7 @@ public class Exam {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Exam exam = (Exam) o;
-        return Objects.equals(code, exam.code) &&
+        return Objects.equals(id, exam.id) &&
                 Objects.equals(name, exam.name) &&
                 Objects.equals(examDate, exam.examDate) &&
                 Objects.equals(startTime, exam.startTime) &&
@@ -81,6 +76,12 @@ public class Exam {
 
     @Override
     public int hashCode() {
-        return Objects.hash(code, name, examDate, startTime, endTime);
+        return Objects.hash(id, name, examDate, startTime, endTime);
+    }
+
+    private static String createID() {
+        byte[] bytes = new byte[6 * 8];
+        new Random().nextBytes(bytes);
+        return new String(Base64.encode(bytes));
     }
 }

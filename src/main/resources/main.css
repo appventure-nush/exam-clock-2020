@@ -17,16 +17,17 @@
     -fx-background-color: -fx-foreground;
 }
 
-.exam-holder:started {
+.exam-holder.started {
     -fx-background-color: #00ff0022;
 }
 
-.exam-code {
-    -fx-font-weight: bold;
+.exam-holder.ended {
+    -fx-background-color: #ff000022;
 }
 
-.exam-name, .exam-code {
+.exam-name {
     -fx-font-size: 1.2em;
+    -fx-padding: 0 0 0 5px;
 }
 
 .time-left {

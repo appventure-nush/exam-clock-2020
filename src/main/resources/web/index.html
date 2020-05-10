@@ -51,12 +51,6 @@
         <form id="examForm">
             <div class="row">
                 <div class="col form-group">
-                    <label for="inputMC">Module Code</label>
-                    <input type="text" class="form-control" id="inputMC" placeholder="Enter module code"
-                           aria-describedby="mcHelp" required>
-                    <small id="mcHelp" class="form-text text-muted">Only 1 exam of any module code can exist</small>
-                </div>
-                <div class="col form-group">
                     <label for="inputEN">Exam Name</label>
                     <input type="text" class="form-control" id="inputEN" placeholder="Enter exam name" required>
                 </div>
@@ -236,8 +230,8 @@
     var adminPanel = document.getElementById('admin-actions');
 
     class Exam {
-        constructor(code, name, examDate, startTime, endTime) {
-            this.code = code;
+        constructor(id, name, examDate, startTime, endTime) {
+            this.id = id;
             this.name = name;
             this.examDate = examDate;
             this.startTime = startTime;
@@ -245,12 +239,12 @@
         }
 
         toHTML() {
-            return `<li data-code="${this.code}"><div class="exam-box row"><div class="exam-info col-sm-10"><h3><code>${this.code}</code> ${this.name}</h3>Exam on <code>${this.examDate}</code><br>From <code>${this.startTime}</code> to <code>${this.endTime}</code></div><div class="exam-action col-sm-2 btn-group-vertical"><button onclick="editExam('${this.code}')" type="button" class="btn btn-secondary">Edit</button><button onclick="deleteExam('${this.code}')" type="button" class="btn btn-secondary">Delete</button></div></div></li>`;
+            return `<li data-id="${this.id}"><div class="exam-box row"><div class="exam-info col-sm-10"><h3><code>${this.id}</code> ${this.name}</h3>Exam on <code>${this.examDate}</code><br>From <code>${this.startTime}</code> to <code>${this.endTime}</code></div><div class="exam-action col-sm-2 btn-group-vertical"><button onclick="editExam('${this.id}')" type="button" class="btn btn-secondary">Edit</button><button onclick="deleteExam('${this.id}')" type="button" class="btn btn-secondary">Delete</button></div></div></li>`;
         }
     }
 
     function reloadExams(es) {
-        exams = es.map(e => new Exam(e.code, e.name, e.examDate, e.startTime, e.endTime));
+        exams = es.map(e => new Exam(e.id, e.name, e.examDate, e.startTime, e.endTime));
         examList.innerHTML = "";
         for (let exam of exams) {
             examList.innerHTML += exam.toHTML();
@@ -380,7 +374,7 @@
     document.getElementById("add").onclick = e => {
         sendData(JSON.stringify({
             method: ADD_EXAM,
-            exam: new Exam(inputMC.value, inputEN.value, inputDT.value, inputST.value, inputET.value)
+            exam: new Exam(inputEN.value, inputDT.value, inputST.value, inputET.value)
         })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
     };
     document.getElementById("start").onclick = e => {
