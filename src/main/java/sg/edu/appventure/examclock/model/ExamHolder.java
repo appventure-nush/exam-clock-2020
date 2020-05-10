@@ -31,12 +31,12 @@ public class ExamHolder extends HBox {
     private final Label examStartTime;
     private final Label examEndTime;
     private final Label timeLeft;
+    private final JFXNodesList list;
+    private final HamburgerBasicCloseTransition animation;
     private LocalDate date;
     private LocalTime start;
     private LocalTime end;
     private Exam exam;
-    private final JFXNodesList list;
-    private final HamburgerBasicCloseTransition animation;
 
     public ExamHolder(MainController controller) {
         VBox infoPane = new VBox();
@@ -120,16 +120,6 @@ public class ExamHolder extends HBox {
         setExam(exam);
     }
 
-    public ExamHolder setExam(Exam exam) {
-        this.exam = exam;
-        examName.setText(exam.getName());
-        examDate.setText(exam.getDate().equals(LocalDate.now().toString()) ? "" : exam.getDate());
-        date = LocalDate.parse(exam.getDate());
-        start = LocalTime.parse(exam.getStartTime());
-        end = LocalTime.parse(exam.getEndTime());
-        return this;
-    }
-
     public void update(LocalDate today, LocalTime now) {
         if (today.isEqual(date)) {
             if (now.isBefore(start)) {
@@ -160,6 +150,16 @@ public class ExamHolder extends HBox {
 
     public Exam getExam() {
         return exam;
+    }
+
+    public ExamHolder setExam(Exam exam) {
+        this.exam = exam;
+        examName.setText(exam.getName());
+        examDate.setText(exam.getDate().equals(LocalDate.now().toString()) ? "" : exam.getDate());
+        date = LocalDate.parse(exam.getDate());
+        start = LocalTime.parse(exam.getStartTime());
+        end = LocalTime.parse(exam.getEndTime());
+        return this;
     }
 
     public ExamHolder reset() {

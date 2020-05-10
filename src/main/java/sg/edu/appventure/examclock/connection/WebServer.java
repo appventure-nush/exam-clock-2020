@@ -37,6 +37,26 @@ public class WebServer extends NanoHTTPD {
 //        }
     }
 
+    public static Response newJSONResponse(Response.IStatus status, JSONObject object) {
+        return newFixedLengthResponse(status, MIME_JSON, object.toJSONString());
+    }
+
+    public static Response newJSONResponse(byte[] key, JSONObject object) {
+        return newJSONResponse(key, Response.Status.OK, object);
+    }
+
+    public static Response newErrorJSONResponse(byte[] key, Response.IStatus status, String error) {
+        JSONObject response = new JSONObject();
+        response.put("error", error);
+        return newJSONResponse(key, status, response);
+    }
+
+    public static Response newJSONResponse(byte[] key, Response.IStatus status, JSONObject object) {
+        return newFixedLengthResponse(status, MIME_PLAINTEXT, new String(Base64.encode(Objects.requireNonNull(
+                Encryption.encrypt(key, object.toJSONString().getBytes())
+        ))));
+    }
+
     @Override
     public Response serve(IHTTPSession session) {
         Response response = serveProxy(session);
@@ -167,25 +187,5 @@ public class WebServer extends NanoHTTPD {
         if (stream != null) return newChunkedResponse(Response.Status.OK, getMimeTypeForFile(uri), stream);
         else
             return newChunkedResponse(Response.Status.NOT_FOUND, MIME_HTML, getClass().getResourceAsStream("/web/404.html"));
-    }
-
-    public static Response newJSONResponse(Response.IStatus status, JSONObject object) {
-        return newFixedLengthResponse(status, MIME_JSON, object.toJSONString());
-    }
-
-    public static Response newJSONResponse(byte[] key, JSONObject object) {
-        return newJSONResponse(key, Response.Status.OK, object);
-    }
-
-    public static Response newErrorJSONResponse(byte[] key, Response.IStatus status, String error) {
-        JSONObject response = new JSONObject();
-        response.put("error", error);
-        return newJSONResponse(key, status, response);
-    }
-
-    public static Response newJSONResponse(byte[] key, Response.IStatus status, JSONObject object) {
-        return newFixedLengthResponse(status, MIME_PLAINTEXT, new String(Base64.encode(Objects.requireNonNull(
-                Encryption.encrypt(key, object.toJSONString().getBytes())
-        ))));
     }
 }

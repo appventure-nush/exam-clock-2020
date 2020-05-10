@@ -49,6 +49,11 @@ import java.util.Stack;
 import java.util.prefs.Preferences;
 
 public class MainController {
+    public ObservableList<Exam> exams;
+    public SimpleBooleanProperty toiletOccupied = new SimpleBooleanProperty(false);
+    public Stage stage;
+    public Stage addExamStage;
+    public ObservableList<Key> keys;
     @FXML
     private SplitPane root;
     @FXML
@@ -87,21 +92,11 @@ public class MainController {
     private ImageView toiletIcon;
     @FXML
     private StackPane toiletIconParent;
-
-    public ObservableList<Exam> exams;
-    public SimpleBooleanProperty toiletOccupied = new SimpleBooleanProperty(false);
-
     private ClockController clockController;
     private PreferenceController preferenceController;
-    public Stage stage;
-    public Stage addExamStage;
     private Stage connectStage;
-
     private Stack<ExamHolder> holderPool;
-
     private Timeline timeline;
-
-    public ObservableList<Key> keys;
     private AddExamController addExamController;
 
     private Preferences examPreferences;

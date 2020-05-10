@@ -29,6 +29,12 @@ public class Exam {
         this(createID(), name, examDate, startTime, endTime);
     }
 
+    private static String createID() {
+        byte[] bytes = new byte[6 * 8];
+        new Random().nextBytes(bytes);
+        return new String(Base64.encode(bytes));
+    }
+
     public boolean isRunning() {
         return LocalDate.parse(examDate).isEqual(LocalDate.now()) && LocalTime.parse(startTime).isBefore(LocalTime.now()) && LocalTime.parse(endTime).isAfter(LocalTime.now());
     }
@@ -81,11 +87,5 @@ public class Exam {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, examDate, startTime, endTime);
-    }
-
-    private static String createID() {
-        byte[] bytes = new byte[6 * 8];
-        new Random().nextBytes(bytes);
-        return new String(Base64.encode(bytes));
     }
 }

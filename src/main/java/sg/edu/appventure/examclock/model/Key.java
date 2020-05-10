@@ -5,14 +5,9 @@ import sg.edu.appventure.examclock.connection.Encryption;
 import java.util.UUID;
 
 public class Key {
-    public enum KeyType {
-        ADMIN, TOILET, READ_ONLY
-    }
-
     public final String id;
     public final byte[] key;
     public final KeyType type;
-
     public Key() {
         this(UUID.randomUUID().toString(), Encryption.createKey(), KeyType.READ_ONLY);
     }
@@ -25,5 +20,9 @@ public class Key {
         this.id = id;
         this.key = key;
         this.type = type;
+    }
+
+    public enum KeyType {
+        ADMIN, TOILET, READ_ONLY
     }
 }

@@ -13,6 +13,9 @@ import sg.edu.appventure.examclock.PreferenceController;
 import java.util.Calendar;
 
 public class ClockController {
+    private static final double speed = 20;
+    private static final double min = Math.pow(2, -speed);
+    private static final double scale = 1 / (1 - min);
     private final Group parent;
     private final Group clockFace;
     private final Group hour;
@@ -20,6 +23,7 @@ public class ClockController {
     private final Group second;
     private final Calendar calendar;
     private final DigitalClock digitalClock;
+    int lastSecond = 0;
 
     public ClockController(Group parent, Group clockFace, Group hour, Group minute, Group second, Polygon hourHand, Polygon minuteHand, Polygon secondHand) {
         this.hour = hour;
@@ -50,6 +54,13 @@ public class ClockController {
         });
     }
 
+    public static double interpolate(double value) {
+        if (value > 1) return Math.floor(value) + interpolate(value % 1);
+        if (value < 0) return Math.ceil(value) - interpolate(-(value % 1));
+        if (value <= 0.5f) return ((float) Math.pow(2, speed * (value * 2 - 1)) - min) * scale / 2;
+        return (2 - ((float) Math.pow(2, -speed * (value * 2 - 1)) - min) * scale) / 2;
+    }
+
     private void createClockLabels() {
         for (int i = 0; i < 60; i++) {
             if (i % 5 == 0) {
@@ -76,8 +87,6 @@ public class ClockController {
         }
     }
 
-    int lastSecond = 0;
-
     public void refresh() {
         calendar.setTimeInMillis(System.currentTimeMillis());
         int hours = calendar.get(Calendar.HOUR_OF_DAY);
@@ -91,17 +100,6 @@ public class ClockController {
             lastSecond = seconds;
             digitalClock.refreshClocks(hours, minutes, seconds);
         }
-    }
-
-    private static final double speed = 20;
-    private static final double min = Math.pow(2, -speed);
-    private static final double scale = 1 / (1 - min);
-
-    public static double interpolate(double value) {
-        if (value > 1) return Math.floor(value) + interpolate(value % 1);
-        if (value < 0) return Math.ceil(value) - interpolate(-(value % 1));
-        if (value <= 0.5f) return ((float) Math.pow(2, speed * (value * 2 - 1)) - min) * scale / 2;
-        return (2 - ((float) Math.pow(2, -speed * (value * 2 - 1)) - min) * scale) / 2;
     }
 
     public void resize(double width, double height) {

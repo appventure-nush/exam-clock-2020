@@ -1,6 +1,18 @@
 package sg.edu.appventure.examclock.connection;
 
 public class Base64 {
+    static private final char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".toCharArray();
+    static private final byte[] codes = new byte[256];
+
+    static {
+        for (int i = 0; i < 256; i++) codes[i] = -1;
+        for (int i = 'A'; i <= 'Z'; i++) codes[i] = (byte) (i - 'A');
+        for (int i = 'a'; i <= 'z'; i++) codes[i] = (byte) (26 + i - 'a');
+        for (int i = '0'; i <= '9'; i++) codes[i] = (byte) (52 + i - '0');
+        codes['+'] = 62;
+        codes['/'] = 63;
+    }
+
     public static char[] encode(byte[] data) {
         char[] out = new char[((data.length + 2) / 3) * 4];
         for (int i = 0, index = 0; i < data.length; i += 3, index += 4) {
@@ -54,17 +66,5 @@ public class Base64 {
         if (index != out.length)
             throw new Error("Miscalculated data length (wrote " + index + " instead of " + out.length + ")");
         return out;
-    }
-
-    static private final char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".toCharArray();
-    static private final byte[] codes = new byte[256];
-
-    static {
-        for (int i = 0; i < 256; i++) codes[i] = -1;
-        for (int i = 'A'; i <= 'Z'; i++) codes[i] = (byte) (i - 'A');
-        for (int i = 'a'; i <= 'z'; i++) codes[i] = (byte) (26 + i - 'a');
-        for (int i = '0'; i <= '9'; i++) codes[i] = (byte) (52 + i - '0');
-        codes['+'] = 62;
-        codes['/'] = 63;
     }
 }

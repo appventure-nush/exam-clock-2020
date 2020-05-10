@@ -16,24 +16,18 @@ import java.net.*;
 import java.util.Enumeration;
 
 public class PreferenceController {
-    private PreferencesFx preferencesFx;
-    private final MainController controller;
-
     public static final SimpleIntegerProperty fontScaleProperty = new SimpleIntegerProperty(12);
     public static final SimpleBooleanProperty nightMode = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty controlPanelEnabledProperty = new SimpleBooleanProperty(false);
     public static final SimpleIntegerProperty panelPortProperty = new SimpleIntegerProperty(8080);
     public static final SimpleStringProperty panelAddressProperty = new SimpleStringProperty("loading...");
     public static final SimpleStringProperty lanNameProperty = new SimpleStringProperty("Exam Clock");
-
     public static final SimpleBooleanProperty allowAddingProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty allowEditProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty allowDeleteProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty allowToiletProperty = new SimpleBooleanProperty(true);
-
     public static final SimpleObjectProperty<Color> secondHandColorProperty = new SimpleObjectProperty<>(Color.RED);
     public static final SimpleBooleanProperty analogueShadowProperty = new SimpleBooleanProperty(false);
-
     public static final SimpleBooleanProperty use12HourFormatProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty digitalAboveAnalogProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty digitalBackgroundProperty = new SimpleBooleanProperty(true);
@@ -41,12 +35,30 @@ public class PreferenceController {
     public static final SimpleObjectProperty<Color> digitalClockDigitColorProperty = new SimpleObjectProperty<>(Color.DODGERBLUE.brighter());
     public static final SimpleObjectProperty<Color> digitalClockDigitBorderColorProperty = new SimpleObjectProperty<>(Color.DODGERBLUE.brighter());
     public static final SimpleObjectProperty<Color> digitalClockBackgroundColorProperty = new SimpleObjectProperty<>(new Color(0, 0, 0, .5));
-
+    private final MainController controller;
+    private PreferencesFx preferencesFx;
     private WebServer webServer;
 
     public PreferenceController(MainController controller) {
         this.controller = controller;
         webServer = new WebServer(controller, controller.exams, panelPortProperty.get());
+    }
+
+    public static String getAddress() {
+        try {
+            for (final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces(); interfaces.hasMoreElements(); ) {
+                final NetworkInterface cur = interfaces.nextElement();
+                if (cur.isLoopback()) continue;
+                for (final InterfaceAddress addr : cur.getInterfaceAddresses()) {
+                    final InetAddress inet_addr = addr.getAddress();
+                    if (!(inet_addr instanceof Inet4Address)) continue;
+                    return inet_addr.getHostAddress();
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void initPreferences() {
@@ -123,23 +135,6 @@ public class PreferenceController {
 
     public void show(boolean modal) {
         preferencesFx.show(modal);
-    }
-
-    public static String getAddress() {
-        try {
-            for (final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces(); interfaces.hasMoreElements(); ) {
-                final NetworkInterface cur = interfaces.nextElement();
-                if (cur.isLoopback()) continue;
-                for (final InterfaceAddress addr : cur.getInterfaceAddresses()) {
-                    final InetAddress inet_addr = addr.getAddress();
-                    if (!(inet_addr instanceof Inet4Address)) continue;
-                    return inet_addr.getHostAddress();
-                }
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public void onClose(WindowEvent event) {

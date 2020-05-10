@@ -10,9 +10,9 @@ import javafx.scene.shape.StrokeType;
 import sg.edu.appventure.examclock.PreferenceController;
 
 public class DigitalClock extends Parent {
-    private final Digit[] digits;
     public final double width;
     public final double height;
+    private final Digit[] digits;
 
     public DigitalClock() {
         digits = new Digit[7];
@@ -61,9 +61,6 @@ public class DigitalClock extends Parent {
  * Simple 7 segment LED style digit. It supports the numbers 0 through 9.
  */
 final class Digit extends Parent {
-    public static double DIGIT_SPACE = 40;
-    public static double DIGIT_WIDTH = 0.675 * DIGIT_SPACE;
-    public static double DIGIT_HEIGHT = 1.35 * DIGIT_SPACE;
     private static final boolean[][] DIGIT_COMBINATIONS = new boolean[][]{
             new boolean[]{true, false, true, true, true, true, true},
             new boolean[]{false, false, false, false, true, false, true},
@@ -75,6 +72,9 @@ final class Digit extends Parent {
             new boolean[]{true, false, false, false, true, false, true},
             new boolean[]{true, true, true, true, true, true, true},
             new boolean[]{true, true, true, true, true, false, true}};
+    public static double DIGIT_SPACE = 40;
+    public static double DIGIT_WIDTH = 0.675 * DIGIT_SPACE;
+    public static double DIGIT_HEIGHT = 1.35 * DIGIT_SPACE;
     private final Polygon[] polygons = new Polygon[]{
             new Polygon(2 / 54d * DIGIT_WIDTH, 0,
                     0.9629629629629629 * DIGIT_WIDTH, 0,
