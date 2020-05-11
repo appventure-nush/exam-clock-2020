@@ -95,6 +95,7 @@ public class WebServer extends NanoHTTPD {
                         System.out.println(keyID + " has been VERIFIED");
                         JSONObject response = new JSONObject();
                         response.put("verified", true);
+                        response.put("type", key.type);
                         return newJSONResponse(keyBytes, response);
                     } else {
                         JSONObject response = new JSONObject();

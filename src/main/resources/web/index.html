@@ -234,6 +234,7 @@
     var loginPanel = document.getElementById('login-panel');
     var controlPanel = document.getElementById('control-panel');
     var adminPanel = document.getElementById('admin-actions');
+    var toiletBtn = document.getElementById("toilet");
 
     class Exam {
         constructor(id, name, examDate, startTime, endTime) {
@@ -285,8 +286,6 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
     var keyTypeDisplay = document.getElementById('keyTypeDisplay');
     var targetIpDisplay = document.getElementById('targetIpDisplay');
     var targetNameDisplay = document.getElementById('targetNameDisplay');
-
-    var toiletBtn = document.getElementById("toilet");
 
     function compress(e) {
         var fileName = e.target.files[0].name;
@@ -357,6 +356,7 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
         sendData(localStorage.keyID).then(data => {
             if (data.verified) {
                 console.log("Verified!");
+                localStorage.setItem("keyType", data.type);
                 loginPanel.innerHTML += `<div class="alert alert-primary" role="alert">Verified!</div>`;
                 $(loginPanel).slideUp();
                 $(controlPanel).slideDown();
@@ -368,6 +368,7 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
                     console.log("Hiding admin controls");
                     admin.hide();
                 }
+                var toiletBtn = document.getElementById("toilet");
                 if (localStorage.keyType === "READ_ONLY") $(toiletBtn).hide();
                 sendData(JSON.stringify({
                     method: "get_exams"
