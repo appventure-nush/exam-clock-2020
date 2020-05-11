@@ -18,14 +18,11 @@ import java.util.Enumeration;
 public class PreferenceController {
     public static final SimpleIntegerProperty fontScaleProperty = new SimpleIntegerProperty(12);
     public static final SimpleBooleanProperty nightMode = new SimpleBooleanProperty(true);
-    public static final SimpleBooleanProperty controlPanelEnabledProperty = new SimpleBooleanProperty(false);
+    public static final SimpleBooleanProperty showToiletProperty = new SimpleBooleanProperty(true);
+    public static final SimpleBooleanProperty controlPanelEnabledProperty = new SimpleBooleanProperty(true);
     public static final SimpleIntegerProperty panelPortProperty = new SimpleIntegerProperty(8080);
     public static final SimpleStringProperty panelAddressProperty = new SimpleStringProperty("loading...");
     public static final SimpleStringProperty lanNameProperty = new SimpleStringProperty("Exam Clock");
-    public static final SimpleBooleanProperty allowAddingProperty = new SimpleBooleanProperty(true);
-    public static final SimpleBooleanProperty allowEditProperty = new SimpleBooleanProperty(true);
-    public static final SimpleBooleanProperty allowDeleteProperty = new SimpleBooleanProperty(true);
-    public static final SimpleBooleanProperty allowToiletProperty = new SimpleBooleanProperty(true);
     public static final SimpleObjectProperty<Color> secondHandColorProperty = new SimpleObjectProperty<>(Color.RED);
     public static final SimpleBooleanProperty analogueShadowProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty use12HourFormatProperty = new SimpleBooleanProperty(false);
@@ -70,7 +67,8 @@ public class PreferenceController {
                         com.dlsc.preferencesfx.model.Group.of("General",
                                 Setting.of("Night Mode", nightMode),
                                 Setting.of("Font Scale", fontScaleProperty, 8, 40),
-                                Setting.of("Use 12 Hour Format", use12HourFormatProperty)
+                                Setting.of("Use 12 Hour Format", use12HourFormatProperty),
+                                Setting.of("Show Toilet", showToiletProperty)
                         ),
                         com.dlsc.preferencesfx.model.Group.of("Analogue Clock",
                                 Setting.of("Second Hand", secondHandColorProperty),
@@ -85,7 +83,7 @@ public class PreferenceController {
                                 Setting.of("Background", digitalClockBackgroundColorProperty)
                         )
                 ),
-                Category.of("Connection",
+                Category.of("Web Panel",
                         com.dlsc.preferencesfx.model.Group.of(
                                 Setting.of("Web Control Panel", controlPanelEnabledProperty)
                         ),
@@ -93,12 +91,6 @@ public class PreferenceController {
                                 Setting.of("Display Name", lanNameProperty),
                                 Setting.of("Port", panelPortProperty),
                                 Setting.of("Panel IP", panelAddressProperty)
-                        ),
-                        com.dlsc.preferencesfx.model.Group.of("Lan Permission",
-                                Setting.of("Add", allowAddingProperty),
-                                Setting.of("Edit", allowEditProperty),
-                                Setting.of("Delete", allowDeleteProperty),
-                                Setting.of("Toilet", allowToiletProperty)
                         )
                 )
         );

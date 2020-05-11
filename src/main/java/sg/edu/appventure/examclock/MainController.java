@@ -14,9 +14,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
-import javafx.scene.effect.Blend;
-import javafx.scene.effect.BlendMode;
-import javafx.scene.effect.ColorInput;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -163,14 +160,7 @@ public class MainController {
             else toiletIconParent.getStyleClass().remove("occupied");
         });
         toiletIcon.setOnMouseClicked(e -> toiletOccupied.set(!toiletOccupied.get()));
-        Blend blendEffect = new Blend(BlendMode.DIFFERENCE);
-        ColorInput input = new ColorInput();
-        blendEffect.setTopInput(input);
-        toiletIcon.setEffect(blendEffect);
-        PreferenceController.nightMode.addListener((observable, oldValue, newValue) -> {
-            if (newValue) toiletIcon.setEffect(blendEffect);
-            else toiletIcon.setEffect(null);
-        });
+        toiletIconParent.visibleProperty().bind(PreferenceController.showToiletProperty);
 
         try {
             initAddExamStage();

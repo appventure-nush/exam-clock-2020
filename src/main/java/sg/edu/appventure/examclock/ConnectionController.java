@@ -50,6 +50,7 @@ public class ConnectionController {
     private ImageView qrCodeImage;
 
     private String selectedID;
+    private boolean shown = false;
 
     @FXML
     public void initialize() {
@@ -96,6 +97,8 @@ public class ConnectionController {
     }
 
     public void showInfo(Key key) {
+        if (shown) return;
+        shown = true;
         try {
             qrCodeImage.setImage(SwingFXUtils.toFXImage(Encryption.generateQRCode(key, PreferenceController.getAddress() + ":" + PreferenceController.panelPortProperty.get()), null));
         } catch (WriterException e) {
@@ -123,6 +126,8 @@ public class ConnectionController {
     }
 
     public void cancel(ActionEvent actionEvent) {
+        if (!shown) return;
+        shown = false;
         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(500), infoPane);
         translateTransition.setFromX(0);
         translateTransition.setToX(infoPane.getWidth());

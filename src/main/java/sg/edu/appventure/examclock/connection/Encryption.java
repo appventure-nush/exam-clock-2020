@@ -23,7 +23,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 
 public class Encryption {
-    public static final int AES_KEY_SIZE = 128;
+    public static final int AES_KEY_SIZE = 256;
     public static final int GCM_NONCE_LENGTH = 12;
     public static final int GCM_TAG_LENGTH = 16;
     private static final byte[] AAD = "ExamClock Encrypted Protocol".getBytes();
@@ -94,7 +94,7 @@ public class Encryption {
             SecretKey secretKey = new SecretKeySpec(key.key, 0, key.key.length, "AES");
             JWK jwk = new OctetSequenceKey.Builder(secretKey)
                     .keyID(key.id)
-                    .algorithm(EncryptionMethod.A128GCM) // indicate the intended key alg (optional)
+                    .algorithm(EncryptionMethod.A256GCM) // indicate the intended key alg (optional)
                     .build();
             put("ip", ip);
             put("id", key.id);
