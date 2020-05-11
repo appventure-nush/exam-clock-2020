@@ -47,7 +47,6 @@ public class Encryption {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             final byte[] nonce = new byte[GCM_NONCE_LENGTH];
             random.nextBytes(nonce);
-            System.out.println("IV = " + Arrays.toString(nonce));
             GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, nonce);
             cipher.init(Cipher.ENCRYPT_MODE, key, spec);
 //            cipher.updateAAD(AAD);

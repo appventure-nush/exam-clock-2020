@@ -48,14 +48,20 @@
         <button id="verify" class="btn btn-primary">Verify Me</button>
     </div>
     <div id="control-panel">
+        <ul class="list-group">
+            <li class="list-group-item">Logged in as<br><code id="keyIdDisplay"></code></li>
+            <li class="list-group-item">Key Type <code id="keyTypeDisplay"></code></li>
+            <li class="list-group-item">Target IP <code id="targetIpDisplay"></code></li>
+            <li class="list-group-item">Target Name <code id="targetNameDisplay"></code></li>
+        </ul>
         <form id="examForm">
-            <div class="row">
+            <div class="row admin-only">
                 <div class="col form-group">
                     <label for="inputEN">Exam Name</label>
                     <input type="text" class="form-control" id="inputEN" placeholder="Enter exam name" required>
                 </div>
             </div>
-            <div class="row">
+            <div class="row admin-only">
                 <div class="col form-group">
                     <label for="inputDT">Exam Date</label>
                     <input type="text" class="form-control" id="inputDT" placeholder="YYYY-MM-DD"
@@ -72,14 +78,14 @@
                 </div>
             </div>
             <div class="row">
-                <div class="btn-group col-md-6" role="group" aria-label="Actions" id="admin-actions">
+                <div class="btn-group col-md-6 admin-only" role="group" aria-label="Actions">
                     <button type="button" class="btn btn-success" id="add">Add</button>
                     <button type="button" class="btn btn-outline-warning" id="start">Start All</button>
                     <button type="button" class="btn btn-outline-danger" id="stop">Stop All</button>
                 </div>
                 <div class="btn-group col-md-6" role="group" aria-label="Actions">
-                    <button type="button" class="btn btn-outline-success" id="toilet">Toilet</button>
                     <button type="button" class="btn btn-outline-info" id="refresh">Refresh</button>
+                    <button type="button" class="btn btn-outline-success" id="toilet">Toilet</button>
                     <button type="button" class="btn btn-outline-danger" id="logout">Exit</button>
                 </div>
             </div>
@@ -275,6 +281,13 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
     var keyL = document.getElementById('key');
     var ipL = document.getElementById('ip');
 
+    var keyIdDisplay = document.getElementById('keyIdDisplay');
+    var keyTypeDisplay = document.getElementById('keyTypeDisplay');
+    var targetIpDisplay = document.getElementById('targetIpDisplay');
+    var targetNameDisplay = document.getElementById('targetNameDisplay');
+
+    var toiletBtn = document.getElementById("toilet");
+
     function compress(e) {
         var fileName = e.target.files[0].name;
         var reader = new FileReader();
@@ -329,6 +342,16 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
         }).catch(e => console.log(rawL.textContent = e || 'No QR code found.'));
     }
 
+    function refreshName() {
+        sendData(JSON.stringify({
+            method: "name"
+        })).then(response => {
+            targetNameDisplay.textContent = response.name;
+        }).catch(err => {
+            console.log(err);
+        });
+    }
+
     var verify = () => {
         console.log("Verifying");
         sendData(localStorage.keyID).then(data => {
@@ -337,12 +360,26 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
                 loginPanel.innerHTML += `<div class="alert alert-primary" role="alert">Verified!</div>`;
                 $(loginPanel).slideUp();
                 $(controlPanel).slideDown();
-                adminPanel.style.display = localStorage.keyType === "ADMIN" ? "block" : "none";
+                let admin = $(".admin-only");
+                if (localStorage.keyType === "ADMIN") {
+                    console.log("Showing admin controls");
+                    admin.show();
+                } else {
+                    console.log("Hiding admin controls");
+                    admin.hide();
+                }
+                if (localStorage.keyType === "READ_ONLY") $(toiletBtn).hide();
                 sendData(JSON.stringify({
                     method: "get_exams"
                 })).then(response => {
                     reloadExams(response.exams);
                 });
+
+                keyIdDisplay.textContent = localStorage.keyID;
+                keyTypeDisplay.textContent = localStorage.keyType;
+                targetIpDisplay.textContent = localStorage.remoteIP;
+                refreshName();
+                window.refreshNameIntervals = setInterval(refreshName, 60000);
             } else loginPanel.innerHTML += `<div class="alert alert-danger" role="alert">${data.error}</div>`;
         }).catch(e => {
             if (e.responseJSON.error === "already-verified") {
@@ -399,7 +436,6 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
             method: STOP_ALL
         })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
     };
-    var toiletBtn = document.getElementById("toilet");
     toiletBtn.onclick = e => {
         sendData(JSON.stringify({
             method: TOILET
@@ -411,6 +447,7 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
         })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
     };
     document.getElementById("logout").onclick = e => {
+        window.clearInterval(window.refreshNameIntervals);
         localStorage.removeItem("keyID");
         localStorage.removeItem("key");
         localStorage.removeItem("remoteIP");

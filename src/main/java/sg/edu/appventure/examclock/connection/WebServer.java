@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import net.minidev.json.JSONObject;
 import sg.edu.appventure.examclock.MainController;
+import sg.edu.appventure.examclock.PreferenceController;
 import sg.edu.appventure.examclock.model.Exam;
 import sg.edu.appventure.examclock.model.Key;
 
@@ -168,6 +169,11 @@ public class WebServer extends NanoHTTPD {
                                     Platform.runLater(() -> controller.toiletOccupied.set(!controller.toiletOccupied.get()));
                                     JSONObject response = new JSONObject();
                                     response.put("occupied", !controller.toiletOccupied.get());
+                                    return newJSONResponse(keyBytes, response);
+                                }
+                                case "name": {
+                                    JSONObject response = new JSONObject();
+                                    response.put("name", PreferenceController.lanNameProperty.get());
                                     return newJSONResponse(keyBytes, response);
                                 }
                             }
