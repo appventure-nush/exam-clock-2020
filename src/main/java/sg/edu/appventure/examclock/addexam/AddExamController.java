@@ -45,20 +45,14 @@ public class AddExamController {
             }
         });
         date_input.setValue(LocalDate.now());
-        ValidatorBase dateValidator = new ValidatorBase("Date not valid") {
-            @Override
-            protected void eval() {
-                hasErrors.set(date_input.getValue().isBefore(LocalDate.now()));
-            }
-        };
-        date_input.setValidators(new RequiredFieldValidator("Required"), dateValidator);
+        date_input.setValidators(new RequiredFieldValidator("Required"));
+        start_time_input.setValidators(new RequiredFieldValidator("Required"));
         ValidatorBase endTimeValidator = new ValidatorBase("End must be after startTime") {
             @Override
             protected void eval() {
                 hasErrors.set(start_time_input.getValue().isAfter(end_time_input.getValue()));
             }
         };
-        start_time_input.setValidators(new RequiredFieldValidator("Required"));
         end_time_input.setValidators(new RequiredFieldValidator("Required"), endTimeValidator);
 
         start_time_input.valueProperty().addListener((observable, oldValue, newValue) -> end_time_input.setValue(newValue.plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));

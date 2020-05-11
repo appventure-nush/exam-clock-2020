@@ -21,6 +21,22 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
+task generateTestSources {
+    inputs.property "version", project.version
+    outputs.dir "$buildDir/generated"
+    doFirst {
+        def versionFile = file("$buildDir/generated/sg/edu/appventure/examclock/Version.java")
+        versionFile.parentFile.mkdirs()
+        versionFile.text = """package sg.edu.appventure.examclock;public class Version {public static String getVersion() {return "$project.version";}}"""
+    }
+}
+
+compileTestJava.dependsOn generateTestSources
+
+sourceSets.main.java {
+    srcDir "$buildDir/generated"
+}
+
 jar {
     manifest {
         attributes 'Main-Class': 'sg.edu.appventure.examclock.ExamClock'

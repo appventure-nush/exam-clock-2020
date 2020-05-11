@@ -44,9 +44,11 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 public class MainController {
     public ObservableList<Exam> exams;
@@ -99,7 +101,7 @@ public class MainController {
     private Timeline timeline;
     private AddExamController addExamController;
 
-    private Preferences examPreferences;
+    private Preferences preferences;
     private FileChooser fileChooser;
 
     @FXML
@@ -107,7 +109,7 @@ public class MainController {
         System.out.println("initialize");
         exams = FXCollections.observableArrayList();
         keys = FXCollections.observableArrayList();
-        examPreferences = Preferences.userNodeForPackage(MainController.class);
+        preferences = Preferences.userNodeForPackage(MainController.class);
         holderPool = new Stack<>();
         exams.addListener((ListChangeListener<Exam>) c -> {
             while (c.next()) {
@@ -129,15 +131,24 @@ public class MainController {
             }
             JSONArray array = new JSONArray();
             array.addAll(exams);
-            examPreferences.put("exams", array.toJSONString());
+            preferences.put("exams", array.toJSONString());
         });
-        String examsStr = examPreferences.get("exams", null);
+        keys.addListener((ListChangeListener<Key>) c -> {
+            JSONArray array = keys.stream().map(Key::toJsonObject).collect(Collectors.toCollection(JSONArray::new));
+            preferences.put("keys", array.toJSONString());
+        });
+        String examsStr = preferences.get("exams", null);
         if (examsStr != null) {
             JSONArray root = (JSONArray) JSONValue.parse(examsStr);
             for (Object o : root) {
                 JSONObject exam = (JSONObject) o;
                 exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime"))));
             }
+        }
+        String keyStr = preferences.get("keys", null);
+        if (keyStr != null) {
+            JSONArray root = (JSONArray) JSONValue.parse(keyStr);
+            keys.addAll(root.stream().map(o -> Key.fromJsonObject((JSONObject) o)).collect(Collectors.toCollection(ArrayList::new)));
         }
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         preferenceController = new PreferenceController(this);
@@ -242,9 +253,11 @@ public class MainController {
     }
 
     public void startAllExams() {
+        LocalDate newDate = LocalDate.now();
+        LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
         exams.forEach(exam -> {
             long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
+            exam.examDate = newDate.toString();
             exam.startTime = newStartTime.toString();
             exam.endTime = newStartTime.plusSeconds(seconds).toString();
         });
@@ -252,9 +265,9 @@ public class MainController {
     }
 
     public void stopAllExams() {
+        LocalTime newEndTime = LocalTime.now().withNano(0);
         exams.forEach(exam -> {
             long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            LocalTime newEndTime = LocalTime.now().withNano(0);
             exam.startTime = newEndTime.minusSeconds(seconds).toString();
             exam.endTime = newEndTime.toString();
         });
