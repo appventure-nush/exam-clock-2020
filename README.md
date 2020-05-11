@@ -27,4 +27,4 @@
 9. Click `Verify me`
 10. If all goes well, you now have access to the panel
 
-### [Releases](https://github.com/appventure-nush/exam-clock-2020/releases/tag/v1.0-beta)
+### [Releases](https://github.com/appventure-nush/exam-clock-2020/releases/tag/v1.1.1-beta)
