@@ -100,6 +100,27 @@ public class Encryption {
             put("id", key.id);
             put("type", key.type.toString());
             put("jwk", jwk.toJSONObject());
+            System.out.println("JWK = " + jwk.toJSONObject().toJSONString());
+            System.out.println("KEY = " + new String(Base64.encode(key.key)));
+            // 2W8NvJizYRdn0Z3Cj6ile/tnkkKZiIjtQyf9WxglC2k=
+            // 2W8NvJizYRdn0Z3Cj6ile_tnkkKZiIjtQyf9WxglC2k
+            // "=" -> ""
+            // "/" -> "_"
         }
+    }
+
+    public static byte[] createKeyFromPassword(String password) {
+        int hash = password.hashCode();
+        byte[] key = new byte[AES_KEY_SIZE / 8];
+        for (int i = 0; i < AES_KEY_SIZE / 8; i++) {
+            key[i] = (byte) (Math.sin(i + hash) * 256 - 127);
+        }
+        SecretKey secretKey = new SecretKeySpec(key, 0, key.length, "AES");
+        JWK jwk = new OctetSequenceKey.Builder(secretKey)
+                .keyID("password")
+                .algorithm(EncryptionMethod.A256GCM) // indicate the intended key alg (optional)
+                .build();
+        System.out.println("JWK = " + jwk.toJSONObject().toJSONString());
+        return key;
     }
 }

@@ -31,11 +31,6 @@ public class WebServer extends NanoHTTPD {
         this.keys = controller.keys;
         this.exams = exams;
         verified_keys = new ArrayList<>();
-//        try {
-//            makeSecure(NanoHTTPD.makeSSLSocketFactory("/keystore.jks", "password".toCharArray()), null);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public static Response newJSONResponse(Response.IStatus status, JSONObject object) {
@@ -75,12 +70,14 @@ public class WebServer extends NanoHTTPD {
         if (keyID == null) return serve(session.getUri());
         else {
             FilteredList<Key> filteredKeys = keys.filtered(key -> key.id.equals(keyID));
-            if (filteredKeys.size() == 0) {
+            if (filteredKeys.size() == 0 && !keyID.equals("password")) {
                 JSONObject response = new JSONObject();
                 response.put("error", "who-are-you");
                 return newJSONResponse(Response.Status.UNAUTHORIZED, response);
             } else {
-                Key key = filteredKeys.get(0);
+                Key key;
+                if (keyID.equals("password")) key = controller.simpleKey;
+                else key = filteredKeys.get(0);
                 String encrypted = session.getParms().get("encrypted");
                 if (!verified_keys.contains(keyID)) { // unverified
                     if (encrypted == null) {

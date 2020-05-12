@@ -4,6 +4,8 @@ import com.google.zxing.WriterException;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXRadioButton;
+import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.validation.RegexValidator;
 import javafx.animation.TranslateTransition;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -45,6 +47,8 @@ public class ConnectionController {
     private Label keyType;
     @FXML
     private TextArea keyRaw;
+    @FXML
+    private JFXTextField masterPassword;
     private MainController mainController;
     private Stage qrCodeStage;
     private ImageView qrCodeImage;
@@ -89,11 +93,17 @@ public class ConnectionController {
             setFitHeight(512);
             setFitWidth(512);
         }})));
+        RegexValidator regexValidator = new RegexValidator();
+
+        regexValidator.setRegexPattern("^[a-zA-Z0-9!@#$%^&*()_+\\[\\]\\\\\\{\\}\\|]{8,}$");
+        masterPassword.setValidators(regexValidator);
     }
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
         keys.setItems(mainController.keys);
+        masterPassword.setText(mainController.preferences.get("password", "password"));
+        mainController.simpleKey.key = Encryption.createKeyFromPassword(mainController.preferences.get("password", "password"));
     }
 
     public void showInfo(Key key) {
@@ -133,6 +143,14 @@ public class ConnectionController {
         translateTransition.setToX(infoPane.getWidth());
         translateTransition.setOnFinished(e -> infoPane.translateXProperty().bind(infoPane.widthProperty().multiply(1)));
         translateTransition.playFromStart();
+    }
+
+    public void changePassword(ActionEvent actionEvent) {
+        if (masterPassword.validate()) {
+            String password = masterPassword.getText();
+            mainController.preferences.put("password", password);
+            mainController.simpleKey.key = Encryption.createKeyFromPassword(password);
+        }
     }
 
     public void showQRCode(ActionEvent actionEvent) {

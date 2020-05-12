@@ -53,6 +53,7 @@ public class MainController {
     public Stage stage;
     public Stage addExamStage;
     public ObservableList<Key> keys;
+    public final Key simpleKey;
     @FXML
     private SplitPane root;
     @FXML
@@ -98,8 +99,12 @@ public class MainController {
     private Timeline timeline;
     private AddExamController addExamController;
 
-    private Preferences preferences;
+    public Preferences preferences;
     private FileChooser fileChooser;
+
+    public MainController() {
+        this.simpleKey = new Key(Key.KeyType.TOILET);
+    }
 
     @FXML
     public void initialize() {
@@ -149,6 +154,7 @@ public class MainController {
         }
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         preferenceController = new PreferenceController(this);
+        root.setStyle("-fx-font-size: " + PreferenceController.fontScaleProperty.get() + "px;");
         PreferenceController.fontScaleProperty.addListener((observable, oldValue, newValue) -> root.setStyle("-fx-font-size: " + newValue + "px;"));
         preferenceController.initPreferences();
 

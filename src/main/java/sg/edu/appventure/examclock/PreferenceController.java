@@ -16,7 +16,7 @@ import java.net.*;
 import java.util.Enumeration;
 
 public class PreferenceController {
-    public static final SimpleIntegerProperty fontScaleProperty = new SimpleIntegerProperty(12);
+    public static final SimpleIntegerProperty fontScaleProperty = new SimpleIntegerProperty(20);
     public static final SimpleBooleanProperty nightMode = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty showToiletProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty controlPanelEnabledProperty = new SimpleBooleanProperty(true);
@@ -66,7 +66,7 @@ public class PreferenceController {
                 Category.of("Display",
                         com.dlsc.preferencesfx.model.Group.of("General",
                                 Setting.of("Night Mode", nightMode),
-                                Setting.of("Font Scale", fontScaleProperty, 8, 40),
+                                Setting.of("Font Size", fontScaleProperty, 8, 40),
                                 Setting.of("Use 12 Hour Format", use12HourFormatProperty),
                                 Setting.of("Show Toilet", showToiletProperty)
                         ),
@@ -94,11 +94,17 @@ public class PreferenceController {
                         )
                 )
         );
+        preferencesFx.getView().setPrefSize(600, 400);
         preferencesFx.getView().getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         preferencesFx.buttonsVisibility(true);
     }
 
     public void attachListener() {
+        try {
+            webServer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         nightMode.addListener((observable, oldValue, newValue) -> {
             controller.stage.getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
             controller.stage.getScene().getStylesheets().add(newValue ? "/theme.dark.css" : "/theme.light.css");

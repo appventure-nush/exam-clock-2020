@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class Key {
     public final String id;
-    public final byte[] key;
+    public byte[] key;
     public final KeyType type;
 
     public Key() {
