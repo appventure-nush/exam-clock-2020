@@ -32,9 +32,9 @@
 10. If all goes well, you now have access to the panel
 
 ### Demo Videos
-   - With a password
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Za9Ktms_NcU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-   - With QR code
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/GOC-5qHN4fM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+   - With a password\
+   [![Some demo video](https://img.youtube.com/vi/Za9Ktms_NcU/0.jpg)](https://www.youtube.com/watch?v=Za9Ktms_NcU)
+   - With QR code\
+   [![Some demo video](https://img.youtube.com/vi/GOC-5qHN4fM/0.jpg)](https://www.youtube.com/watch?v=GOC-5qHN4fM)
 
 ### [Releases](https://github.com/appventure-nush/exam-clock-2020/releases)
