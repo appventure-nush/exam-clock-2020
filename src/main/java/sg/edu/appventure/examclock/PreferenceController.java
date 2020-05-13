@@ -58,6 +58,26 @@ public class PreferenceController {
         return null;
     }
 
+    public static boolean available(int port) {
+        ServerSocket ss = null;
+        DatagramSocket ds = null;
+        try {
+            ss = new ServerSocket(port);
+            ss.setReuseAddress(true);
+            ds = new DatagramSocket(port);
+            ds.setReuseAddress(true);
+            return true;
+        } catch (IOException ignored) {
+        } finally {
+            if (ds != null) ds.close();
+            if (ss != null) try {
+                ss.close();
+            } catch (IOException ignored) {
+            }
+        }
+        return false;
+    }
+
     public void initPreferences() {
         attachListener();
         panelAddressProperty.set("http://" + getAddress() + ":" + panelPortProperty.get());

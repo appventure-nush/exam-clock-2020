@@ -5,6 +5,7 @@ import fi.iki.elonen.NanoHTTPD;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.scene.control.Alert;
 import net.minidev.json.JSONObject;
 import sg.edu.appventure.examclock.MainController;
 import sg.edu.appventure.examclock.PreferenceController;
@@ -24,12 +25,14 @@ public class WebServer extends NanoHTTPD {
     private final MainController controller;
     private final ObservableList<Key> keys;
     private final ObservableList<Exam> exams;
+    private final int port;
 
     public WebServer(MainController controller, ObservableList<Exam> exams, int port) {
         super(port);
         this.controller = controller;
         this.keys = controller.keys;
         this.exams = exams;
+        this.port = port;
         verified_keys = new ArrayList<>();
     }
 
@@ -58,6 +61,15 @@ public class WebServer extends NanoHTTPD {
         Response response = serveProxy(session);
         response.addHeader("Access-Control-Allow-Origin", "*");
         return response;
+    }
+
+    public void start() throws IOException {
+        if (PreferenceController.available(port)) super.start();
+        else {
+            System.out.println("Port " + port + " not available");
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Port " + port + " is already in use!");
+            Platform.runLater(alert::showAndWait);
+        }
     }
 
     public Response serveProxy(IHTTPSession session) {

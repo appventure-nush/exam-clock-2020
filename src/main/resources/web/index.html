@@ -400,6 +400,9 @@
     }
 </script>
 <script id="encryption-script">
+    if (!(window.crypto.subtle && window.crypto.importKey)) {
+        alert("Your browser is blocking crypto module.\nUse any other browser than chrome!");
+    }
     var key;
 
     async function encrypt(string, key) {
@@ -669,6 +672,10 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
         }, false, ['encrypt', 'decrypt']);
         console.log("Imported key", key);
         verify();
+    }
+    if (/^(?:http:\/\/)?((?:\d+\.){3}\d+:\d+)\/?$/.test(window.location.href)) {
+        let ip = window.location.href.replace(/^(?:http:\/\/)?((?:\d+\.){3}\d+:\d+)\/?$/, "$1");
+        document.getElementById("passwordIP").value = ip;
     }
     if (localStorage.remoteIP) document.getElementById("passwordIP").value = localStorage.remoteIP;
     if (localStorage.password) document.getElementById("password").value = localStorage.password;
