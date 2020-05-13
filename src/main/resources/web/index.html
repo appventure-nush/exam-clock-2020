@@ -400,7 +400,7 @@
     }
 </script>
 <script id="encryption-script">
-    if (!(window.crypto.subtle && window.crypto.importKey)) {
+    if (!window.crypto.subtle) {
         alert("Your browser is blocking crypto module.\nUse any other browser than chrome!");
     }
     var key;
