@@ -61,10 +61,12 @@
     </div>
     <div id="control-panel">
         <ul class="list-group">
-            <li class="list-group-item">Logged in as<br><code id="keyIdDisplay"></code></li>
-            <li class="list-group-item">Key Type <code id="keyTypeDisplay"></code></li>
-            <li class="list-group-item">Target IP <code id="targetIpDisplay"></code></li>
-            <li class="list-group-item">Target Name <code id="targetNameDisplay"></code></li>
+            <li class="list-group-item">Logged in as<br><code id="keyIdDisplay"></code> (<code
+                    id="keyTypeDisplay"></code>)
+            </li>
+            <li class="list-group-item">Connected to<br><code id="targetNameDisplay"></code> (<code
+                    id="targetIpDisplay"></code>)
+            </li>
         </ul>
         <form id="examForm">
             <div class="row admin-only">
@@ -598,6 +600,12 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
                 loginPanel.innerHTML += `<div class="alert alert-primary" role="alert">Verified!</div>`;
                 $(loginPanel).slideUp();
                 $(controlPanel).slideDown();
+                keyIdDisplay.textContent = localStorage.keyID;
+                keyTypeDisplay.textContent = localStorage.keyType;
+                targetIpDisplay.textContent = localStorage.remoteIP;
+                console.log("ID", localStorage.keyID);
+                console.log("Type", localStorage.keyID);
+                console.log("IP", localStorage.remoteIP);
                 let admin = $(".admin-only");
                 if (localStorage.keyType === "ADMIN") {
                     console.log("Showing admin controls");
@@ -613,10 +621,6 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
                 })).then(response => {
                     reloadExams(response.exams);
                 });
-
-                keyIdDisplay.textContent = localStorage.keyID;
-                keyTypeDisplay.textContent = localStorage.keyType;
-                targetIpDisplay.textContent = localStorage.remoteIP;
                 refreshName();
                 window.refreshNameIntervals = setInterval(refreshName, 60000);
             } else loginPanel.innerHTML += `<div class="alert alert-danger" role="alert">${data.error}</div>`;
@@ -624,6 +628,12 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
             if (e.responseJSON.error === "already-verified") {
                 $(loginPanel).slideUp();
                 $(controlPanel).slideDown();
+                keyIdDisplay.textContent = localStorage.keyID;
+                keyTypeDisplay.textContent = localStorage.keyType;
+                targetIpDisplay.textContent = localStorage.remoteIP;
+                console.log("ID", localStorage.keyID);
+                console.log("Type", localStorage.keyID);
+                console.log("IP", localStorage.remoteIP);
                 sendData(JSON.stringify({
                     method: "get_exams"
                 })).then(response => {
@@ -737,6 +747,7 @@ From <code>${this.startTime}</code> to <code>${this.endTime}</code>
         localStorage.removeItem("key");
         localStorage.removeItem("remoteIP");
         localStorage.removeItem("keyJWK");
+        localStorage.removeItem("password");
         location.reload();
     };
 
