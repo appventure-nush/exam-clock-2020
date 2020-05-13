@@ -50,6 +50,6 @@
     -fx-background-color: red;
 }
 
-#keyRaw {
+#keyRaw, #addressDisplay {
     -fx-font-family: "monospace";
 }

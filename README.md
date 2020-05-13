@@ -20,9 +20,11 @@
 5. Click `Show QR Code`
 6. Goto https://appventure-nush.github.io/exam-clock-2020-web/
 7. Allow insecure content on your browser
-   - Chrome
-   > Follow https://support.google.com/chrome/answer/114662 \
-   > And change "Insecure Content" to `Allow`
+   - **Chrome**\
+   Follow https://support.google.com/chrome/answer/114662 \
+   And change "Insecure Content" to `Allow`
+   - **Unable to?**\
+   You can use the web panel 
 8. Upload a photo of the QR Code
 9. Click `Verify me`
 10. If all goes well, you now have access to the panel

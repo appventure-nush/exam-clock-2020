@@ -49,6 +49,8 @@ public class ConnectionController {
     private TextArea keyRaw;
     @FXML
     private JFXTextField masterPassword;
+    @FXML
+    private JFXTextField addressDisplay;
     private MainController mainController;
     private Stage qrCodeStage;
     private ImageView qrCodeImage;
@@ -93,10 +95,11 @@ public class ConnectionController {
             setFitHeight(512);
             setFitWidth(512);
         }})));
-        RegexValidator regexValidator = new RegexValidator();
-
+        RegexValidator regexValidator = new RegexValidator("Minimal length: 8");
         regexValidator.setRegexPattern("^[a-zA-Z0-9!@#$%^&*()_+\\[\\]\\\\\\{\\}\\|]{8,}$");
         masterPassword.setValidators(regexValidator);
+        addressDisplay.setText("http://" + PreferenceController.getAddress() + ":" + PreferenceController.panelPortProperty.get());
+        addressDisplay.focusedProperty().addListener((observable, oldValue, newValue) -> addressDisplay.setText("http://" + PreferenceController.getAddress() + ":" + PreferenceController.panelPortProperty.get()));
     }
 
     public void setMainController(MainController mainController) {

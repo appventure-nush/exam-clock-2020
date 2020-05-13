@@ -36,15 +36,21 @@
         </HBox>
         <JFXListView fx:id="keys" prefHeight="300.0" VBox.vgrow="ALWAYS"/>
         <HBox alignment="CENTER_LEFT" spacing="5.0">
-            <children>
-                <Label text="Or Password:"/>
-                <JFXTextField fx:id="masterPassword" maxWidth="1.7976931348623157E308" onAction="#changePassword"
-                              promptText="A Password" HBox.hgrow="ALWAYS"/>
-                <JFXButton onAction="#changePassword" styleClass="primary-raised" text="Set"/>
-            </children>
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
             </padding>
+            <Label text="Or Password:"/>
+            <JFXTextField fx:id="masterPassword" maxWidth="1.7976931348623157E308" onAction="#changePassword"
+                          promptText="A Password" HBox.hgrow="ALWAYS"/>
+            <JFXButton onAction="#changePassword" styleClass="primary-raised" text="Set"/>
+        </HBox>
+        <HBox alignment="CENTER_LEFT" spacing="5.0">
+            <padding>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+            </padding>
+            <Label text="Alt Panel IP:"/>
+            <JFXTextField fx:id="addressDisplay" editable="false" text="Ress" maxWidth="1.7976931348623157E308"
+                          HBox.hgrow="ALWAYS"/>
         </HBox>
     </VBox>
     <VBox fx:id="infoPane" styleClass="opaque" translateX="100.0">
