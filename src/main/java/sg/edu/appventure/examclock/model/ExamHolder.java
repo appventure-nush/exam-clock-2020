@@ -37,8 +37,10 @@ public class ExamHolder extends HBox {
     private LocalTime start;
     private LocalTime end;
     private Exam exam;
+    private final MainController controller;
 
     public ExamHolder(MainController controller) {
+        this.controller = controller;
         VBox infoPane = new VBox();
         infoPane.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(infoPane, Priority.SOMETIMES);
@@ -73,17 +75,14 @@ public class ExamHolder extends HBox {
             deleteButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.TRASH));
             deleteButton.getStyleClass().addAll("primary-raised", "animated-option-button");
             list.addAnimatedNode(deleteButton);
-            deleteButton.setOnAction(e -> controller.exams.remove(exam));
+            deleteButton.setOnAction(e -> delete());
 
             JFXButton editButton = new JFXButton();
             editButton.setFont(Font.font(14));
             editButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.EDIT));
             editButton.getStyleClass().addAll("primary-raised", "animated-option-button");
             list.addAnimatedNode(editButton);
-            editButton.setOnAction(e -> {
-                controller.exams.remove(exam);
-                controller.showAddExamStage(exam);
-            });
+            editButton.setOnAction(e -> edit());
             list.setRotate(90);
         }
 
@@ -115,6 +114,18 @@ public class ExamHolder extends HBox {
         setSpacing(5);
         setPadding(new Insets(2, 4, 2, 4));
         setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+
+        setOnMouseClicked(event -> {
+            if (controller.selectedExamHolder != null) {
+                controller.selectedExamHolder.getStyleClass().remove("selected");
+                if (controller.selectedExamHolder == this) {
+                    controller.selectedExamHolder = null;
+                    return;
+                }
+            }
+            getStyleClass().add("selected");
+            controller.selectedExamHolder = this;
+        });
     }
 
     public ExamHolder(MainController controller, Exam exam) {
@@ -168,6 +179,19 @@ public class ExamHolder extends HBox {
         list.animateList(false);
         animation.setRate(-1);
         animation.play();
+        if (controller.selectedExamHolder == this) {
+            controller.selectedExamHolder = null;
+            getStyleClass().remove("selected");
+        }
         return this;
+    }
+
+    public void edit() {
+        controller.exams.remove(exam);
+        controller.showAddExamStage(exam);
+    }
+
+    public void delete() {
+        controller.exams.remove(exam);
     }
 }

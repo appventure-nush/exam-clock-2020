@@ -56,3 +56,7 @@
 .jfx-radio-button {
     -jfx-selected-color: -fx-accent;
 }
+
+.scroll-pane {
+    -fx-focus-color: transparent;
+}

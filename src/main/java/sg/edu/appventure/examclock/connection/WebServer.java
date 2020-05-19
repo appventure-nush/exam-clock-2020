@@ -160,7 +160,7 @@ public class WebServer extends NanoHTTPD {
                                 case "start_all": {
                                     if (key.type != Key.KeyType.ADMIN)
                                         return newErrorJSONResponse(keyBytes, Response.Status.BAD_REQUEST, "no-permission");
-                                    controller.startAllExams();
+                                    controller.startAllExams(null);
                                     JSONObject response = new JSONObject();
                                     response.put("exams", exams);
                                     return newJSONResponse(keyBytes, response);
@@ -168,7 +168,7 @@ public class WebServer extends NanoHTTPD {
                                 case "stop_all": {
                                     if (key.type != Key.KeyType.ADMIN)
                                         return newErrorJSONResponse(keyBytes, Response.Status.BAD_REQUEST, "no-permission");
-                                    controller.stopAllExams();
+                                    controller.stopAllExams(null);
                                     JSONObject response = new JSONObject();
                                     response.put("exams", exams);
                                     return newJSONResponse(keyBytes, response);

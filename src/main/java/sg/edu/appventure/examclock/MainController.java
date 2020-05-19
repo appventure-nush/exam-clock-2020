@@ -1,6 +1,5 @@
 package sg.edu.appventure.examclock;
 
-import com.jfoenix.controls.JFXButton;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -11,15 +10,20 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -34,8 +38,11 @@ import sg.edu.appventure.examclock.model.Exam;
 import sg.edu.appventure.examclock.model.ExamHolder;
 import sg.edu.appventure.examclock.model.Key;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -54,6 +61,7 @@ public class MainController {
     public Stage addExamStage;
     public ObservableList<Key> keys;
     public final Key simpleKey;
+    public ExamHolder selectedExamHolder;
     @FXML
     private SplitPane root;
     @FXML
@@ -79,14 +87,6 @@ public class MainController {
     @FXML
     private VBox rightPane;
     @FXML
-    private JFXButton addBtn;
-    @FXML
-    private JFXButton startBtn;
-    @FXML
-    private JFXButton stopBtn;
-    @FXML
-    private JFXButton settingBtn;
-    @FXML
     private VBox examList;
     @FXML
     private ImageView toiletIcon;
@@ -101,6 +101,8 @@ public class MainController {
 
     public Preferences preferences;
     private FileChooser fileChooser;
+    @FXML
+    private MenuBar menuBar;
 
     public MainController() {
         this.simpleKey = new Key(Key.KeyType.TOILET);
@@ -109,6 +111,8 @@ public class MainController {
     @FXML
     public void initialize() {
         System.out.println("initialize");
+        final String os = System.getProperty("os.name");
+        if (os != null && os.startsWith("Mac")) menuBar.useSystemMenuBarProperty().set(true);
         exams = FXCollections.observableArrayList();
         keys = FXCollections.observableArrayList();
         preferences = Preferences.userNodeForPackage(MainController.class);
@@ -131,9 +135,6 @@ public class MainController {
                     }
                 }
             }
-            JSONArray array = new JSONArray();
-            array.addAll(exams);
-            preferences.put("exams", array.toJSONString());
         });
         keys.addListener((ListChangeListener<Key>) c -> {
             JSONArray array = keys.stream().map(Key::toJsonObject).collect(Collectors.toCollection(JSONArray::new));
@@ -180,8 +181,6 @@ public class MainController {
         fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
         fileChooser.getExtensionFilters().add(extFilter);
-        startBtn.setOnAction(e -> startAllExams());
-        stopBtn.setOnAction(e -> stopAllExams());
         play();
     }
 
@@ -197,11 +196,6 @@ public class MainController {
 
     public void resize(double width, double height) {
         clockController.resize(width, height);
-    }
-
-    @FXML
-    public void addExamClicked(ActionEvent event) {
-        addExamStage.show();
     }
 
     public void showAddExamStage(Exam exam) {
@@ -248,7 +242,51 @@ public class MainController {
         addExamStage.hide();
     }
 
-    public void startAllExams() {
+    @FXML
+    public void addExamClicked(ActionEvent event) {
+        addExamStage.show();
+    }
+
+    @FXML
+    public void editExamClicked(ActionEvent event) {
+        if (selectedExamHolder != null) selectedExamHolder.edit();
+    }
+
+    @FXML
+    public void deleteExamClicked(ActionEvent event) {
+        if (selectedExamHolder != null) selectedExamHolder.delete();
+    }
+
+    @FXML
+    public void startSelectedExams(ActionEvent event) {
+        if (selectedExamHolder != null) {
+            LocalDate newDate = LocalDate.now();
+            LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
+            Exam exam = selectedExamHolder.getExam();
+            long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
+            exam.examDate = newDate.toString();
+            exam.startTime = newStartTime.toString();
+            exam.endTime = newStartTime.plusSeconds(seconds).toString();
+            selectedExamHolder.setExam(selectedExamHolder.getExam());
+        }
+    }
+
+    @FXML
+    public void stopSelectedExams(ActionEvent event) {
+        if (selectedExamHolder != null) {
+            LocalDate newDate = LocalDate.now();
+            LocalTime newEndTime = LocalTime.now().withNano(0);
+            Exam exam = selectedExamHolder.getExam();
+            long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
+            exam.examDate = newDate.toString();
+            exam.startTime = newEndTime.minusSeconds(seconds).toString();
+            exam.endTime = newEndTime.toString();
+            selectedExamHolder.setExam(selectedExamHolder.getExam());
+        }
+    }
+
+    @FXML
+    public void startAllExams(ActionEvent event) {
         LocalDate newDate = LocalDate.now();
         LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
         exams.forEach(exam -> {
@@ -260,14 +298,42 @@ public class MainController {
         examList.getChildren().forEach(node -> Platform.runLater(() -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam())));
     }
 
-    public void stopAllExams() {
+    @FXML
+    public void stopAllExams(ActionEvent event) {
+        LocalDate newDate = LocalDate.now();
         LocalTime newEndTime = LocalTime.now().withNano(0);
         exams.forEach(exam -> {
             long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
+            exam.examDate = newDate.toString();
             exam.startTime = newEndTime.minusSeconds(seconds).toString();
             exam.endTime = newEndTime.toString();
         });
         examList.getChildren().forEach(node -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam()));
+    }
+
+
+    @FXML
+    public void reset(ActionEvent event) {
+        exams.clear();
+    }
+
+    @FXML
+    public void save(ActionEvent event) {
+        JSONArray array = new JSONArray();
+        array.addAll(exams);
+        preferences.put("exams", array.toJSONString());
+    }
+
+    @FXML
+    public void load(ActionEvent event) {
+        String examsStr = preferences.get("exams", null);
+        if (examsStr != null) {
+            JSONArray root = (JSONArray) JSONValue.parse(examsStr);
+            for (Object o : root) {
+                JSONObject exam = (JSONObject) o;
+                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime"))));
+            }
+        }
     }
 
     @FXML
@@ -304,6 +370,54 @@ public class MainController {
         if (file == null) return;
         try {
             Files.write(Paths.get(file.toURI()), JSONArray.toJSONString(exams).getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void about(ActionEvent actionEvent) {
+        try {
+            Stage stage = new Stage();
+            Group logo = FXMLLoader.load(getClass().getResource("/logo_light.fxml"));
+
+            Label title = new Label("Exam Clock", new Label(Version.getVersion()) {{
+                setFont(Font.font("monospaced", 14));
+            }});
+            title.setContentDisplay(ContentDisplay.BOTTOM);
+            title.setFont(Font.font(30));
+            VBox vbox = new VBox(title,
+                    new Hyperlink("GitHub Repo") {{
+                        setOnAction(e -> {
+                            if (Desktop.isDesktopSupported()) {
+                                try {
+                                    Desktop.getDesktop().browse(new URI("https://github.com/appventure-nush/exam-clock-2020"));
+                                } catch (IOException | URISyntaxException e1) {
+                                    e1.printStackTrace();
+                                }
+                            }
+                        });
+                    }},
+                    new TitledPane("Created by",
+                            new Label("Zhao Yun (h1710169)\nWang HengYue (h1710149)\nJamie Pang (h1510104)")
+                    ) {{
+                        setCollapsible(false);
+                    }},
+                    new TitledPane("Originally by",
+                            new Label("Leong Yu Siang")
+                    ) {{
+                        setCollapsible(false);
+                    }},
+                    logo);
+            vbox.setPadding(new Insets(10));
+            vbox.setSpacing(10);
+            vbox.setAlignment(Pos.CENTER);
+            Scene scene = new Scene(vbox);
+            stage.setScene(scene);
+            stage.setWidth(200);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setResizable(false);
+            stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }

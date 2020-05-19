@@ -25,6 +25,10 @@
     -fx-background-color: #ff000022;
 }
 
+.exam-holder.selected {
+    -fx-border-color: -fx-foreground;
+}
+
 .exam-name {
     -fx-font-size: 1.2em;
     -fx-padding: 0 0 0 5px;

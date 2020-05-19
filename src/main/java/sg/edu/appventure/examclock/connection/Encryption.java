@@ -102,10 +102,6 @@ public class Encryption {
             put("jwk", jwk.toJSONObject());
             System.out.println("JWK = " + jwk.toJSONObject().toJSONString());
             System.out.println("KEY = " + new String(Base64.encode(key.key)));
-            // 2W8NvJizYRdn0Z3Cj6ile/tnkkKZiIjtQyf9WxglC2k=
-            // 2W8NvJizYRdn0Z3Cj6ile_tnkkKZiIjtQyf9WxglC2k
-            // "=" -> ""
-            // "/" -> "_"
         }
     }
 
