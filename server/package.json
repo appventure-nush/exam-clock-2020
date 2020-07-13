@@ -1,0 +1,27 @@
+{
+  "name": "exam-clock-server",
+  "version": "1.0.0",
+  "description": "Server for Exam Clock",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appventure-nush/exam-clock-2020.git"
+  },
+  "keywords": [
+    "clock",
+    "idk"
+  ],
+  "author": "Zhao Yun",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/appventure-nush/exam-clock-2020/issues"
+  },
+  "homepage": "https://github.com/appventure-nush/exam-clock-2020#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}

@@ -114,8 +114,10 @@ public class PreferenceController {
                         )
                 )
         );
-        preferencesFx.getView().setPrefSize(600, 400);
+        preferencesFx.persistWindowState(true);
+        preferencesFx.getView().setStyle("-fx-font-size: " + fontScaleProperty.get() * 0.7 + "px;");
         preferencesFx.getView().getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
+        preferencesFx.getView().getStyleClass().add("preference");
         preferencesFx.buttonsVisibility(true);
     }
 
@@ -152,6 +154,7 @@ public class PreferenceController {
     }
 
     public void show(boolean modal) {
+        preferencesFx.getView().setStyle("-fx-font-size: " + fontScaleProperty.get() * 0.7 + "px;");
         preferencesFx.show(modal);
     }
 

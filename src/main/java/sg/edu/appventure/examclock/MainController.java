@@ -201,8 +201,8 @@ public class MainController {
     public void showAddExamStage(Exam exam) {
         addExamController.name_input.setText(exam.name);
         addExamController.date_input.setValue(LocalDate.parse(exam.examDate));
-        addExamController.start_time_input.setValue(LocalTime.parse(exam.startTime));
-        addExamController.end_time_input.setValue(LocalTime.parse(exam.endTime));
+        addExamController.start_time_input.setText(AddExamController.timeFormatter.format(LocalTime.parse(exam.startTime)));
+        addExamController.end_time_input.setText(AddExamController.timeFormatter.format(LocalTime.parse(exam.endTime)));
         addExamStage.show();
     }
 
@@ -314,7 +314,9 @@ public class MainController {
 
     @FXML
     public void reset(ActionEvent event) {
-        exams.clear();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure? This will remove everything!", ButtonType.NO, ButtonType.YES);
+        alert.showAndWait();
+        if (alert.getResult() == ButtonType.YES) exams.clear();
     }
 
     @FXML

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Control Panel</title>
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
+    <link href="//cdn.jsdelivr.net/timepicker.js/latest/timepicker.min.css" rel="stylesheet">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <link href='favicon.256.png' rel='icon'>
+    <style>
+        #exams {
+            list-style-type: none;
+            margin-top: 20px;
+            padding: 0;
+        }
+
+        .exam-box {
+            border: black 1px solid;
+            border-radius: 5px;
+        }
+
+        .exam-info {
+            padding: 10px 20px 10px 20px;
+        }
+
+        .exam-action {
+            padding: 0;
+        }
+
+        #control-panel {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="login-panel">
+        <h3>Login with Password</h3>
+        <div class="form-group">
+            <label for="passwordIP">IP Address</label>
+            <input class="form-control" id="passwordIP" placeholder="IP of web panel" type="text">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input class="form-control" id="password" placeholder="Enter password" type="password">
+        </div>
+        <button class="btn btn-primary" id="password-login" type="button">Login</button>
+        <hr>
+        <h3>Login with secret QR code</h3>
+        <div class="custom-file">
+            <input class="custom-file-input" id="file-selector" type="file">
+            <label class="custom-file-label" for="file-selector">Upload QR Code</label>
+        </div>
+        <ul class="list-group">
+            <li class="list-group-item"><h5>Raw</h5><code id="raw"></code></li>
+            <li class="list-group-item"><h5>Key ID</h5><code id="keyID"></code></li>
+            <li class="list-group-item"><h5>Key</h5><code id="key"></code></li>
+            <li class="list-group-item"><h5>IP</h5><code id="ip"></code></li>
+        </ul>
+        <button class="btn btn-primary" id="verify">Verify Me</button>
+    </div>
+    <div id="control-panel">
+        <ul class="list-group">
+            <li class="list-group-item">Logged in as<br><code id="keyIdDisplay"></code> (<code
+                    id="keyTypeDisplay"></code>)
+            </li>
+            <li class="list-group-item">Connected to<br><code id="targetNameDisplay"></code> (<code
+                    id="targetIpDisplay"></code>)
+            </li>
+        </ul>
+        <form id="examForm">
+            <div class="row admin-only">
+                <div class="col form-group">
+                    <label for="inputEN">Exam Name</label>
+                    <input class="form-control" id="inputEN" placeholder="Enter exam name" required type="text">
+                </div>
+            </div>
+            <div class="row admin-only">
+                <div class="col form-group">
+                    <label for="inputDT">Exam Date</label>
+                    <input class="form-control" id="inputDT"
+                           pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))"
+                           placeholder="YYYY-MM-DD"
+                           required
+                           title="Enter a date in this format YYYY-MM-DD" type="text">
+                </div>
+                <div class="col form-group">
+                    <label for="inputST">Start Time</label>
+                    <input class="form-control" id="inputST" placeholder="HH:MM:SS" required type="text">
+                </div>
+                <div class="col form-group">
+                    <label for="inputET">End Time</label>
+                    <input class="form-control" id="inputET" placeholder="HH:MM:SS" required type="text">
+                </div>
+            </div>
+            <div class="row">
+                <div aria-label="Actions" class="btn-group col-md-6 admin-only" role="group">
+                    <button class="btn btn-success" id="add" type="button">Add</button>
+                    <button class="btn btn-outline-warning" id="start" type="button">Start All</button>
+                    <button class="btn btn-outline-danger" id="stop" type="button">Stop All</button>
+                </div>
+                <div aria-label="Actions" class="btn-group col-md-6" role="group">
+                    <button class="btn btn-outline-info" id="refresh" type="button">Refresh</button>
+                    <button class="btn btn-outline-success" id="toilet" type="button">Toilet</button>
+                    <button class="btn btn-outline-danger" id="logout" type="button">Exit</button>
+                </div>
+            </div>
+        </form>
+        <ul id="exams">
+
+        </ul>
+    </div>
+</div>
+<script crossorigin="anonymous" src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.1/dist/jquery.validate.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script crossorigin="anonymous" src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<script src="//cdn.jsdelivr.net/timepicker.js/latest/timepicker.min.js"></script>
+<script src="/socket.io/socket.io.slim.js"></script>
+<script id="encryption-script">
+    var socket = io();
+
+    function sendData(string) {
+        return new Promise((resolve, reject) => {
+            socket.emit('data', string);
+        });
+    }
+</script>
+<script id="definition">
+    var ADD_EXAM = "add_exam";
+    var DELETE_EXAM = "delete";
+    var GET_EXAMS = "get_exams";
+    var START_ALL = "start_all";
+    var STOP_ALL = "stop_all";
+    var TOILET = "toilet";
+    var examList = document.getElementById("exams");
+    var loginPanel = document.getElementById('login-panel');
+    var controlPanel = document.getElementById('control-panel');
+    var adminPanel = document.getElementById('admin-actions');
+    var toiletBtn = document.getElementById("toilet");
+
+    class Exam {
+        constructor(id, name, examDate, startTime, endTime) {
+            this.id = id;
+            this.name = name;
+            this.examDate = examDate;
+            this.startTime = startTime;
+            this.endTime = endTime;
+        }
+
+        toHTML() {
+            return `
+<li data-id="${this.id}">
+<div class="exam-box row">
+<div class="exam-info col-sm-10">
+<h3><code>${this.id}</code> ${this.name}</h3>
+Exam on <code>${this.examDate}</code><br>
+From <code>${this.startTime}</code> to <code>${this.endTime}</code>
+</div>
+<div class="exam-action col-sm-2 btn-group-vertical">
+<button onclick="editExam('${this.id}')" type="button" class="btn btn-secondary">Edit</button>
+<button onclick="deleteExam('${this.id}')" type="button" class="btn btn-secondary">Delete</button>
+</div>
+</div>
+</li>`;
+        }
+    }
+
+    function reloadExams(es) {
+        exams = es.map(e => new Exam(e.id, e.name, e.examDate, e.startTime, e.endTime));
+        examList.innerHTML = "";
+        for (let exam of exams) {
+            examList.innerHTML += exam.toHTML();
+        }
+    }
+</script>
+<script>
+    var exams = [];
+    var inputEN = document.getElementById("inputEN");
+    var inputDT = document.getElementById("inputDT");
+    var inputST = document.getElementById("inputST");
+    var inputET = document.getElementById("inputET");
+
+    document.getElementById("add").onclick = e => {
+        sendData(JSON.stringify({
+            method: ADD_EXAM,
+            exam: new Exam("", inputEN.value, inputDT.value, inputST.value, inputET.value)
+        })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
+    };
+    document.getElementById("start").onclick = e => {
+        sendData(JSON.stringify({
+            method: START_ALL
+        })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
+    };
+    document.getElementById("stop").onclick = e => {
+        sendData(JSON.stringify({
+            method: STOP_ALL
+        })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
+    };
+    toiletBtn.onclick = e => {
+        sendData(JSON.stringify({
+            method: TOILET
+        })).then(response => toiletBtn.className = "btn " + (response.occupied ? "btn-outline-danger" : "btn-outline-success")).catch(err => alert(err.responseJSON.error));
+    };
+    document.getElementById("refresh").onclick = e => {
+        sendData(JSON.stringify({
+            method: GET_EXAMS
+        })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
+    };
+    document.getElementById("logout").onclick = e => {
+        window.clearInterval(window.refreshNameIntervals);
+        localStorage.removeItem("keyID");
+        localStorage.removeItem("key");
+        localStorage.removeItem("remoteIP");
+        localStorage.removeItem("keyJWK");
+        localStorage.removeItem("password");
+        location.reload();
+    };
+
+    function deleteExam(id) {
+        sendData(JSON.stringify({
+            method: DELETE_EXAM,
+            id: id
+        })).then(response => reloadExams(response.exams)).catch(err => alert(err.responseJSON.error));
+    }
+
+    function editExam(id) {
+        var exam = exams.find(e => e.id === id);
+        inputEN.value = exam.name;
+        inputDT.value = exam.examDate;
+        inputST.value = exam.startTime;
+        inputET.value = exam.endTime;
+        deleteExam(id);
+    }
+
+    var timepicker = new TimePicker(['inputST', 'inputET'], {
+        theme: 'dark', // or 'blue-grey'
+        lang: 'en', // 'en', 'pt' for now
+    });
+    timepicker.on('change', function (evt) {
+        console.info(evt);
+        evt.element.value = (evt.hour || '00') + ':' + (evt.minute || '00');
+    });
+
+    var today = new Date();
+    inputDT.value = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, '0') + "-" + String(today.getDate()).padStart(2, '0');
+</script>
+</body>
+</html>

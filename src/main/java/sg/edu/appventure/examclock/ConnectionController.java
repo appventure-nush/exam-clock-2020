@@ -1,11 +1,6 @@
 package sg.edu.appventure.examclock;
 
 import com.google.zxing.WriterException;
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXListView;
-import com.jfoenix.controls.JFXRadioButton;
-import com.jfoenix.controls.JFXTextField;
-import com.jfoenix.validation.RegexValidator;
 import javafx.animation.TranslateTransition;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -30,15 +25,15 @@ public class ConnectionController {
     @FXML
     private ToggleGroup keyTypeGroup;
     @FXML
-    private JFXRadioButton typeAdmin;
+    private RadioButton typeAdmin;
     @FXML
-    private JFXRadioButton typeToilet;
+    private RadioButton typeToilet;
     @FXML
-    private JFXRadioButton typeRead;
+    private RadioButton typeRead;
     @FXML
-    private JFXButton createKey;
+    private Button createKey;
     @FXML
-    private JFXListView<Key> keys;
+    private ListView<Key> keys;
     @FXML
     private VBox infoPane;
     @FXML
@@ -48,9 +43,9 @@ public class ConnectionController {
     @FXML
     private TextArea keyRaw;
     @FXML
-    private JFXTextField masterPassword;
+    private PasswordField masterPassword;
     @FXML
-    private JFXTextField addressDisplay;
+    private TextField addressDisplay;
     private MainController mainController;
     private Stage qrCodeStage;
     private ImageView qrCodeImage;
@@ -68,9 +63,8 @@ public class ConnectionController {
             Label type = new Label();
             type.setMaxWidth(Double.MAX_VALUE);
             HBox.setHgrow(type, Priority.ALWAYS);
-            JFXButton open = new JFXButton("Details");
+            Button open = new Button("Details");
             open.setUnderline(true);
-
             HBox hbox = new HBox(uuid, type, open);
             hbox.setAlignment(Pos.CENTER);
             hbox.setSpacing(10);
@@ -95,9 +89,6 @@ public class ConnectionController {
             setFitHeight(512);
             setFitWidth(512);
         }})));
-        RegexValidator regexValidator = new RegexValidator("Minimal length: 8");
-        regexValidator.setRegexPattern("^[a-zA-Z0-9!@#$%^&*()_+\\[\\]\\\\\\{\\}\\|]{8,}$");
-        masterPassword.setValidators(regexValidator);
         addressDisplay.setText("http://" + PreferenceController.getAddress() + ":" + PreferenceController.panelPortProperty.get());
         addressDisplay.focusedProperty().addListener((observable, oldValue, newValue) -> addressDisplay.setText("http://" + PreferenceController.getAddress() + ":" + PreferenceController.panelPortProperty.get()));
     }
@@ -149,11 +140,9 @@ public class ConnectionController {
     }
 
     public void changePassword(ActionEvent actionEvent) {
-        if (masterPassword.validate()) {
-            String password = masterPassword.getText();
-            mainController.preferences.put("password", password);
-            mainController.simpleKey.key = Encryption.createKeyFromPassword(password);
-        }
+        String password = masterPassword.getText();
+        mainController.preferences.put("password", password);
+        mainController.simpleKey.key = Encryption.createKeyFromPassword(password);
     }
 
     public void showQRCode(ActionEvent actionEvent) {

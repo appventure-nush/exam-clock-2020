@@ -18,6 +18,8 @@ public class Exam {
     }
 
     public Exam(String id, String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
+        if (name.isEmpty()) throw new RuntimeException("Name is Empty!");
+        if (endTime.isBefore(startTime)) throw new RuntimeException("Start is before end!");
         this.id = id;
         this.name = name;
         this.examDate = examDate.toString();

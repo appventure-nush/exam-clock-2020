@@ -1,16 +1,14 @@
 package sg.edu.appventure.examclock.model;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXHamburger;
-import com.jfoenix.controls.JFXNodesList;
-import com.jfoenix.transitions.hamburger.HamburgerBasicCloseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import sg.edu.appventure.examclock.MainController;
@@ -22,6 +20,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class ExamHolder extends HBox {
+    private static final Image menu_night = new Image(ExamHolder.class.getResource("/menu_night.png").toExternalForm(), 20, 20, true, true);
+    private static final Image menu_day = new Image(ExamHolder.class.getResource("/menu_day.png").toExternalForm(), 20, 20, true, true);
     private static final DateTimeFormatter FORMAT_12_HOURS = DateTimeFormatter.ofPattern("hh:mm:ss a");
     private static final DateTimeFormatter FORMAT_24_HOURS = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final DateTimeFormatter FORMAT_12_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("hh:mm a");
@@ -31,8 +31,6 @@ public class ExamHolder extends HBox {
     private final Label examStartTime;
     private final Label examEndTime;
     private final Label timeLeft;
-    private final JFXNodesList list;
-    private final HamburgerBasicCloseTransition animation;
     private LocalDate date;
     private LocalTime start;
     private LocalTime end;
@@ -49,44 +47,20 @@ public class ExamHolder extends HBox {
         examName.setMaxWidth(Double.MAX_VALUE);
         examName.setWrapText(true);
         HBox.setHgrow(examName, Priority.ALWAYS);
-        list = new JFXNodesList();
-        list.setSpacing(10);
+        MenuButton menu = new MenuButton();
+        menu.setGraphic(new ImageView(PreferenceController.nightMode.get() ? menu_night : menu_day));
+        menu.getItems().addAll(new MenuItem("Really"), new MenuItem("Do not"));
 
-        {
-            JFXHamburger hamburger = new JFXHamburger();
-            animation = new HamburgerBasicCloseTransition(hamburger);
-            hamburger.setAnimation(animation);
-            hamburger.setMaxWidth(14);
-            hamburger.setMaxHeight(12);
+        MenuItem deleteButton = new MenuItem("Delete");
+        deleteButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.TRASH));
+        menu.getItems().add(deleteButton);
+        deleteButton.setOnAction(e -> delete());
 
-            JFXButton menuButton = new JFXButton();
-            menuButton.setFont(Font.font(14));
-            menuButton.setGraphic(hamburger);
-            menuButton.setDisableVisualFocus(true);
-            menuButton.getStyleClass().addAll("animated-option-button", "animated-option-sub-button");
-            menuButton.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-                animation.setRate(list.isExpanded() ? 1 : -1);
-                animation.play();
-            });
-            list.addAnimatedNode(menuButton);
-
-            JFXButton deleteButton = new JFXButton();
-            deleteButton.setFont(Font.font(14));
-            deleteButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.TRASH));
-            deleteButton.getStyleClass().addAll("primary-raised", "animated-option-button");
-            list.addAnimatedNode(deleteButton);
-            deleteButton.setOnAction(e -> delete());
-
-            JFXButton editButton = new JFXButton();
-            editButton.setFont(Font.font(14));
-            editButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.EDIT));
-            editButton.getStyleClass().addAll("primary-raised", "animated-option-button");
-            list.addAnimatedNode(editButton);
-            editButton.setOnAction(e -> edit());
-            list.setRotate(90);
-        }
-
-        infoPane.getChildren().add(new HBox(examName, list) {{
+        MenuItem editButton = new MenuItem("Edit");
+        editButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.EDIT));
+        menu.getItems().add(editButton);
+        editButton.setOnAction(e -> edit());
+        infoPane.getChildren().add(new HBox(examName, menu) {{
             setSpacing(5);
         }});
 
@@ -100,6 +74,7 @@ public class ExamHolder extends HBox {
         HBox.setHgrow(examStartTime, Priority.ALWAYS);
         HBox.setHgrow(examEndTime, Priority.ALWAYS);
 
+        infoPane.setSpacing(5);
         infoPane.getChildren().add(new HBox(examDate, examStartTime, new Label("", new Glyph("FontAwesome", FontAwesome.Glyph.ARROW_RIGHT)), examEndTime));
         getChildren().add(infoPane);
 
@@ -176,9 +151,6 @@ public class ExamHolder extends HBox {
     }
 
     public ExamHolder reset() {
-        list.animateList(false);
-        animation.setRate(-1);
-        animation.play();
         if (controller.selectedExamHolder == this) {
             controller.selectedExamHolder = null;
             getStyleClass().remove("selected");

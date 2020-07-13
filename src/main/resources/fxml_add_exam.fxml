@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.*?>
 <?import tornadofx.control.*?>
 <Form fx:id="form" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
       prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sg.edu.appventure.examclock.addexam.AddExamController">
     <Fieldset inputGrow="SOMETIMES" text="Exam Details">
         <Field text="Name">
-            <JFXTextField fx:id="name_input"/>
+            <TextField fx:id="name_input"/>
         </Field>
         <Field text="Date">
-            <JFXDatePicker fx:id="date_input" defaultColor="#3F51B5" maxWidth="Infinity"/>
+            <DatePicker fx:id="date_input" maxWidth="Infinity"/>
         </Field>
         <Field text="Duration h:m">
             <Spinner fx:id="duration_hours" editable="true" max="23" min="0"/>
@@ -21,14 +19,14 @@
             <Spinner fx:id="duration_minutes" editable="true" max="59" min="0"/>
         </Field>
         <Field text="Start Time">
-            <JFXTimePicker fx:id="start_time_input" defaultColor="#3F51B5" maxWidth="Infinity"/>
+            <TextField fx:id="start_time_input" maxWidth="Infinity" promptText="hh:mm am/pm"/>
         </Field>
         <Field text="End Time">
-            <JFXTimePicker fx:id="end_time_input" defaultColor="#3F51B5" maxWidth="Infinity"/>
+            <TextField fx:id="end_time_input" maxWidth="Infinity" promptText="hh:mm am/pm"/>
         </Field>
         <Field>
-            <JFXButton onAction="#add" text="Add" styleClass="primary-raised"/>
-            <JFXButton onAction="#cancel" text="Cancel"/>
+            <Button onAction="#add" text="Add" styleClass="primary-raised"/>
+            <Button onAction="#cancel" text="Cancel"/>
         </Field>
     </Fieldset>
     <padding>
