@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 router.get('/', function (req, res) {
     res.render('index', {});
 })
 router.post('/', function (req, res) {
-    console.log(req.body);
-    res.render('index', {title: 'Express'});
+    if (req.body.clockID) res.render('panel', {clockID: req.body.clockID});
+    else res.render('index', {clockIDDontExist: true});
 });
 
 module.exports = router;

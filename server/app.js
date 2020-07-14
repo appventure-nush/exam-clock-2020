@@ -41,4 +41,11 @@ app.use(function (err, req, res, next) {
     res.render('error');
 });
 
-module.exports = app;
+module.exports = {
+    app: app, callback: http => {
+        const io = require('socket.io')(http);
+        io.on('connection', (socket) => {
+            console.log('a user connected');
+        });
+    }
+};
