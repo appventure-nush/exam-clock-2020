@@ -4,10 +4,13 @@
   "main": "app.js",
   "private": true,
   "dependencies": {
+    "cookie-parser": "^1.4.5",
     "debug": "^2.6.9",
-    "express-session": "^1.17.1",
-    "express-handlebars": "^5.0.0",
     "express": "^4.16.4",
+    "express-handlebars": "^5.0.0",
+    "express-session": "^1.17.1",
+    "http-errors": "^1.8.0",
+    "morgan": "^1.10.0",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {},
