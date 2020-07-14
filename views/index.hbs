@@ -1,0 +1,7 @@
+<form action="/" method="post">
+    <label for="clockID">Clock ID: </label><input id="clockID" name="clockID" placeholder="XXXXXX"/><br>
+    <input type="submit" value="Connect"/>
+</form>
+{{#if clockIDDontExist}}
+    <h4>Your key is that of a clock of another universe</h4>
+{{/if}}

@@ -1,0 +1,27 @@
+{
+  "name": "exam-clock-2020-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "debug": "^2.6.9",
+    "express-session": "^1.17.1",
+    "express-handlebars": "^5.0.0",
+    "express": "^4.16.4",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appventure-nush/exam-clock-2020.git"
+  },
+  "author": "Zhao Yun",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/appventure-nush/exam-clock-2020/issues"
+  },
+  "homepage": "https://github.com/appventure-nush/exam-clock-2020#readme"
+}
