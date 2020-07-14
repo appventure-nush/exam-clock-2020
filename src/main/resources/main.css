@@ -13,10 +13,6 @@
     -fx-fill: derive(-fx-background, 20%);
 }
 
-.jfx-hamburger StackPane {
-    -fx-background-color: -fx-foreground;
-}
-
 .exam-holder.started {
     -fx-background-color: #00ff0022;
 }
@@ -54,6 +50,6 @@
     -fx-background-color: red;
 }
 
-#keyRaw, #addressDisplay {
-    -fx-font-family: "monospace";
+#keyRaw, #addressDisplay, #clockIDLabel {
+    -fx-font-family: "Courier New";
 }

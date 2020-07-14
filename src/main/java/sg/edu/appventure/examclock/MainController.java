@@ -108,6 +108,13 @@ public class MainController {
         this.simpleKey = new Key(Key.KeyType.TOILET);
     }
 
+    private static String generateClockID(int length) {
+        char[] set = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789".toCharArray();
+        char[] res = new char[length];
+        for (int i = 0; i < length; i++) res[i] = set[(int) (set.length * Math.random())];
+        return new String(res);
+    }
+
     @FXML
     public void initialize() {
         System.out.println("initialize");
@@ -153,6 +160,7 @@ public class MainController {
             JSONArray root = (JSONArray) JSONValue.parse(keyStr);
             keys.addAll(root.stream().map(o -> Key.fromJsonObject((JSONObject) o)).collect(Collectors.toCollection(ArrayList::new)));
         }
+        PreferenceController.clockID = preferences.get("clockID", generateClockID(7));
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         preferenceController = new PreferenceController(this);
         root.setStyle("-fx-font-size: " + PreferenceController.fontScaleProperty.get() + "px;");

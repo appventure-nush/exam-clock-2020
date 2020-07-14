@@ -46,6 +46,8 @@ public class ConnectionController {
     private PasswordField masterPassword;
     @FXML
     private TextField addressDisplay;
+    @FXML
+    private Label clockIDLabel;
     private MainController mainController;
     private Stage qrCodeStage;
     private ImageView qrCodeImage;
@@ -91,6 +93,7 @@ public class ConnectionController {
         }})));
         addressDisplay.setText("http://" + PreferenceController.getAddress() + ":" + PreferenceController.panelPortProperty.get());
         addressDisplay.focusedProperty().addListener((observable, oldValue, newValue) -> addressDisplay.setText("http://" + PreferenceController.getAddress() + ":" + PreferenceController.panelPortProperty.get()));
+        clockIDLabel.setText(PreferenceController.clockID);
     }
 
     public void setMainController(MainController mainController) {

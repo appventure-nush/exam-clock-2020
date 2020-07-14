@@ -43,18 +43,12 @@
 }
 
 .primary-raised {
-    -jfx-button-type: RAISED;
-    -jfx-disable-visual-focus: true;
     -fx-background-color: -fx-accent;
     -fx-text-fill: white;
 }
 
 .red {
     -fx-background-color: -fx-error;
-}
-
-.jfx-radio-button {
-    -jfx-selected-color: -fx-accent;
 }
 
 .scroll-pane {
