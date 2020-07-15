@@ -94,6 +94,7 @@ public class MainController {
     private StackPane toiletIconParent;
     private ClockController clockController;
     private PreferenceController preferenceController;
+    public ConnectionController connectionController;
     private Stage connectStage;
     private Stack<ExamHolder> holderPool;
     private Timeline timeline;
@@ -108,11 +109,15 @@ public class MainController {
         this.simpleKey = new Key(Key.KeyType.TOILET);
     }
 
-    private static String generateClockID(int length) {
+    private static String generateClockID() {
         char[] set = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789".toCharArray();
-        char[] res = new char[length];
-        for (int i = 0; i < length; i++) res[i] = set[(int) (set.length * Math.random())];
+        char[] res = new char[7];
+        for (int i = 0; i < 7; i++) res[i] = set[(int) (set.length * Math.random())];
         return new String(res);
+    }
+
+    public void regenClockID() {
+        PreferenceController.clockID = generateClockID();
     }
 
     @FXML
@@ -160,7 +165,8 @@ public class MainController {
             JSONArray root = (JSONArray) JSONValue.parse(keyStr);
             keys.addAll(root.stream().map(o -> Key.fromJsonObject((JSONObject) o)).collect(Collectors.toCollection(ArrayList::new)));
         }
-        PreferenceController.clockID = preferences.get("clockID", generateClockID(7));
+        PreferenceController.clockID = preferences.get("clockID", generateClockID());
+        preferences.put("clockID", PreferenceController.clockID);
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         preferenceController = new PreferenceController(this);
         root.setStyle("-fx-font-size: " + PreferenceController.fontScaleProperty.get() + "px;");
@@ -223,7 +229,6 @@ public class MainController {
         scene.getStylesheets().add("/main.css");
         scene.getStylesheets().add("/theme.css");
         scene.getStylesheets().add(PreferenceController.nightMode.get() ? "theme.dark.css" : "/theme.light.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/picker.dark.css" : "/picker.light.css");
         addExamStage.setTitle("Add Exam");
         addExamStage.initModality(Modality.APPLICATION_MODAL);
         addExamStage.setScene(scene);
@@ -238,7 +243,6 @@ public class MainController {
         scene.getStylesheets().add("/main.css");
         scene.getStylesheets().add("/theme.css");
         scene.getStylesheets().add(PreferenceController.nightMode.get() ? "theme.dark.css" : "/theme.light.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/picker.dark.css" : "/picker.light.css");
         connectStage.setTitle("Connection");
         connectStage.setResizable(false);
         connectStage.initModality(Modality.APPLICATION_MODAL);
@@ -440,6 +444,7 @@ public class MainController {
     public void onClose(WindowEvent event) {
         stop();
         preferenceController.onClose(event);
+        connectionController.onClose(event);
     }
 
     public void play() {

@@ -16,8 +16,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import sg.edu.appventure.examclock.connection.Base64;
+import sg.edu.appventure.examclock.connection.ClientSocket;
 import sg.edu.appventure.examclock.connection.Encryption;
 import sg.edu.appventure.examclock.model.Key;
 
@@ -54,6 +56,8 @@ public class ConnectionController {
 
     private String selectedID;
     private boolean shown = false;
+
+    private ClientSocket socket;
 
     @FXML
     public void initialize() {
@@ -98,6 +102,8 @@ public class ConnectionController {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+        mainController.connectionController = this;
+        socket = new ClientSocket(mainController);
         keys.setItems(mainController.keys);
         masterPassword.setText(mainController.preferences.get("password", "password"));
         mainController.simpleKey.key = Encryption.createKeyFromPassword(mainController.preferences.get("password", "password"));
@@ -150,5 +156,9 @@ public class ConnectionController {
 
     public void showQRCode(ActionEvent actionEvent) {
         qrCodeStage.show();
+    }
+
+    public void onClose(WindowEvent event) {
+        socket.close();
     }
 }
