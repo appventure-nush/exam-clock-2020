@@ -1,21 +1,27 @@
-let CLOCKS;
+const CLOCKS = require("../clocks.js");
 const express = require('express');
 const router = express.Router();
 
-router.get('/', function (req, res) {
-    res.render('index', {});
+router.get('/', (req, res) => {
+    res.render('index', {sessionID: req.sessionID});
 });
-router.get('/:clockID', function (req, res) {
-    res.render('panel', {clockID: req.params.clockID});
+router.get('/clocks', (req, res) => {
+    res.json(Object.values(CLOCKS).map(clock => {
+        return {
+            id: clock.clockID,
+            name: clock.clockName
+        };
+    }));
 });
-router.post('/', function (req, res) {
-    if (req.body.clockID) {
+router.get('/:clockID', (req, res) => {
+    if (CLOCKS[req.body.clockID] && CLOCKS[req.params.clockID].accepts(req.session.sessionID)) res.render('panel', {clockID: req.params.clockID});
+    else res.render('index', {error: true});
+});
+router.post('/', (req, res) => {
+    if (req.body.clockID && req.body.nick && CLOCKS[req.body.clockID] && CLOCKS[req.body.clockID].accepts(req.session.sessionID)) {
         req.session.clockID = req.body.clockID;
         res.redirect('/' + req.body.clockID);
-    } else res.render('index', {clockIDDontExist: true});
+    } else res.render('index', {error: true});
 });
 
-module.exports = (clocks) => {
-    CLOCKS = clocks;
-    return router;
-};
+module.exports = router;

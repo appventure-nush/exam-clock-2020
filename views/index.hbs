@@ -1,7 +1,50 @@
 <form action="/" method="post">
-    <label for="clockID">Clock ID: </label><input id="clockID" name="clockID" placeholder="XXXXXX"/><br>
+    <label for="nick">Nickname (Only for verification): </label>
+    <input id="nick" name="nick" placeholder="Anything"/><br>
+    <label for="clockID">Clock ID: </label>
+    <input id="clockID" name="clockID" placeholder="XXXXXX"/><br>
     <input type="submit" value="Connect"/>
 </form>
-{{#if clockIDDontExist}}
+<script>
+    var socket = io();
+    var respondedAndAccepted = false;
+    var inputNK = document.getElementById("nick");
+    var inputCID = document.getElementById("clockID");
+    socket.on('connect', () => { // initial connection
+        socket.emit('controller_connected', socket.id); // tell server ima controller
+        console.log("Socket ID", socket.id);
+        console.log("Session ID", {{sessionID}});
+    });
+    socket.on('request_callback', response => {
+        console.log("Request has been responsed with", response);
+        if (response === "accepted") {
+            respondedAndAccepted = true;
+            $('form').submit();
+        } else if (response === "rejected") {
+            respondedAndAccepted = false;
+            alert("You have been rejected!");
+        }
+    })
+    socket.on('error', (error) => {
+        console.log("Error!", error);
+    });
+
+    fetch("/clocks").then(res => res.json()).then(clocks => console.log("Clocks", clocks));
+
+    inputNK.value = localStorage.getItem("nick");
+    inputCID.value = localStorage.getItem("clockID");
+    $('form').submit(e => {
+        localStorage.setItem("nick", inputNK.value);
+        localStorage.setItem("clockID", inputCID.value);
+        if (!respondedAndAccepted) {
+            e.preventDefault();
+            socket.emit("request", inputCID.value, inputNK.value);
+            return false;
+        } else return true;
+    });
+</script>
+<!--TODO: Just add script here intercept form submission, and emit a event "request" with clockID as msg -->
+<!--TODO: also add a listener of event "request_callback" -->
+{{#if error}}
     <h4>Your key is that of a clock of another universe</h4>
 {{/if}}
