@@ -83,8 +83,7 @@ function initSocket(http) {
                     console.log('clock "', clock.clockID, '" ' + response + ' the request from ' + controllerID);
                     if (response === "accepted") clock.request_callback(controllerID);
                     io.to(CONTROLLERS[controllerID]).emit('request_callback', response);
-                })
-                // TODO: add event "request_callback"
+                });
             }
         });
         socket.on('controller_connected', msg => {
