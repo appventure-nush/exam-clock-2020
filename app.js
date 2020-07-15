@@ -76,11 +76,11 @@ function initSocket(http) {
                 clock = CLOCKS[clock.clockID] = new Clock(clock.clockID, socket.id, clock.clockName);
                 io.in("controllers").emit("new_clock", JSON.stringify(clock));
                 socket.on('disconnect', () => {
-                    console.log('clock "', clock.clockID, '" disconnected');
+                    console.log('clock "' + clock.clockID + '" disconnected');
                     io.in("controllers").emit("clock_died", JSON.stringify(clock));
                 });
                 socket.on('request_callback', (controllerID, response) => {
-                    console.log('clock "', clock.clockID, '" ' + response + ' the request from ' + controllerID);
+                    console.log('clock "' + clock.clockID + '" ' + response + ' the request from ' + controllerID);
                     if (response === "accepted") clock.request_callback(controllerID);
                     io.to(CONTROLLERS[controllerID]).emit('request_callback', response);
                 });
@@ -105,10 +105,13 @@ function initSocket(http) {
                 if (!CLOCKS[req.clockID]) return;
                 CLOCKS[req.clockID].toilet(req.occupied, socket);
             });
-            socket.on("request", (id, nick) => {
-                console.log("[REQUEST]", id, nick);
-                if (!CLOCKS[id]) return;
-                CLOCKS[id].request(nick, socket);
+            socket.on("request", (clockID, nick) => {
+                if (!CLOCKS[clockID]) {
+                    socket.emit('request_callback', 'not_found');
+                    return;
+                }
+                console.log("[REQUEST]", nick, clockID, "accepts =", CLOCKS[clockID].accepts(socket.handshake.session.sessionID));
+                CLOCKS[clockID].request(nick, socket);
             });
         });
     });

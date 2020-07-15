@@ -6,15 +6,13 @@
     <input type="submit" value="Connect"/>
 </form>
 <script>
-    var socket = io();
     var respondedAndAccepted = false;
     var inputNK = document.getElementById("nick");
     var inputCID = document.getElementById("clockID");
-    socket.on('connect', () => { // initial connection
-        socket.emit('controller_connected', socket.id); // tell server ima controller
-        console.log("Socket ID", socket.id);
-        console.log("Session ID", "{{sessionID}}");
-    });
+    inputNK.value = localStorage.getItem("nick");
+    inputCID.value = localStorage.getItem("clockID");
+
+    // fetch("/clocks").then(res => res.json()).then(clocks => console.log("Clocks", clocks));
     socket.on('request_callback', response => {
         console.log("Request has been responsed with", response);
         if (response === "accepted") {
@@ -23,16 +21,12 @@
         } else if (response === "rejected") {
             respondedAndAccepted = false;
             alert("You have been rejected!");
+        } else if (response === "not_found") {
+            respondedAndAccepted = false;
+            alert("Clock not found!");
         }
-    })
-    socket.on('error', (error) => {
-        console.log("Error!", error);
     });
 
-    fetch("/clocks").then(res => res.json()).then(clocks => console.log("Clocks", clocks));
-
-    inputNK.value = localStorage.getItem("nick");
-    inputCID.value = localStorage.getItem("clockID");
     $('form').submit(e => {
         localStorage.setItem("nick", inputNK.value);
         localStorage.setItem("clockID", inputCID.value);
