@@ -6,9 +6,9 @@
     <input type="submit" value="Connect"/>
 </form>
 <script>
-    var respondedAndAccepted = false;
-    var inputNK = document.getElementById("nick");
-    var inputCID = document.getElementById("clockID");
+    let respondedAndAccepted = false;
+    const inputNK = document.getElementById("nick");
+    const inputCID = document.getElementById("clockID");
     inputNK.value = localStorage.getItem("nick");
     inputCID.value = localStorage.getItem("clockID");
 

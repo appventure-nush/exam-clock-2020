@@ -1,1 +1,14 @@
-You are connected to {{clockID}}
+<form>
+    <label for="examName">Exam Name: </label>
+    <input id="nick" name="nick" placeholder="Anything"/><br>
+    <label for="clockID">Clock ID: </label>
+    <input id="clockID" name="clockID" placeholder="XXXXXX"/><br>
+    <input type="submit" value="Add"/>
+</form>
+<script>
+    $('form').submit(e => {
+        e.preventDefault();
+        socket.emit("request", inputCID.value, inputNK.value);
+        return false;
+    });
+</script>
