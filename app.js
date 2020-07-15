@@ -74,10 +74,10 @@ function initSocket(http) {
                 console.log('clock "', clock.clockID, '" connected');
                 socket.join("clocks");
                 clock = CLOCKS[clock.clockID] = new Clock(clock.clockID, socket.id, clock.clockName);
-                io.in("controllers").emit("new_clock", JSON.stringify(clock));
+                io.in("controllers").emit("new_clock", JSON.stringify({id: clock.clockID, name: clock.clockName}));
                 socket.on('disconnect', () => {
                     console.log('clock "' + clock.clockID + '" disconnected');
-                    io.in("controllers").emit("clock_died", JSON.stringify(clock));
+                    io.in("controllers").emit("clock_died", clock.clockID);
                 });
                 socket.on('request_callback', (controllerID, response) => {
                     console.log('clock "' + clock.clockID + '" ' + response + ' the request from ' + controllerID);
