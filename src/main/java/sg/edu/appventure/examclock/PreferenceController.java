@@ -16,10 +16,13 @@ import java.net.*;
 import java.util.Enumeration;
 
 public class PreferenceController {
+    public static final SimpleStringProperty connectivityStateProperty = new SimpleStringProperty("Not connected");
+
     public static final SimpleIntegerProperty fontScaleProperty = new SimpleIntegerProperty(20);
     public static final SimpleBooleanProperty nightMode = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty showToiletProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty controlPanelEnabledProperty = new SimpleBooleanProperty(true);
+    public static final SimpleBooleanProperty openToRequestsProperty = new SimpleBooleanProperty(true);
     public static final SimpleIntegerProperty panelPortProperty = new SimpleIntegerProperty(8080);
     public static final SimpleStringProperty panelAddressProperty = new SimpleStringProperty("loading...");
     public static final SimpleStringProperty lanNameProperty = new SimpleStringProperty("Exam Clock");
@@ -106,10 +109,13 @@ public class PreferenceController {
                 ),
                 Category.of("Web Panel",
                         com.dlsc.preferencesfx.model.Group.of(
-                                Setting.of("Web Control Panel", controlPanelEnabledProperty)
+                                Setting.of("Display Name", lanNameProperty)
+                        ),
+                        com.dlsc.preferencesfx.model.Group.of("Central Server",
+                                Setting.of("Open to requests", openToRequestsProperty)
                         ),
                         com.dlsc.preferencesfx.model.Group.of("Lan",
-                                Setting.of("Display Name", lanNameProperty),
+                                Setting.of("Localhost Control Panel", controlPanelEnabledProperty),
                                 Setting.of("Port", panelPortProperty),
                                 Setting.of("Panel IP", panelAddressProperty)
                         )

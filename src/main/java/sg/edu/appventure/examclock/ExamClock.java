@@ -1,6 +1,7 @@
 package sg.edu.appventure.examclock;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,7 +29,8 @@ public class ExamClock extends Application {
         scene.getStylesheets().add("/main.css");
         scene.getStylesheets().add("/theme.css");
         scene.getStylesheets().add(PreferenceController.nightMode.get() ? "theme.dark.css" : "/theme.light.css");
-        primaryStage.setTitle("Exam Clock " + Version.getVersion());
+        primaryStage.titleProperty().bind(Bindings.concat("Exam Clock " + Version.getVersion() + " : ", PreferenceController.connectivityStateProperty));
+
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(event -> {
             System.out.println("Closing Down...");
