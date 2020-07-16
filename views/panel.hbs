@@ -1,14 +1,124 @@
-<form>
-    <label for="examName">Exam Name: </label>
-    <input id="nick" name="nick" placeholder="Anything"/><br>
-    <label for="clockID">Clock ID: </label>
-    <input id="clockID" name="clockID" placeholder="XXXXXX"/><br>
-    <input type="submit" value="Add"/>
-</form>
-<script>
-    $('form').submit(e => {
-        e.preventDefault();
-        socket.emit("request", inputCID.value, inputNK.value);
-        return false;
-    });
-</script>
+<style>
+    body {
+        padding-top: 50px;
+        font-size: 15px;
+    }
+
+    .exam-form form {
+        margin-bottom: 15px;
+        background: #f7f7f7;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/date-input-polyfill@2.14.0/date-input-polyfill.dist.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/time-input-polyfill"></script>
+<div class="container-md exam-form">
+    <form>
+        <ul class="list-group" id="exams">
+        </ul>
+        <div class="row">
+            <div class="form-group col">
+                <label for="name">Exam Name</label>
+                <input class="form-control" id="name" type="text">
+            </div>
+            <div class="form-group col">
+                <label for="date">Exam Date</label>
+
+                <input class="form-control" id="date" placeholder="mm/dd" type="date">
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col">
+                <label for="start">Start Time</label>
+                <input class="form-control" id="start" placeholder="hh:mm" type="time">
+            </div>
+            <div class="form-group col">
+                <label for="end">End Time</label>
+                <input class="form-control" id="end" placeholder="hh:mm" type="time">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button id="addBtn" type="button" class="btn btn-primary">Add</button>
+            <button id="toilet" type="button" class="btn btn-primary">Toilet</button>
+        </div>
+    </form>
+    <script>
+        const CLOCK_ID = "{{clockID}}";
+        const nameIN = document.getElementById("name");
+        const dateIN = document.getElementById("date");
+        const startIN = document.getElementById("start");
+        const endIN = document.getElementById("end");
+
+        const addBtn = document.getElementById("addBtn");
+        const toilet = document.getElementById("toilet");
+        let toiletState = "vacant";
+        const examsUI = document.getElementById("exams");
+        const date = new Date();
+        const EXAMS = [];
+        dateIN.setAttribute("min", dateIN.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') +
+                '-' + date.getDate().toString().padStart(2, '0'));
+        addBtn.onclick = () => {
+            socket.emit("new_exam", JSON.stringify({
+                clockID: CLOCK_ID,
+                name: nameIN.value,
+                date: dateIN.value,
+                start: startIN.value,
+                end: endIN.value
+            }));
+        };
+        toilet.onclick = () => {
+            socket.emit("toilet", JSON.stringify({
+                clockID: CLOCK_ID,
+                status: toiletState = toiletState === "vacant" ? "occupied" : "vacant"
+            }));
+        };
+
+        socket.on('new_exam', (clockID, json) => {
+            let examRaw = JSON.parse(json);
+            let exam = new Exam(examRaw.id, examRaw.name, examRaw.date, examRaw.start, examRaw.end);
+            EXAMS.push(exam);
+            examsUI.innerHTML += exam.toHTML();
+        });
+        socket.on('delete_exam', (clockID, examID) => {
+            if (document.getElementById("e_" + examID)) document.getElementById("e_" + examID).remove();
+            EXAMS.splice(EXAMS.map(exam => exam.id).indexOf(examID), 1);
+        });
+
+        class Exam {
+            constructor(id, name, date, start, end) {
+                this.id = id;
+                this.name = name;
+                this.date = date;
+                this.start = start;
+                this.end = end;
+            }
+
+            toHTML() {
+                return `
+<li data-id="e_${this.id}" class="list-group-item">
+<div class="exam-box row">
+<div class="exam-info col-sm-10">
+<h3><code>${this.id}</code> ${this.name}</h3>
+Exam on <code>${this.date}</code><br>
+From <code>${this.start}</code> to <code>${this.end}</code>
+</div>
+<div class="exam-action col-sm-2 btn-group-vertical">
+<button onclick="editExam('${this.id}')" type="button" class="btn btn-secondary">Edit</button>
+<button onclick="deleteExam('${this.id}')" type="button" class="btn btn-secondary">Delete</button>
+</div>
+</div>
+</li>`;
+            }
+        }
+
+        function editExam(id) {
+
+        }
+
+        function deleteExam(id) {
+
+        }
+    </script>
+</div>

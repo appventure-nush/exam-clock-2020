@@ -15,7 +15,6 @@ router.get('/clocks', (req, res) => {
     }));
 });
 router.get('/:clockID', (req, res) => {
-    console.log(CLOCKS[req.params.clockID]);
     if (CLOCKS[req.params.clockID] && CLOCKS[req.params.clockID].accepts(req.session.sessionID)) res.render('panel', {clockID: req.params.clockID});
     else res.redirect('/');
 });

@@ -16,6 +16,10 @@ class Clock {
         return this.controllers.includes(controllerID);
     }
 
+    acceptsSocket(socket) {
+        return this.accepts(socket.handshake.session.sessionID);
+    }
+
     request(nick, socket) {
         if (this.accepts(socket.handshake.session.sessionID)) socket.emit('request_callback', "accepted")
         else io.to(this.socketID).emit("request", socket.handshake.session.sessionID, nick);
@@ -25,9 +29,9 @@ class Clock {
         if (!this.accepts(controllerID)) this.controllers.push(controllerID);
     }
 
-    add_exam(exam, socket) {
+    new_exam(exam, socket) {
         if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("add_exam", socket.handshake.session.sessionID, exam.name, exam.date, exam.startTime, exam.endTime);
+            io.to(this.socketID).emit("new_exam", socket.handshake.session.sessionID, exam.name, exam.date, exam.start, exam.end);
             console.log("[ADD]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "):", exam.name);
         }
     }
@@ -39,10 +43,10 @@ class Clock {
         }
     }
 
-    toilet(occupied, socket) {
+    toilet(status, socket) {
         if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("toilet", socket.handshake.session.sessionID, occupied);
-            console.log("[TOILET]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "): OCCUPIED =", occupied);
+            io.to(this.socketID).emit("toilet", socket.handshake.session.sessionID, status);
+            console.log("[TOILET]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "): TOILET STATUS =", status);
         }
     }
 }

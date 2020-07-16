@@ -26,7 +26,7 @@ const session = require('express-session')({
 app.use(session);
 app.use(express.json());
 app.use(cookieParser());
-app.use(logger('dev'));
+// app.use(logger('dev'));
 app.use((req, res, next) => {
     req.session.sessionID = req.sessionID;
     next();
@@ -57,6 +57,7 @@ module.exports = {
 };
 
 const CONTROLLERS = {};
+const CONTROLLER_ROOMS = {};
 
 function initSocket(http) {
     const io = server(http);
@@ -78,39 +79,52 @@ function initSocket(http) {
                 socket.on('disconnect', () => {
                     console.log('clock "' + clock.clockID + '" disconnected');
                     io.in("controllers").emit("clock_died", clock.clockID);
+                    delete CLOCKS[clock.clockID];
                 });
                 socket.on('request_callback', (controllerID, response) => {
                     console.log('clock "' + clock.clockID + '" ' + response + ' the request from ' + controllerID);
-                    if (response === "accepted") clock.request_callback(controllerID);
-                    io.to(CONTROLLERS[controllerID]).emit('request_callback', response);
+                    if (response === "accepted") {
+                        clock.request_callback(controllerID);
+                        CONTROLLERS[controllerID].join('c_' + controllerID);
+                        CONTROLLER_ROOMS[controllerID].push('c_' + controllerID);
+                    }
+                    io.to(CONTROLLERS[controllerID].id).emit('request_callback', response);
                 });
+                socket.on('new_exam', json => io.to('c_' + clock.clockID).emit("new_exam", json));
+                socket.on('delete_exam', examID => io.to('c_' + clock.clockID).emit("delete_exam", examID));
             }
         });
         socket.on('controller_connected', msg => {
             socket.join("controllers");
-            console.log('a controller "', socket.id, '" connected with session \"' + socket.handshake.session.sessionID + '\"');
-            CONTROLLERS[socket.handshake.session.sessionID] = socket.id;
-            socket.on('add_exam', json => {
+            let controllerID = socket.handshake.session.sessionID;
+            console.log('a controller "', socket.id, '" connected with session \"' + controllerID + '\"');
+            CONTROLLERS[controllerID] = socket;
+            if (!CONTROLLER_ROOMS[controllerID]) CONTROLLER_ROOMS[controllerID] = [];
+            CONTROLLER_ROOMS[controllerID].forEach(room => socket.join(room));
+            socket.on('new_exam', json => {
+                console.log("new_exam from " + socket.handshake.session.sessionID);
                 let req = JSON.parse(json);
-                if (!CLOCKS[req.clockID]) return;
-                CLOCKS[req.clockID].add_exam(req, socket);
+                if (!CLOCKS[req.clockID] || !CLOCKS[req.clockID].acceptsSocket(socket)) return;
+                CLOCKS[req.clockID].new_exam(req, socket);
             });
             socket.on('delete_exam', json => {
+                console.log("delete_exam from " + socket.handshake.session.sessionID);
                 let req = JSON.parse(json);
-                if (!CLOCKS[req.clockID]) return;
+                if (!CLOCKS[req.clockID] || !CLOCKS[req.clockID].acceptsSocket(socket)) return;
                 CLOCKS[req.clockID].delete_exam(req.id, socket);
             });
             socket.on('toilet', json => {
+                console.log("toilet from " + socket.handshake.session.sessionID);
                 let req = JSON.parse(json);
-                if (!CLOCKS[req.clockID]) return;
-                CLOCKS[req.clockID].toilet(req.occupied, socket);
+                if (!CLOCKS[req.clockID] || !CLOCKS[req.clockID].acceptsSocket(socket)) return;
+                CLOCKS[req.clockID].toilet(req.status, socket);
             });
             socket.on("request", (clockID, nick) => {
                 if (!CLOCKS[clockID]) {
                     socket.emit('request_callback', 'not_found');
                     return;
                 }
-                console.log("[REQUEST]", nick, clockID, "accepts =", CLOCKS[clockID].accepts(socket.handshake.session.sessionID));
+                console.log("[REQUEST]", nick, clockID, "accepts =", CLOCKS[clockID].accepts(controllerID));
                 CLOCKS[clockID].request(nick, socket);
             });
         });
