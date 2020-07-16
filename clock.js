@@ -33,7 +33,7 @@ class Clock {
 
     new_exam(exam, socket) {
         if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("new_exam", socket.handshake.session.sessionID, exam.id, exam.name, exam.date, exam.start, exam.end);
+            io.to(this.socketID).emit("new_exam", socket.handshake.session.sessionID, exam.name, exam.date, exam.start, exam.end);
             console.log("[ADD]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "):", exam.name);
         }
     }
