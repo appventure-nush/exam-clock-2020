@@ -34,8 +34,8 @@ public class ClientSocket {
         opts.callFactory = okHttpClient;
         opts.webSocketFactory = okHttpClient;
         try {
-//            socket = IO.socket("https://exam-clock-nush.tk", opts);
-            socket = IO.socket("http://localhost:3000", opts);
+            socket = IO.socket("https://exam-clock-nush.tk", opts);
+//            socket = IO.socket("http://localhost:3000", opts);
             socket.on(Socket.EVENT_CONNECT, args -> {
                 System.out.println("Connected to Server!");
                 Platform.runLater(() -> PreferenceController.connectivityStateProperty.set("Connected"));
@@ -147,5 +147,9 @@ public class ClientSocket {
 
     public void close() {
         socket.close();
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

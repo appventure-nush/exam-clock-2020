@@ -161,4 +161,9 @@ public class ConnectionController {
     public void onClose(WindowEvent event) {
         socket.close();
     }
+
+    public void connect(ActionEvent actionEvent) {
+        socket.getSocket().close();
+        socket.getSocket().open();
+    }
 }
