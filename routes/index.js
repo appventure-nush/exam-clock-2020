@@ -15,7 +15,11 @@ router.get('/clocks', (req, res) => {
     }));
 });
 router.get('/:clockID', (req, res) => {
-    if (CLOCKS[req.params.clockID] && CLOCKS[req.params.clockID].accepts(req.session.sessionID)) res.render('panel', {clockID: req.params.clockID});
+    if (CLOCKS[req.params.clockID] && CLOCKS[req.params.clockID].accepts(req.session.sessionID))
+        res.render('panel', {
+            clockID: req.params.clockID,
+            exams: CLOCKS[req.params.clockID].exams.map(exam => JSON.stringify(exam)).join(", ")
+        });
     else res.redirect('/');
 });
 router.post('/', (req, res) => {

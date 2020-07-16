@@ -1,11 +1,13 @@
 let io;
 
 class Clock {
+    exams;
     clockID;
     socketID;
     clockName; // purely for display
 
-    constructor(clockID, socketID, clockName) {
+    constructor(clockID, socketID, clockName, exams) {
+        this.exams = exams;
         this.clockID = clockID;
         this.socketID = socketID;
         this.clockName = clockName;
@@ -31,7 +33,7 @@ class Clock {
 
     new_exam(exam, socket) {
         if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("new_exam", socket.handshake.session.sessionID, exam.name, exam.date, exam.start, exam.end);
+            io.to(this.socketID).emit("new_exam", socket.handshake.session.sessionID, exam.id, exam.name, exam.date, exam.start, exam.end);
             console.log("[ADD]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "):", exam.name);
         }
     }
@@ -43,11 +45,20 @@ class Clock {
         }
     }
 
-    toilet(status, socket) {
+    toilet(socket) {
         if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("toilet", socket.handshake.session.sessionID, status);
-            console.log("[TOILET]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "): TOILET STATUS =", status);
+            io.to(this.socketID).emit("toilet", socket.handshake.session.sessionID);
+            console.log("[TOILET]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + ")");
         }
+    }
+
+    newExam(exam) {
+        this.exams.push({id: exam.id, name: exam.name, date: exam.date, start: exam.start, end: exam.end})
+    }
+
+    deleteExam(examID) {
+        let index = this.exams.findIndex(exam => exam.id === examID);
+        if (index !== -1) this.exams.splice(index, 1);
     }
 }
 

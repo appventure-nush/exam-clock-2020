@@ -74,7 +74,8 @@ function initSocket(http) {
             } else { // A **NEW** FULLY VERIFIED CLOCK
                 console.log('clock "', clock.clockID, '" connected');
                 socket.join("clocks");
-                clock = CLOCKS[clock.clockID] = new Clock(clock.clockID, socket.id, clock.clockName);
+                let exams = clock.exams;
+                clock = CLOCKS[clock.clockID] = new Clock(clock.clockID, socket.id, clock.clockName, exams);
                 io.in("controllers").emit("new_clock", JSON.stringify({id: clock.clockID, name: clock.clockName}));
                 socket.on('disconnect', () => {
                     console.log('clock "' + clock.clockID + '" disconnected');
@@ -85,13 +86,23 @@ function initSocket(http) {
                     console.log('clock "' + clock.clockID + '" ' + response + ' the request from ' + controllerID);
                     if (response === "accepted") {
                         clock.request_callback(controllerID);
-                        CONTROLLERS[controllerID].join('c_' + controllerID);
-                        CONTROLLER_ROOMS[controllerID].push('c_' + controllerID);
+                        CONTROLLERS[controllerID].join('c_' + clock.clockID);
+                        CONTROLLER_ROOMS[controllerID].push('c_' + clock.clockID);
                     }
                     io.to(CONTROLLERS[controllerID].id).emit('request_callback', response);
                 });
-                socket.on('new_exam', json => io.to('c_' + clock.clockID).emit("new_exam", json));
-                socket.on('delete_exam', examID => io.to('c_' + clock.clockID).emit("delete_exam", examID));
+                socket.on('toilet', occupied => {
+                    console.log("[CLOCK TOILET] " + clock.clockID + " " + occupied);
+                    io.to('c_' + clock.clockID).emit("toilet", clock.clockID, occupied);
+                });
+                socket.on('new_exam', json => {
+                    clock.newExam(JSON.parse(json));
+                    io.to('c_' + clock.clockID).emit("new_exam", clock.clockID, json);
+                });
+                socket.on('delete_exam', examID => {
+                    clock.deleteExam(examID);
+                    io.to('c_' + clock.clockID).emit("delete_exam", clock.clockID, examID);
+                });
             }
         });
         socket.on('controller_connected', msg => {
@@ -102,22 +113,17 @@ function initSocket(http) {
             if (!CONTROLLER_ROOMS[controllerID]) CONTROLLER_ROOMS[controllerID] = [];
             CONTROLLER_ROOMS[controllerID].forEach(room => socket.join(room));
             socket.on('new_exam', json => {
-                console.log("new_exam from " + socket.handshake.session.sessionID);
                 let req = JSON.parse(json);
                 if (!CLOCKS[req.clockID] || !CLOCKS[req.clockID].acceptsSocket(socket)) return;
                 CLOCKS[req.clockID].new_exam(req, socket);
             });
-            socket.on('delete_exam', json => {
-                console.log("delete_exam from " + socket.handshake.session.sessionID);
-                let req = JSON.parse(json);
-                if (!CLOCKS[req.clockID] || !CLOCKS[req.clockID].acceptsSocket(socket)) return;
-                CLOCKS[req.clockID].delete_exam(req.id, socket);
+            socket.on('delete_exam', (clockID, examID) => {
+                if (!CLOCKS[clockID] || !CLOCKS[clockID].acceptsSocket(socket)) return;
+                CLOCKS[clockID].delete_exam(examID, socket);
             });
-            socket.on('toilet', json => {
-                console.log("toilet from " + socket.handshake.session.sessionID);
-                let req = JSON.parse(json);
-                if (!CLOCKS[req.clockID] || !CLOCKS[req.clockID].acceptsSocket(socket)) return;
-                CLOCKS[req.clockID].toilet(req.status, socket);
+            socket.on('toilet', clockID => {
+                if (!CLOCKS[clockID] || !CLOCKS[clockID].acceptsSocket(socket)) return;
+                CLOCKS[clockID].toilet(socket);
             });
             socket.on("request", (clockID, nick) => {
                 if (!CLOCKS[clockID]) {

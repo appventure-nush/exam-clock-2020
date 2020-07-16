@@ -41,7 +41,7 @@
 
         <div class="form-group">
             <button id="addBtn" type="button" class="btn btn-primary">Add</button>
-            <button id="toilet" type="button" class="btn btn-primary">Toilet</button>
+            <button id="toilet" type="button" class="btn btn-success">Toilet</button>
         </div>
     </form>
     <script>
@@ -56,35 +56,53 @@
         let toiletState = "vacant";
         const examsUI = document.getElementById("exams");
         const date = new Date();
-        const EXAMS = [];
+        const EXAMS = [{{{exams}}}];
+
         dateIN.setAttribute("min", dateIN.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') +
                 '-' + date.getDate().toString().padStart(2, '0'));
-        addBtn.onclick = () => {
-            socket.emit("new_exam", JSON.stringify({
-                clockID: CLOCK_ID,
-                name: nameIN.value,
-                date: dateIN.value,
-                start: startIN.value,
-                end: endIN.value
-            }));
+        addBtn.onclick = () => socket.emit("new_exam", JSON.stringify({
+            clockID: CLOCK_ID,
+            name: nameIN.value,
+            date: dateIN.value,
+            start: startIN.value,
+            end: endIN.value
+        }));
+        toilet.onclick = () => socket.emit("toilet", CLOCK_ID);
+        const editExam = (id) => {
         };
-        toilet.onclick = () => {
-            socket.emit("toilet", JSON.stringify({
-                clockID: CLOCK_ID,
-                status: toiletState = toiletState === "vacant" ? "occupied" : "vacant"
-            }));
-        };
+        const deleteExam = (id) => socket.emit("delete_exam", CLOCK_ID, id);
+
 
         socket.on('new_exam', (clockID, json) => {
+            if (clockID !== CLOCK_ID) return;
             let examRaw = JSON.parse(json);
             let exam = new Exam(examRaw.id, examRaw.name, examRaw.date, examRaw.start, examRaw.end);
+            console.log(exam);
             EXAMS.push(exam);
             examsUI.innerHTML += exam.toHTML();
         });
         socket.on('delete_exam', (clockID, examID) => {
+            if (clockID !== CLOCK_ID) return;
             if (document.getElementById("e_" + examID)) document.getElementById("e_" + examID).remove();
             EXAMS.splice(EXAMS.map(exam => exam.id).indexOf(examID), 1);
         });
+        socket.on('toilet', (clockID, status) => {
+            if (clockID !== CLOCK_ID) return;
+            toiletState = status;
+            toilet.classList.remove("btn-success");
+            toilet.classList.remove("btn-danger");
+            toilet.classList.add(status === "occupied" ? "btn-danger" : "btn-success");
+        });
+
+        function refreshExams() {
+            examsUI.innerHTML = "";
+            for (let i = 0; i < EXAMS.length; i++) {
+                let exam = EXAMS[i];
+                if (!(exam instanceof Exam))
+                    exam = EXAMS[i] = new Exam(exam.id, exam.name, exam.date, exam.start, exam.end);
+                examsUI.innerHTML += exam.toHTML();
+            }
+        }
 
         class Exam {
             constructor(id, name, date, start, end) {
@@ -97,7 +115,7 @@
 
             toHTML() {
                 return `
-<li data-id="e_${this.id}" class="list-group-item">
+<li id="e_${this.id}" class="list-group-item">
 <div class="exam-box row">
 <div class="exam-info col-sm-10">
 <h3><code>${this.id}</code> ${this.name}</h3>
@@ -113,12 +131,6 @@ From <code>${this.start}</code> to <code>${this.end}</code>
             }
         }
 
-        function editExam(id) {
-
-        }
-
-        function deleteExam(id) {
-
-        }
+        refreshExams();
     </script>
 </div>
