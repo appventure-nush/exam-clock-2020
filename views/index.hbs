@@ -21,6 +21,11 @@
         font-size: 15px;
         font-weight: bold;
     }
+
+    #clocks:empty::before {
+        margin-left: 5px;
+        content: "No clocks connected"
+    }
 </style>
 <div class="container login-form">
     <form action="/" method="post">
@@ -42,17 +47,17 @@
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">Clocks
                     </button>
-                    <div class="dropdown-menu" id="clocks">
-                    </div>
+                    <div class="dropdown-menu" id="clocks"></div>
                 </div>
             </div>
         </div>
         <div class="form-group">
-            <button type="submit" class="btn btn-primary btn-block">Connect</button>
+            <button id="connect" type="submit" class="btn btn-primary btn-block">Connect</button>
         </div>
     </form>
     <script>
         let respondedAndAccepted = false;
+        const connectBtn = document.getElementById("connect");
         const inputNK = document.getElementById("nick");
         const inputCID = document.getElementById("clockID");
         const clocksUI = document.getElementById("clocks");
@@ -73,9 +78,15 @@
             } else if (response === "rejected") {
                 respondedAndAccepted = false;
                 alert("You have been rejected!");
+                connectBtn.disabled = false;
+                let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
+                if (spinner) spinner.remove();
             } else if (response === "not_found") {
                 respondedAndAccepted = false;
                 alert("Clock not found!");
+                connectBtn.disabled = false;
+                let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
+                if (spinner) spinner.remove();
             }
         });
         socket.on('new_clock', clockJSON => {
@@ -93,6 +104,14 @@
             if (!respondedAndAccepted) {
                 e.preventDefault();
                 socket.emit("request", inputCID.value, inputNK.value);
+                connectBtn.innerHTML = "<span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>\n" + connectBtn.innerHTML;
+                connectBtn.disabled = true;
+                setTimeout(() => {
+                    connectBtn.disabled = false;
+                    let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
+                    if (spinner) spinner.remove();
+                    alert("Time out!");
+                }, 60000);
                 return false;
             } else return true;
         });

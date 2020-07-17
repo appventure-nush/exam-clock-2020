@@ -38,6 +38,18 @@ class Clock {
         }
     }
 
+    edit_exam(exam, socket) {
+        if (this.accepts(socket.handshake.session.sessionID)) {
+            io.to(this.socketID).emit("edit_exam", socket.handshake.session.sessionID, exam.id, exam.name, exam.date, exam.start, exam.end);
+            let index = this.exams.findIndex(e => e.id === exam.id);
+            this.exams[index].name = exam.name;
+            this.exams[index].date = exam.date;
+            this.exams[index].start = exam.start;
+            this.exams[index].end = exam.end;
+            console.log("[EDIT]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "):", exam.name);
+        }
+    }
+
     delete_exam(examID, socket) {
         if (this.accepts(socket.handshake.session.sessionID)) {
             io.to(this.socketID).emit("delete_exam", socket.handshake.session.sessionID, examID);

@@ -10,6 +10,30 @@
         box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
         padding: 30px;
     }
+
+    .exam-holder {
+        padding: 0;
+    }
+
+    .exam-box {
+        margin: 0;
+    }
+
+    .exam-info {
+        padding: 10px 20px 10px 20px;
+    }
+
+    .exam-action {
+        padding: 0;
+    }
+
+    .edit-btn {
+        border-top-left-radius: 0;
+    }
+
+    .delete-btn {
+        border-bottom-left-radius: 0;
+    }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/date-input-polyfill@2.14.0/date-input-polyfill.dist.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/time-input-polyfill"></script>
@@ -41,6 +65,8 @@
 
         <div class="form-group">
             <button id="addBtn" type="button" class="btn btn-primary">Add</button>
+            <button id="editBtn" type="button" class="btn btn-primary" disabled>Edit</button>
+            <button id="cancelBtn" type="button" class="btn btn-light" style="display: none;">Cancel</button>
             <button id="toilet" type="button" class="btn btn-success">Toilet</button>
         </div>
     </form>
@@ -52,29 +78,93 @@
         const endIN = document.getElementById("end");
 
         const addBtn = document.getElementById("addBtn");
+        const editBtn = document.getElementById("editBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
         const toilet = document.getElementById("toilet");
         let toiletState = "vacant";
         const examsUI = document.getElementById("exams");
         const date = new Date();
         const EXAMS = [{{{exams}}}];
 
+        let editing = false;
+        let exam_in_edit = null;
+
         dateIN.setAttribute("min", dateIN.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') +
                 '-' + date.getDate().toString().padStart(2, '0'));
-        addBtn.onclick = () => socket.emit("new_exam", JSON.stringify({
+        addBtn.onclick = () => clearInputs(socket.emit("new_exam", JSON.stringify({
             clockID: CLOCK_ID,
             name: nameIN.value,
             date: dateIN.value,
             start: startIN.value,
             end: endIN.value
-        }));
+        })));
         toilet.onclick = () => socket.emit("toilet", CLOCK_ID);
+        editBtn.onclick = () => {
+            addBtn.disabled = false;
+            editBtn.disabled = true;
+            cancelBtn.style.display = "none";
+            socket.emit("edit_exam", JSON.stringify({
+                clockID: CLOCK_ID,
+                id: exam_in_edit.id,
+                name: nameIN.value,
+                date: dateIN.value,
+                start: startIN.value,
+                end: endIN.value
+            }));
+            exam_in_edit.name = nameIN.value;
+            exam_in_edit.date = dateIN.value;
+            exam_in_edit.start = startIN.value;
+            exam_in_edit.end = endIN.value;
+            exam_in_edit = null;
+            editing = false;
+            clearInputs();
+            refreshExams();
+        };
+        cancelBtn.onclick = () => {
+            addBtn.disabled = false;
+            editBtn.disabled = true;
+            cancelBtn.style.display = "none";
+            exam_in_edit = null;
+            editing = false;
+            clearInputs();
+        }
+
+        function clearInputs() {
+            nameIN.value = null;
+            dateIN.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') +
+                    '-' + date.getDate().toString().padStart(2, '0')
+            startIN.value = null;
+            endIN.value = null;
+        }
+
         const editExam = (id) => {
+            let exam = EXAMS.find(exam => exam.id === id);
+            if (exam) {
+                exam_in_edit = exam;
+                nameIN.value = exam.name;
+                dateIN.value = exam.date;
+                startIN.value = exam.start;
+                endIN.value = exam.end;
+                editing = true;
+                addBtn.disabled = true;
+                editBtn.disabled = false;
+                cancelBtn.style.display = "inline-block";
+            }
         };
         const deleteExam = (id) => socket.emit("delete_exam", CLOCK_ID, id);
 
-
+        socket.on('exam_update', (clockID, json) => {
+            if (clockID !== CLOCK_ID) return;
+            console.log("Received full exam update from remote");
+            let examsRaw = JSON.parse(json);
+            EXAMS.splice(0, EXAMS.length);
+            for (let exam of examsRaw)
+                EXAMS.push(new Exam(exam.id, exam.name, exam.date, exam.start, exam.end));
+            refreshExams();
+        });
         socket.on('new_exam', (clockID, json) => {
             if (clockID !== CLOCK_ID) return;
+            console.log("Received new exam from remote");
             let examRaw = JSON.parse(json);
             let exam = new Exam(examRaw.id, examRaw.name, examRaw.date, examRaw.start, examRaw.end);
             console.log(exam);
@@ -83,11 +173,13 @@
         });
         socket.on('delete_exam', (clockID, examID) => {
             if (clockID !== CLOCK_ID) return;
+            console.log("Received exam deleted from remote");
             if (document.getElementById("e_" + examID)) document.getElementById("e_" + examID).remove();
             EXAMS.splice(EXAMS.map(exam => exam.id).indexOf(examID), 1);
         });
         socket.on('toilet', (clockID, status) => {
             if (clockID !== CLOCK_ID) return;
+            console.log("Received toilet update from remote");
             toiletState = status;
             toilet.classList.remove("btn-success");
             toilet.classList.remove("btn-danger");
@@ -114,8 +206,7 @@
             }
 
             toHTML() {
-                return `
-<li id="e_${this.id}" class="list-group-item">
+                return `<li id="e_${this.id}" class="list-group-item exam-holder">
 <div class="exam-box row">
 <div class="exam-info col-sm-10">
 <h3><code>${this.id}</code> ${this.name}</h3>
@@ -123,8 +214,8 @@ Exam on <code>${this.date}</code><br>
 From <code>${this.start}</code> to <code>${this.end}</code>
 </div>
 <div class="exam-action col-sm-2 btn-group-vertical">
-<button onclick="editExam('${this.id}')" type="button" class="btn btn-secondary">Edit</button>
-<button onclick="deleteExam('${this.id}')" type="button" class="btn btn-secondary">Delete</button>
+<button onclick="editExam('${this.id}')" type="button" class="btn btn-secondary edit-btn">Edit</button>
+<button onclick="deleteExam('${this.id}')" type="button" class="btn btn-danger delete-btn">Delete</button>
 </div>
 </div>
 </li>`;

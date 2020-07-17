@@ -103,6 +103,10 @@ function initSocket(http) {
                     clock.deleteExam(examID);
                     io.to('c_' + clock.clockID).emit("delete_exam", clock.clockID, examID);
                 });
+                socket.on('exam_update', exams => {
+                    clock.exams = JSON.parse(exams);
+                    io.to('c_' + clock.clockID).emit("exam_update", clock.clockID, exams);
+                });
             }
         });
         socket.on('controller_connected', msg => {
@@ -116,6 +120,11 @@ function initSocket(http) {
                 let req = JSON.parse(json);
                 if (!CLOCKS[req.clockID] || !CLOCKS[req.clockID].acceptsSocket(socket)) return;
                 CLOCKS[req.clockID].new_exam(req, socket);
+            });
+            socket.on('edit_exam', json => {
+                let req = JSON.parse(json);
+                if (!CLOCKS[req.clockID] || !CLOCKS[req.clockID].acceptsSocket(socket)) return;
+                CLOCKS[req.clockID].edit_exam(req, socket);
             });
             socket.on('delete_exam', (clockID, examID) => {
                 if (!CLOCKS[clockID] || !CLOCKS[clockID].acceptsSocket(socket)) return;

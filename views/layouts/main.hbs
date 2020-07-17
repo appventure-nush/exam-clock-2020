@@ -21,7 +21,6 @@
 <body>
 
 <script>
-    localStorage.debug = 'socket.io-client:socket';
     const socket = io();
     socket.on('connect', () => { // initial connection
         socket.emit('controller_connected', socket.id); // tell server ima controller
