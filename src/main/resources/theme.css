@@ -3,6 +3,10 @@
     -fx-font-size: 14px;
 }
 
+.constant-size {
+    -fx-font-size: 14px;
+}
+
 /* Fix derived prompt color for text fields */
 .text-input {
     -fx-prompt-text-fill: derive(-fx-control-inner-background, +50%);

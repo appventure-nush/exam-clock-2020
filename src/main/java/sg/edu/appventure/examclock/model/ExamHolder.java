@@ -5,8 +5,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import org.controlsfx.glyphfont.FontAwesome;
@@ -20,8 +18,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class ExamHolder extends HBox {
-    private static final Image menu_night = new Image(ExamHolder.class.getResource("/menu_night.png").toExternalForm(), 20, 20, true, true);
-    private static final Image menu_day = new Image(ExamHolder.class.getResource("/menu_day.png").toExternalForm(), 20, 20, true, true);
     private static final DateTimeFormatter FORMAT_12_HOURS = DateTimeFormatter.ofPattern("hh:mm:ss a");
     private static final DateTimeFormatter FORMAT_24_HOURS = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final DateTimeFormatter FORMAT_12_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("hh:mm a");
@@ -48,8 +44,7 @@ public class ExamHolder extends HBox {
         examName.setWrapText(true);
         HBox.setHgrow(examName, Priority.ALWAYS);
         MenuButton menu = new MenuButton();
-        menu.setGraphic(new ImageView(PreferenceController.nightMode.get() ? menu_night : menu_day));
-        menu.getItems().addAll(new MenuItem("Really"), new MenuItem("Do not"));
+        menu.getStyleClass().add("constant-size");
 
         MenuItem deleteButton = new MenuItem("Delete");
         deleteButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.TRASH));
@@ -145,8 +140,8 @@ public class ExamHolder extends HBox {
         examName.setText(exam.getName());
         examDate.setText(exam.getDate().equals(LocalDate.now().toString()) ? "" : exam.getDate());
         date = LocalDate.parse(exam.getDate());
-        start = LocalTime.parse(exam.getStartTime());
-        end = LocalTime.parse(exam.getEndTime());
+        start = LocalTime.parse(exam.getStart());
+        end = LocalTime.parse(exam.getEnd());
         return this;
     }
 

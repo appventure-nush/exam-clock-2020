@@ -13,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
@@ -198,6 +199,16 @@ public class MainController {
         play();
     }
 
+    public ExamHolder getExamHolder(Exam exam) {
+        for (Node child : examList.getChildren()) {
+            ExamHolder holder = (ExamHolder) child;
+            if (holder.getExam().id.equals(exam.id)) {
+                return holder;
+            }
+        }
+        return null;
+    }
+
     public void refresh() {
         clockController.refresh();
         LocalDate today = LocalDate.now();
@@ -214,9 +225,9 @@ public class MainController {
 
     public void showAddExamStage(Exam exam) {
         addExamController.name_input.setText(exam.name);
-        addExamController.date_input.setValue(LocalDate.parse(exam.examDate));
-        addExamController.start_time_input.setText(AddExamController.timeFormatter.format(LocalTime.parse(exam.startTime)));
-        addExamController.end_time_input.setText(AddExamController.timeFormatter.format(LocalTime.parse(exam.endTime)));
+        addExamController.date_input.setValue(LocalDate.parse(exam.date));
+        addExamController.start_time_input.setText(AddExamController.timeFormatter.format(LocalTime.parse(exam.start)));
+        addExamController.end_time_input.setText(AddExamController.timeFormatter.format(LocalTime.parse(exam.end)));
         addExamStage.show();
     }
 
@@ -276,9 +287,9 @@ public class MainController {
             LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
             Exam exam = selectedExamHolder.getExam();
             long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            exam.examDate = newDate.toString();
-            exam.startTime = newStartTime.toString();
-            exam.endTime = newStartTime.plusSeconds(seconds).toString();
+            exam.date = newDate.toString();
+            exam.start = newStartTime.toString();
+            exam.end = newStartTime.plusSeconds(seconds).toString();
             selectedExamHolder.setExam(selectedExamHolder.getExam());
         }
     }
@@ -290,9 +301,9 @@ public class MainController {
             LocalTime newEndTime = LocalTime.now().withNano(0);
             Exam exam = selectedExamHolder.getExam();
             long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            exam.examDate = newDate.toString();
-            exam.startTime = newEndTime.minusSeconds(seconds).toString();
-            exam.endTime = newEndTime.toString();
+            exam.date = newDate.toString();
+            exam.start = newEndTime.minusSeconds(seconds).toString();
+            exam.end = newEndTime.toString();
             selectedExamHolder.setExam(selectedExamHolder.getExam());
         }
     }
@@ -303,9 +314,9 @@ public class MainController {
         LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
         exams.forEach(exam -> {
             long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            exam.examDate = newDate.toString();
-            exam.startTime = newStartTime.toString();
-            exam.endTime = newStartTime.plusSeconds(seconds).toString();
+            exam.date = newDate.toString();
+            exam.start = newStartTime.toString();
+            exam.end = newStartTime.plusSeconds(seconds).toString();
         });
         examList.getChildren().forEach(node -> Platform.runLater(() -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam())));
     }
@@ -316,9 +327,9 @@ public class MainController {
         LocalTime newEndTime = LocalTime.now().withNano(0);
         exams.forEach(exam -> {
             long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            exam.examDate = newDate.toString();
-            exam.startTime = newEndTime.minusSeconds(seconds).toString();
-            exam.endTime = newEndTime.toString();
+            exam.date = newDate.toString();
+            exam.start = newEndTime.minusSeconds(seconds).toString();
+            exam.end = newEndTime.toString();
         });
         examList.getChildren().forEach(node -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam()));
     }

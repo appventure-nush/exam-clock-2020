@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import okhttp3.OkHttpClient;
 import sg.edu.appventure.examclock.MainController;
@@ -45,6 +46,7 @@ public class ClientSocket {
                     .on(Socket.EVENT_DISCONNECT, args -> Platform.runLater(() -> PreferenceController.connectivityStateProperty.set("Disconnected")));
             socket.on("clock_id_clash", this::onClockIDClash);
             socket.on("new_exam", this::onNewExam);
+            socket.on("edit_exam", this::onEditExam);
             socket.on("delete_exam", this::onDeleteExam);
             socket.on("toilet", this::onToilet);
             socket.on("request", this::onRequest);
@@ -55,13 +57,14 @@ public class ClientSocket {
                         examObj.put("id", exam.id);
                         examObj.put("name", exam.name);
                         examObj.put("date", exam.getDate());
-                        examObj.put("start", exam.getStartTime());
-                        examObj.put("end", exam.getEndTime());
+                        examObj.put("start", exam.getStart());
+                        examObj.put("end", exam.getEnd());
                         socket.emit("new_exam", examObj.toJSONString());
                     });
                     c.getRemoved().forEach(exam -> socket.emit("delete_exam", exam.id));
                 }
             });
+            controller.toiletOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant"));
             socket.open();
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -76,18 +79,8 @@ public class ClientSocket {
         }
     }
 
-    private void onToilet(Object... objects) {
-        Platform.runLater(() -> {
-            String socketID = String.valueOf(objects[0]);
-            try {
-                String toiletStatus = String.valueOf(objects[1]);
-                if (toiletStatus.equals("occupied")) controller.toiletOccupied.set(true);
-                else if (toiletStatus.equals("vacant")) controller.toiletOccupied.set(false);
-                System.out.println("Controller " + socketID + " claims that the toilet is " + toiletStatus);
-            } catch (IndexOutOfBoundsException e) {
-                socket.emit("clock_error", socketID, "no_status_provided");
-            }
-        });
+    private void onToilet(Object object) {
+        Platform.runLater(() -> controller.toiletOccupied.set(!controller.toiletOccupied.get()));
     }
 
     private void onRequest(Object[] objects) {
@@ -122,27 +115,54 @@ public class ClientSocket {
         }
     }
 
+    private void onEditExam(Object... objects) {
+        try {
+            for (Exam exam : controller.exams) {
+                if (exam.id.equals(String.valueOf(objects[1]))) {
+                    exam.name = String.valueOf(objects[2]);
+                    exam.date = String.valueOf(objects[3]);
+                    exam.start = String.valueOf(objects[4]);
+                    exam.end = String.valueOf(objects[5]);
+                    Platform.runLater(() -> controller.getExamHolder(exam).setExam(exam));
+                    break;
+                }
+            }
+        } catch (DateTimeException e) {
+            e.printStackTrace();
+            socket.emit("clock_error", objects[0], "date_time_invalid");
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            socket.emit("clock_error", objects[0], e.getMessage());
+        }
+    }
+
     private void onDeleteExam(Object... objects) {
         String id = String.valueOf(objects[1]);
-        for (int i = 0; i < controller.exams.size(); i++) {
-            if (controller.exams.get(i).id.equals(id)) {
-                controller.exams.remove(i);
-                return;
+        Platform.runLater(() -> {
+            for (int i = 0; i < controller.exams.size(); i++) {
+                if (controller.exams.get(i).id.equals(id)) {
+                    controller.exams.remove(i);
+                    return;
+                }
             }
-        }
-        socket.emit("clock_error", objects[0], "exam_not_found");
+            socket.emit("clock_error", objects[0], "exam_not_found");
+        });
     }
 
     private void identifySelf() {
         JSONObject obj = new JSONObject();
         obj.put("clockID", PreferenceController.clockID);
         obj.put("clockName", PreferenceController.lanNameProperty.get());
+        JSONArray array = new JSONArray();
+        array.addAll(controller.exams);
+        obj.put("exams", array);
         socket.emit("clock_connected", obj.toJSONString());
     }
 
     public void onClockIDClash(Object... args) {
         System.out.println("So somehow there's a clash of clock id");
         controller.regenClockID();
+        identifySelf();
     }
 
     public void close() {
@@ -151,5 +171,13 @@ public class ClientSocket {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public void resend() {
+        JSONObject obj = new JSONObject();
+        JSONArray array = new JSONArray();
+        array.addAll(controller.exams);
+        obj.put("exams", array);
+        socket.emit("exam_", obj.toJSONString());
     }
 }

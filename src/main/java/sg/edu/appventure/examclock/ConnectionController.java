@@ -166,4 +166,8 @@ public class ConnectionController {
         socket.getSocket().close();
         socket.getSocket().open();
     }
+
+    public void resend(ActionEvent actionEvent) {
+        socket.resend();
+    }
 }

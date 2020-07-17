@@ -10,25 +10,25 @@ import java.util.Random;
 public class Exam {
     public String id;
     public String name;
-    public String examDate;
-    public String startTime;
-    public String endTime;
+    public String date;
+    public String start;
+    public String end;
 
     public Exam() {
     }
 
-    public Exam(String id, String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
+    public Exam(String id, String name, LocalDate date, LocalTime start, LocalTime end) {
         if (name.isEmpty()) throw new RuntimeException("Name is Empty!");
-        if (endTime.isBefore(startTime)) throw new RuntimeException("Start is before end!");
+        if (end.isBefore(start)) throw new RuntimeException("Start is before end!");
         this.id = id;
         this.name = name;
-        this.examDate = examDate.toString();
-        this.startTime = startTime.withNano(0).withSecond(0).toString();
-        this.endTime = endTime.withNano(0).withSecond(0).toString();
+        this.date = date.toString();
+        this.start = start.withNano(0).withSecond(0).toString();
+        this.end = end.withNano(0).withSecond(0).toString();
     }
 
-    public Exam(String name, LocalDate examDate, LocalTime startTime, LocalTime endTime) {
-        this(createID(), name, examDate, startTime, endTime);
+    public Exam(String name, LocalDate date, LocalTime start, LocalTime end) {
+        this(createID(), name, date, start, end);
     }
 
     private static String createID() {
@@ -38,12 +38,12 @@ public class Exam {
     }
 
     public boolean isRunning() {
-        return LocalDate.parse(examDate).isEqual(LocalDate.now()) && LocalTime.parse(startTime).isBefore(LocalTime.now()) && LocalTime.parse(endTime).isAfter(LocalTime.now());
+        return LocalDate.parse(date).isEqual(LocalDate.now()) && LocalTime.parse(start).isBefore(LocalTime.now()) && LocalTime.parse(end).isAfter(LocalTime.now());
     }
 
     public boolean hasEnded() {
-        LocalDate date = LocalDate.parse(examDate);
-        return date.isBefore(LocalDate.now()) || date.isEqual(LocalDate.now()) && LocalTime.parse(endTime).isBefore(LocalTime.now());
+        LocalDate date = LocalDate.parse(this.date);
+        return date.isBefore(LocalDate.now()) || date.isEqual(LocalDate.now()) && LocalTime.parse(end).isBefore(LocalTime.now());
     }
 
     public String getID() {
@@ -55,23 +55,23 @@ public class Exam {
     }
 
     public String getDate() {
-        return examDate;
+        return date;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getStart() {
+        return start;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public String getEnd() {
+        return end;
     }
 
     public LocalTime getStartTimeObj() {
-        return LocalTime.parse(startTime);
+        return LocalTime.parse(start);
     }
 
     public LocalTime getEndTimeObj() {
-        return LocalTime.parse(endTime);
+        return LocalTime.parse(end);
     }
 
     @Override
@@ -81,13 +81,13 @@ public class Exam {
         Exam exam = (Exam) o;
         return Objects.equals(id, exam.id) &&
                 Objects.equals(name, exam.name) &&
-                Objects.equals(examDate, exam.examDate) &&
-                Objects.equals(startTime, exam.startTime) &&
-                Objects.equals(endTime, exam.endTime);
+                Objects.equals(this.date, exam.date) &&
+                Objects.equals(start, exam.start) &&
+                Objects.equals(end, exam.end);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, examDate, startTime, endTime);
+        return Objects.hash(id, name, date, start, end);
     }
 }
