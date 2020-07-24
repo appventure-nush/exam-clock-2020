@@ -19,12 +19,12 @@ class Clock {
     }
 
     acceptsSocket(socket) {
-        return this.accepts(socket.handshake.session.sessionID);
+        return this.accepts(socket.request.user.id);
     }
 
     request(nick, socket) {
-        if (this.accepts(socket.handshake.session.sessionID)) socket.emit('request_callback', "accepted")
-        else io.to(this.socketID).emit("request", socket.handshake.session.sessionID, nick);
+        if (this.accepts(socket.request.user.id)) socket.emit('request_callback', "accepted")
+        else io.to(this.socketID).emit("request", socket.request.user.id, nick);
     }
 
     request_callback(controllerID) {
@@ -32,35 +32,35 @@ class Clock {
     }
 
     new_exam(exam, socket) {
-        if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("new_exam", socket.handshake.session.sessionID, exam.name, exam.date, exam.start, exam.end);
-            console.log("[ADD]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "):", exam.name);
+        if (this.acceptsSocket(socket)) {
+            io.to(this.socketID).emit("new_exam", socket.request.user.id, exam.name, exam.date, exam.start, exam.end);
+            console.log("[ADD]", socket.request.user.id, "->", this.clockID, "(" + this.clockName + "):", exam.name);
         }
     }
 
     edit_exam(exam, socket) {
-        if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("edit_exam", socket.handshake.session.sessionID, exam.id, exam.name, exam.date, exam.start, exam.end);
+        if (this.acceptsSocket(socket)) {
+            io.to(this.socketID).emit("edit_exam", socket.request.user.id, exam.id, exam.name, exam.date, exam.start, exam.end);
             let index = this.exams.findIndex(e => e.id === exam.id);
             this.exams[index].name = exam.name;
             this.exams[index].date = exam.date;
             this.exams[index].start = exam.start;
             this.exams[index].end = exam.end;
-            console.log("[EDIT]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "):", exam.name);
+            console.log("[EDIT]", socket.request.user.id, "->", this.clockID, "(" + this.clockName + "):", exam.name);
         }
     }
 
     delete_exam(examID, socket) {
-        if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("delete_exam", socket.handshake.session.sessionID, examID);
-            console.log("[DELETE]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + "):", examID);
+        if (this.acceptsSocket(socket)) {
+            io.to(this.socketID).emit("delete_exam", socket.request.user.id, examID);
+            console.log("[DELETE]", socket.request.user.id, "->", this.clockID, "(" + this.clockName + "):", examID);
         }
     }
 
     toilet(socket) {
-        if (this.accepts(socket.handshake.session.sessionID)) {
-            io.to(this.socketID).emit("toilet", socket.handshake.session.sessionID);
-            console.log("[TOILET]", socket.handshake.session.sessionID, "->", this.clockID, "(" + this.clockName + ")");
+        if (this.acceptsSocket(socket)) {
+            io.to(this.socketID).emit("toilet", socket.request.user.id);
+            console.log("[TOILET]", socket.request.user.id, "->", this.clockID, "(" + this.clockName + ")");
         }
     }
 
@@ -74,7 +74,7 @@ class Clock {
     }
 }
 
-module.exports = function (sio) {
-    io = sio;
+module.exports = function (ioc) {
+    io = ioc;
     return Clock;
 }

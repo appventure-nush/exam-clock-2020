@@ -9,9 +9,12 @@
     "express": "^4.16.4",
     "express-handlebars": "^5.0.0",
     "express-session": "^1.17.1",
-    "express-socket.io-session": "^1.3.5",
     "http-errors": "^1.8.0",
+    "memorystore": "^1.6.2",
     "morgan": "^1.10.0",
+    "passport": "^0.4.1",
+    "passport-microsoft": "^0.1.0",
+    "passport.socketio": "^3.7.0",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {},

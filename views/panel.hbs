@@ -1,14 +1,27 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">
+        <img src="/images/favicon.256.png" width="30" height="30" class="d-inline-block align-top" alt="">
+        Control Panel
+    </a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Clocks</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
 <style>
     body {
         padding-top: 50px;
         font-size: 15px;
     }
 
-    .exam-form form {
-        margin-bottom: 15px;
-        background: #f7f7f7;
-        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-        padding: 30px;
+    .exam-form {
+        padding: 20px;
     }
 
     .exam-holder {
@@ -45,176 +58,184 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/date-input-polyfill@2.14.0/date-input-polyfill.dist.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/time-input-polyfill"></script>
-<div class="container-md exam-form">
-    <form>
-        <ul class="list-group" id="exams">
-        </ul>
-        <div class="row">
-            <div class="form-group col">
-                <label for="name">Exam Name</label>
-                <input class="form-control" id="name" type="text">
-            </div>
-            <div class="form-group col">
-                <label for="date">Exam Date</label>
-
-                <input class="form-control" id="date" placeholder="mm/dd" type="date">
-            </div>
+<form class="exam-form">
+    <ul class="list-group" id="exams">
+    </ul>
+    <div class="row">
+        <div class="form-group col">
+            <label for="name">Exam Name</label>
+            <input class="form-control" id="name" type="text">
         </div>
-        <div class="row">
-            <div class="form-group col">
-                <label for="start">Start Time</label>
-                <input class="form-control" id="start" placeholder="hh:mm" type="time">
-            </div>
-            <div class="form-group col">
-                <label for="end">End Time</label>
-                <input class="form-control" id="end" placeholder="hh:mm" type="time">
-            </div>
+        <div class="form-group col">
+            <label for="date">Exam Date</label>
+
+            <input class="form-control" id="date" placeholder="mm/dd" type="date">
         </div>
-
-        <div class="form-group">
-            <button id="addBtn" type="button" class="btn btn-primary">Add</button>
-            <button id="editBtn" type="button" class="btn btn-primary" disabled>Edit</button>
-            <button id="cancelBtn" type="button" class="btn btn-light" style="display: none;">Cancel</button>
-            <button id="toilet" type="button" class="btn btn-success">Toilet</button>
+    </div>
+    <div class="row">
+        <div class="form-group col">
+            <label for="start">Start Time</label>
+            <input class="form-control" id="start" placeholder="hh:mm" type="time">
         </div>
-    </form>
-    <script>
-        const CLOCK_ID = "{{clockID}}";
-        const nameIN = document.getElementById("name");
-        const dateIN = document.getElementById("date");
-        const startIN = document.getElementById("start");
-        const endIN = document.getElementById("end");
+        <div class="form-group col">
+            <label for="end">End Time</label>
+            <input class="form-control" id="end" placeholder="hh:mm" type="time">
+        </div>
+    </div>
 
-        const addBtn = document.getElementById("addBtn");
-        const editBtn = document.getElementById("editBtn");
-        const cancelBtn = document.getElementById("cancelBtn");
-        const toilet = document.getElementById("toilet");
-        let toiletState = "vacant";
-        const examsUI = document.getElementById("exams");
-        const date = new Date();
-        const EXAMS = [{{{exams}}}];
+    <div class="form-group">
+        <button id="addBtn" type="button" class="btn btn-primary">Add</button>
+        <button id="editBtn" type="button" class="btn btn-primary" disabled>Edit</button>
+        <button id="cancelBtn" type="button" class="btn btn-light" style="display: none;">Cancel</button>
+        <button id="toilet" type="button" class="btn btn-success">Toilet</button>
+    </div>
+</form>
+<script>
+    const socket = io();
+    socket.on('connect', () => { // initial connection
+        // socket.emit('controller_connected', socket.id); // tell server ima controller
+        console.log("Socket ID", socket.id);
+        console.log("Session ID", "{{sessionID}}");
+    });
+    const CLOCK_ID = "{{clockID}}";
+    const nameIN = document.getElementById("name");
+    const dateIN = document.getElementById("date");
+    const startIN = document.getElementById("start");
+    const endIN = document.getElementById("end");
 
-        let editing = false;
-        let exam_in_edit = null;
+    const addBtn = document.getElementById("addBtn");
+    const editBtn = document.getElementById("editBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const toilet = document.getElementById("toilet");
+    let toiletState = "vacant";
+    const examsUI = document.getElementById("exams");
+    const date = new Date();
+    const EXAMS = [{{{exams}}}];
 
-        dateIN.setAttribute("min", dateIN.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') +
-                '-' + date.getDate().toString().padStart(2, '0'));
-        addBtn.onclick = () => clearInputs(socket.emit("new_exam", JSON.stringify({
+    let editing = false;
+    let exam_in_edit = null;
+
+    dateIN.setAttribute("min", dateIN.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') +
+            '-' + date.getDate().toString().padStart(2, '0'));
+    addBtn.onclick = () => clearInputs(socket.emit("new_exam", JSON.stringify({
+        clockID: CLOCK_ID,
+        name: nameIN.value,
+        date: dateIN.value,
+        start: startIN.value,
+        end: endIN.value
+    })));
+    toilet.onclick = () => socket.emit("toilet", CLOCK_ID);
+    editBtn.onclick = () => {
+        addBtn.disabled = false;
+        editBtn.disabled = true;
+        editBtn.innerHTML = "Edit";
+        cancelBtn.style.display = "none";
+        socket.emit("edit_exam", JSON.stringify({
             clockID: CLOCK_ID,
+            id: exam_in_edit.id,
             name: nameIN.value,
             date: dateIN.value,
             start: startIN.value,
             end: endIN.value
-        })));
-        toilet.onclick = () => socket.emit("toilet", CLOCK_ID);
-        editBtn.onclick = () => {
-            addBtn.disabled = false;
-            editBtn.disabled = true;
-            cancelBtn.style.display = "none";
-            socket.emit("edit_exam", JSON.stringify({
-                clockID: CLOCK_ID,
-                id: exam_in_edit.id,
-                name: nameIN.value,
-                date: dateIN.value,
-                start: startIN.value,
-                end: endIN.value
-            }));
-            exam_in_edit.name = nameIN.value;
-            exam_in_edit.date = dateIN.value;
-            exam_in_edit.start = startIN.value;
-            exam_in_edit.end = endIN.value;
-            exam_in_edit = null;
-            editing = false;
-            clearInputs();
-            refreshExams();
-        };
-        cancelBtn.onclick = () => {
-            addBtn.disabled = false;
-            editBtn.disabled = true;
-            cancelBtn.style.display = "none";
-            exam_in_edit = null;
-            editing = false;
-            clearInputs();
+        }));
+        exam_in_edit.name = nameIN.value;
+        exam_in_edit.date = dateIN.value;
+        exam_in_edit.start = startIN.value;
+        exam_in_edit.end = endIN.value;
+        exam_in_edit = null;
+        editing = false;
+        clearInputs();
+        refreshExams();
+    };
+    cancelBtn.onclick = () => {
+        addBtn.disabled = false;
+        editBtn.disabled = true;
+        editBtn.innerHTML = "Edit";
+        cancelBtn.style.display = "none";
+        exam_in_edit = null;
+        editing = false;
+        clearInputs();
+    }
+
+    function clearInputs() {
+        nameIN.value = null;
+        dateIN.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') +
+                '-' + date.getDate().toString().padStart(2, '0')
+        startIN.value = null;
+        endIN.value = null;
+    }
+
+    const editExam = (id) => {
+        let exam = EXAMS.find(exam => exam.id === id);
+        if (exam) {
+            exam_in_edit = exam;
+            nameIN.value = exam.name;
+            dateIN.value = exam.date;
+            startIN.value = exam.start;
+            endIN.value = exam.end;
+            editing = true;
+            addBtn.disabled = true;
+            editBtn.disabled = false;
+            editBtn.innerHTML = "Confirm";
+            cancelBtn.style.display = "inline-block";
         }
+    };
+    const deleteExam = (id) => socket.emit("delete_exam", CLOCK_ID, id);
 
-        function clearInputs() {
-            nameIN.value = null;
-            dateIN.value = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') +
-                    '-' + date.getDate().toString().padStart(2, '0')
-            startIN.value = null;
-            endIN.value = null;
-        }
+    socket.on('exam_update', (clockID, json) => {
+        if (clockID !== CLOCK_ID) return;
+        console.log("Received full exam update from remote");
+        let examsRaw = JSON.parse(json);
+        EXAMS.splice(0, EXAMS.length);
+        for (let exam of examsRaw)
+            EXAMS.push(new Exam(exam.id, exam.name, exam.date, exam.start, exam.end));
+        refreshExams();
+    });
+    socket.on('new_exam', (clockID, json) => {
+        if (clockID !== CLOCK_ID) return;
+        console.log("Received new exam from remote");
+        let examRaw = JSON.parse(json);
+        let exam = new Exam(examRaw.id, examRaw.name, examRaw.date, examRaw.start, examRaw.end);
+        console.log(exam);
+        EXAMS.push(exam);
+        examsUI.innerHTML += exam.toHTML();
+    });
+    socket.on('delete_exam', (clockID, examID) => {
+        if (clockID !== CLOCK_ID) return;
+        console.log("Received exam deleted from remote");
+        if (document.getElementById("e_" + examID)) document.getElementById("e_" + examID).remove();
+        EXAMS.splice(EXAMS.map(exam => exam.id).indexOf(examID), 1);
+    });
+    socket.on('toilet', (clockID, status) => {
+        if (clockID !== CLOCK_ID) return;
+        console.log("Received toilet update from remote");
+        toiletState = status;
+        toilet.classList.remove("btn-success");
+        toilet.classList.remove("btn-danger");
+        toilet.classList.add(status === "occupied" ? "btn-danger" : "btn-success");
+    });
 
-        const editExam = (id) => {
-            let exam = EXAMS.find(exam => exam.id === id);
-            if (exam) {
-                exam_in_edit = exam;
-                nameIN.value = exam.name;
-                dateIN.value = exam.date;
-                startIN.value = exam.start;
-                endIN.value = exam.end;
-                editing = true;
-                addBtn.disabled = true;
-                editBtn.disabled = false;
-                cancelBtn.style.display = "inline-block";
-            }
-        };
-        const deleteExam = (id) => socket.emit("delete_exam", CLOCK_ID, id);
-
-        socket.on('exam_update', (clockID, json) => {
-            if (clockID !== CLOCK_ID) return;
-            console.log("Received full exam update from remote");
-            let examsRaw = JSON.parse(json);
-            EXAMS.splice(0, EXAMS.length);
-            for (let exam of examsRaw)
-                EXAMS.push(new Exam(exam.id, exam.name, exam.date, exam.start, exam.end));
-            refreshExams();
-        });
-        socket.on('new_exam', (clockID, json) => {
-            if (clockID !== CLOCK_ID) return;
-            console.log("Received new exam from remote");
-            let examRaw = JSON.parse(json);
-            let exam = new Exam(examRaw.id, examRaw.name, examRaw.date, examRaw.start, examRaw.end);
-            console.log(exam);
-            EXAMS.push(exam);
+    function refreshExams() {
+        examsUI.innerHTML = "";
+        for (let i = 0; i < EXAMS.length; i++) {
+            let exam = EXAMS[i];
+            if (!(exam instanceof Exam))
+                exam = EXAMS[i] = new Exam(exam.id, exam.name, exam.date, exam.start, exam.end);
             examsUI.innerHTML += exam.toHTML();
-        });
-        socket.on('delete_exam', (clockID, examID) => {
-            if (clockID !== CLOCK_ID) return;
-            console.log("Received exam deleted from remote");
-            if (document.getElementById("e_" + examID)) document.getElementById("e_" + examID).remove();
-            EXAMS.splice(EXAMS.map(exam => exam.id).indexOf(examID), 1);
-        });
-        socket.on('toilet', (clockID, status) => {
-            if (clockID !== CLOCK_ID) return;
-            console.log("Received toilet update from remote");
-            toiletState = status;
-            toilet.classList.remove("btn-success");
-            toilet.classList.remove("btn-danger");
-            toilet.classList.add(status === "occupied" ? "btn-danger" : "btn-success");
-        });
+        }
+    }
 
-        function refreshExams() {
-            examsUI.innerHTML = "";
-            for (let i = 0; i < EXAMS.length; i++) {
-                let exam = EXAMS[i];
-                if (!(exam instanceof Exam))
-                    exam = EXAMS[i] = new Exam(exam.id, exam.name, exam.date, exam.start, exam.end);
-                examsUI.innerHTML += exam.toHTML();
-            }
+    class Exam {
+        constructor(id, name, date, start, end) {
+            this.id = id;
+            this.name = name;
+            this.date = date;
+            this.start = start;
+            this.end = end;
         }
 
-        class Exam {
-            constructor(id, name, date, start, end) {
-                this.id = id;
-                this.name = name;
-                this.date = date;
-                this.start = start;
-                this.end = end;
-            }
-
-            toHTML() {
-                return `<li id="e_${this.id}" class="list-group-item exam-holder">
+        toHTML() {
+            return `<li id="e_${this.id}" class="list-group-item exam-holder">
 <div class="exam-box row">
 <div class="exam-info col-sm-10">
 <h3><code>${this.id}</code> ${this.name}</h3>
@@ -227,9 +248,8 @@ From <code>${this.start}</code> to <code>${this.end}</code>
 </div>
 </div>
 </li>`;
-            }
         }
+    }
 
-        refreshExams();
-    </script>
-</div>
+    refreshExams();
+</script>

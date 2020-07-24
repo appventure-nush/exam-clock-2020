@@ -1,15 +1,23 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">
+        <img src="/images/favicon.256.png" width="30" height="30" class="d-inline-block align-top" alt="">
+        Control Panel
+    </a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
 <style>
-    .login-form {
+    .container {
         width: 340px;
-        margin: 50px auto;
-        font-size: 15px;
     }
 
-    .login-form form {
-        margin-bottom: 15px;
-        background: #f7f7f7;
-        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-        padding: 30px;
+    .login-form {
+        padding: 15px;
     }
 
     .form-control, .btn {
@@ -27,93 +35,98 @@
         content: "No clocks connected"
     }
 </style>
-<div class="container login-form">
-    <form action="/" method="post">
-        {{#if error}}
-            <div class="alert alert-danger" role="alert">
-                Your key is that of a clock of another universe
+<form action="/" method="post" class="login-form">
+    {{#if error}}
+        <div class="alert alert-danger" role="alert">
+            Your key is that of a clock of another universe
+        </div>
+    {{/if}}
+    <div class="form-group">
+        Logged in as {{user.displayName}}
+    </div>
+    <div class="form-group">
+        <label for="nick">Nickname</label>
+        <input aria-describedby="nickHelp" class="form-control" id="nick" name="nick" type="text"
+               value="{{user.displayName}}">
+        <small id="nickHelp" class="form-text text-muted">Nick name is used only for verification</small>
+    </div>
+    <div class="form-group">
+        <label for="clockID">Clock ID</label>
+        <div class="input-group">
+            <input class="form-control" id="clockID" name="clockID" type="text">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">Clocks
+                </button>
+                <div class="dropdown-menu" id="clocks"></div>
             </div>
-        {{/if}}
-        <div class="form-group">
-            <label for="nick">Nickname</label>
-            <input aria-describedby="nickHelp" class="form-control" id="nick" name="nick" type="text">
-            <small id="nickHelp" class="form-text text-muted">Nick name is used only for verification</small>
         </div>
-        <div class="form-group">
-            <label for="clockID">Clock ID</label>
-            <div class="input-group">
-                <input class="form-control" id="clockID" name="clockID" type="text">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false">Clocks
-                    </button>
-                    <div class="dropdown-menu" id="clocks"></div>
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <button id="connect" type="submit" class="btn btn-primary btn-block">Connect</button>
-        </div>
-    </form>
-    <script>
-        let respondedAndAccepted = false;
-        const connectBtn = document.getElementById("connect");
-        const inputNK = document.getElementById("nick");
-        const inputCID = document.getElementById("clockID");
-        const clocksUI = document.getElementById("clocks");
-        inputNK.value = localStorage.getItem("nick");
-        inputCID.value = localStorage.getItem("clockID");
+    </div>
+    <button id="connect" type="submit" class="btn btn-primary btn-block">Connect</button>
+</form>
+<script>
+    const socket = io();
+    socket.on('connect', () => { // initial connection
+        // socket.emit('controller_connected', socket.id); // tell server ima controller
+        console.log("Socket ID", socket.id);
+        console.log("Session ID", "{{sessionID}}");
+    });
+    let respondedAndAccepted = false;
+    const connectBtn = document.getElementById("connect");
+    const inputNK = document.getElementById("nick");
+    const inputCID = document.getElementById("clockID");
+    const clocksUI = document.getElementById("clocks");
+    inputCID.value = localStorage.getItem("clockID");
 
-        fetch("/clocks").then(res => res.json()).then(clocks => {
-            clocksUI.innerHTML = "";
-            for (let clock of clocks)
-                clocksUI.innerHTML += `<a id='c_${clock.id}' class="dropdown-item" href="#" onclick="inputCID.value='${clock.id}'">${clock.id} (${clock.name})</a>`;
-        });
-
-        socket.on('request_callback', response => {
-            console.log("Request has been responsed with", response);
-            if (response === "accepted") {
-                respondedAndAccepted = true;
-                $('form').submit();
-            } else if (response === "rejected") {
-                respondedAndAccepted = false;
-                alert("You have been rejected!");
-                connectBtn.disabled = false;
-                let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
-                if (spinner) spinner.remove();
-            } else if (response === "not_found") {
-                respondedAndAccepted = false;
-                alert("Clock not found!");
-                connectBtn.disabled = false;
-                let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
-                if (spinner) spinner.remove();
-            }
-        });
-        socket.on('new_clock', clockJSON => {
-            let clock = JSON.parse(clockJSON);
+    fetch("/clocks").then(res => res.json()).then(clocks => {
+        clocksUI.innerHTML = "";
+        for (let clock of clocks)
             clocksUI.innerHTML += `<a id='c_${clock.id}' class="dropdown-item" href="#" onclick="inputCID.value='${clock.id}'">${clock.id} (${clock.name})</a>`;
-        });
-        socket.on('clock_died', clockID => {
-            let clock = document.getElementById('c_' + clockID);
-            if (clock) clock.remove();
-        });
+    });
 
-        $('form').submit(e => {
-            localStorage.setItem("nick", inputNK.value);
-            localStorage.setItem("clockID", inputCID.value);
-            if (!respondedAndAccepted) {
-                e.preventDefault();
-                socket.emit("request", inputCID.value, inputNK.value);
-                connectBtn.innerHTML = "<span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>\n" + connectBtn.innerHTML;
-                connectBtn.disabled = true;
-                setTimeout(() => {
-                    connectBtn.disabled = false;
-                    let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
-                    if (spinner) spinner.remove();
-                    alert("Time out!");
-                }, 60000);
-                return false;
-            } else return true;
-        });
-    </script>
-</div>
+    socket.on('request_callback', response => {
+        console.log("Request has been responsed with", response);
+        if (response === "accepted") {
+            respondedAndAccepted = true;
+            $('form').submit();
+        } else if (response === "rejected") {
+            respondedAndAccepted = false;
+            alert("You have been rejected!");
+            connectBtn.disabled = false;
+            let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
+            if (spinner) spinner.remove();
+        } else if (response === "not_found") {
+            respondedAndAccepted = false;
+            alert("Clock not found!");
+            connectBtn.disabled = false;
+            let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
+            if (spinner) spinner.remove();
+        }
+    });
+    socket.on('new_clock', clockJSON => {
+        let clock = JSON.parse(clockJSON);
+        clocksUI.innerHTML += `<a id='c_${clock.id}' class="dropdown-item" href="#" onclick="inputCID.value='${clock.id}'">${clock.id} (${clock.name})</a>`;
+    });
+    socket.on('clock_died', clockID => {
+        let clock = document.getElementById('c_' + clockID);
+        if (clock) clock.remove();
+    });
+
+    $('form').submit(e => {
+        localStorage.setItem("nick", inputNK.value);
+        localStorage.setItem("clockID", inputCID.value);
+        if (!respondedAndAccepted) {
+            e.preventDefault();
+            socket.emit("request", inputCID.value, inputNK.value);
+            connectBtn.innerHTML = "<span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>\n" + connectBtn.innerHTML;
+            connectBtn.disabled = true;
+            setTimeout(() => {
+                connectBtn.disabled = false;
+                let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
+                if (spinner) spinner.remove();
+                alert("Time out!");
+            }, 60000);
+            return false;
+        } else return true;
+    });
+</script>
