@@ -13,7 +13,10 @@ import sg.edu.appventure.examclock.MainController;
 import sg.edu.appventure.examclock.PreferenceController;
 import sg.edu.appventure.examclock.model.Exam;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -32,9 +35,11 @@ public class ClientSocket {
         IO.setDefaultOkHttpWebSocketFactory(okHttpClient);
         IO.setDefaultOkHttpCallFactory(okHttpClient);
         IO.Options opts = new IO.Options();
+        opts.path = "/socket.clocks";
         opts.callFactory = okHttpClient;
         opts.webSocketFactory = okHttpClient;
         try {
+            opts.query = "clock=" + URLEncoder.encode(identifySelf(), String.valueOf(StandardCharsets.UTF_8));
             socket = IO.socket("https://exam-clock-nush.tk", opts);
 //            socket = IO.socket("http://localhost:3000", opts);
             socket.on(Socket.EVENT_CONNECT, args -> {
@@ -66,7 +71,7 @@ public class ClientSocket {
             });
             controller.toiletOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant"));
             socket.open();
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
@@ -149,14 +154,14 @@ public class ClientSocket {
         });
     }
 
-    private void identifySelf() {
+    private String identifySelf() {
         JSONObject obj = new JSONObject();
         obj.put("clockID", PreferenceController.clockID);
         obj.put("clockName", PreferenceController.lanNameProperty.get());
         JSONArray array = new JSONArray();
         array.addAll(controller.exams);
         obj.put("exams", array);
-        socket.emit("clock_connected", obj.toJSONString());
+        return obj.toJSONString();
     }
 
     public void onClockIDClash(Object... args) {
