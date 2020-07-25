@@ -19,7 +19,24 @@ import java.time.temporal.ChronoUnit;
 
 public class AddExamController {
     public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy MMM dd");
-    public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
+    public static final DateTimeFormatter[] timeFormatters = {
+            DateTimeFormatter.ofPattern("hh:mma"),
+            DateTimeFormatter.ofPattern("HH:mm"),
+            DateTimeFormatter.ofPattern("h:mma"),
+            DateTimeFormatter.ofPattern("H:mm"),
+            DateTimeFormatter.ofPattern("hha"),
+            DateTimeFormatter.ofPattern("ha")
+    };
+
+    private static LocalTime parseTime(String time, int index) {
+        if (index >= timeFormatters.length) throw new DateTimeParseException("No match found", time, 0);
+        try {
+            return LocalTime.parse(time.replace(" ", ""), timeFormatters[index]);
+        } catch (DateTimeParseException e) {
+            return parseTime(time, index + 1);
+        }
+    }
+
     public TextField name_input;
     public DatePicker date_input;
     public Form form;
@@ -47,9 +64,9 @@ public class AddExamController {
 
         start_time_input.textProperty().addListener((observable, newv, oldv) -> {
             try {
-                LocalTime parsed = LocalTime.parse(start_time_input.getText().toUpperCase(), timeFormatter);
+                LocalTime parsed = parseTime(start_time_input.getText().toUpperCase(), 0);
                 start_time_input.setUserData(parsed);
-                end_time_input.setText(timeFormatter.format(parsed.plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
+                end_time_input.setText(timeFormatters[0].format(parsed.plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
             } catch (DateTimeParseException e) {
 //                if (start_time_input.getUserData() != null)
 //                    start_time_input.setText(timeFormatter.format((LocalTime) start_time_input.getUserData()));
@@ -57,7 +74,7 @@ public class AddExamController {
         });
         end_time_input.textProperty().addListener((observable, newv, oldv) -> {
             try {
-                LocalTime parsed = LocalTime.parse(end_time_input.getText().toUpperCase(), timeFormatter);
+                LocalTime parsed = parseTime(end_time_input.getText().toUpperCase(), 0);
                 end_time_input.setUserData(parsed);
                 LocalTime start = (LocalTime) start_time_input.getUserData();
                 int minutes = (int) start.until(parsed, ChronoUnit.MINUTES);
@@ -70,18 +87,18 @@ public class AddExamController {
         });
         duration_hours.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (start_time_input.getUserData() == null) return;
-            end_time_input.setText(timeFormatter.format(((LocalTime) start_time_input.getUserData()).plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
+            end_time_input.setText(timeFormatters[0].format(((LocalTime) start_time_input.getUserData()).plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
         });
         duration_minutes.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (start_time_input.getUserData() == null) return;
-            end_time_input.setText(timeFormatter.format(((LocalTime) start_time_input.getUserData()).plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
+            end_time_input.setText(timeFormatters[0].format(((LocalTime) start_time_input.getUserData()).plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
         });
     }
 
     @FXML
     public void add(ActionEvent event) {
         try {
-            Exam exam = new Exam(name_input.getText(), date_input.getValue(), LocalTime.parse(start_time_input.getText().toUpperCase(), timeFormatter), LocalTime.parse(end_time_input.getText().toUpperCase(), timeFormatter));
+            Exam exam = new Exam(name_input.getText(), date_input.getValue(), parseTime(start_time_input.getText().toUpperCase(), 0), parseTime(end_time_input.getText().toUpperCase(), 0));
             mainController.addCallback(exam);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());

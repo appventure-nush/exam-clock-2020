@@ -21,13 +21,29 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class ClientSocket {
     private Socket socket;
     private final MainController controller;
     public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-    public static final DateTimeFormatter timeFormatter12 = DateTimeFormatter.ofPattern("HH:mm a");
+    public static final DateTimeFormatter[] timeFormatters = {
+            DateTimeFormatter.ofPattern("hh:mma"),
+            DateTimeFormatter.ofPattern("HH:mm"),
+            DateTimeFormatter.ofPattern("h:mma"),
+            DateTimeFormatter.ofPattern("H:mm"),
+            DateTimeFormatter.ofPattern("hha"),
+            DateTimeFormatter.ofPattern("ha")
+    };
+
+    private static LocalTime parseTime(String time, int index) {
+        if (index >= timeFormatters.length) throw new DateTimeParseException("Invalid date/time!", time, 0);
+        try {
+            return LocalTime.parse(time.replace(" ", ""), timeFormatters[index]);
+        } catch (DateTimeException e) {
+            return parseTime(time, index + 1);
+        }
+    }
 
     public ClientSocket(MainController controller) {
         this.controller = controller;
@@ -76,14 +92,6 @@ public class ClientSocket {
         }
     }
 
-    private static LocalTime parseTime(String time) {
-        try {
-            return LocalTime.parse(time, timeFormatter);
-        } catch (DateTimeException e) {
-            return LocalTime.parse(time, timeFormatter12);
-        }
-    }
-
     private void onToilet(Object object) {
         Platform.runLater(() -> controller.toiletOccupied.set(!controller.toiletOccupied.get()));
     }
@@ -108,8 +116,8 @@ public class ClientSocket {
             Exam exam = new Exam(
                     String.valueOf(objects[1]),
                     LocalDate.parse(String.valueOf(objects[2]), dateFormatter),
-                    parseTime(String.valueOf(objects[3])),
-                    parseTime(String.valueOf(objects[4])));
+                    parseTime(String.valueOf(objects[3]), 0),
+                    parseTime(String.valueOf(objects[4]), 0));
             Platform.runLater(() -> controller.exams.add(exam));
         } catch (DateTimeException e) {
             e.printStackTrace();

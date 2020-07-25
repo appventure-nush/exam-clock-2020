@@ -226,8 +226,8 @@ public class MainController {
     public void showAddExamStage(Exam exam) {
         addExamController.name_input.setText(exam.name);
         addExamController.date_input.setValue(LocalDate.parse(exam.date));
-        addExamController.start_time_input.setText(AddExamController.timeFormatter.format(LocalTime.parse(exam.start)));
-        addExamController.end_time_input.setText(AddExamController.timeFormatter.format(LocalTime.parse(exam.end)));
+        addExamController.start_time_input.setText(AddExamController.timeFormatters[0].format(LocalTime.parse(exam.start)));
+        addExamController.end_time_input.setText(AddExamController.timeFormatters[0].format(LocalTime.parse(exam.end)));
         addExamStage.show();
     }
 
