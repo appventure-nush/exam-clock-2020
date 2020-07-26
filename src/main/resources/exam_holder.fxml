@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1" type="javafx.scene.layout.HBox" maxHeight="-Infinity"
+         maxWidth="1.7976931348623157E308"
+         minHeight="-Infinity" minWidth="-Infinity" spacing="5.0"
+         styleClass="exam-holder" xmlns="http://javafx.com/javafx/8.0.171">
+    <VBox maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+        <Label fx:id="nameLabel" maxWidth="1.7976931348623157E308" styleClass="exam-name" wrapText="true"/>
+        <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308">
+            <Label fx:id="timeLabel" maxWidth="1.7976931348623157E308" text="20:40pm -&gt; 20:50pm"
+                   HBox.hgrow="ALWAYS"/>
+            <MenuButton mnemonicParsing="false" styleClass="constant-size">
+                <items>
+                    <MenuItem mnemonicParsing="false" onAction="#onDupe" text="Duplicate"/>
+                    <MenuItem mnemonicParsing="false" onAction="#onEdit" text="Edit"/>
+                    <MenuItem mnemonicParsing="false" onAction="#onDelete" text="Delete"/>
+                </items>
+            </MenuButton>
+        </HBox>
+    </VBox>
+    <Label fx:id="countLabel" maxHeight="1.7976931348623157E308" minWidth="-Infinity" textAlignment="CENTER"
+           styleClass="time-left,elevated"/>
+</fx:root>

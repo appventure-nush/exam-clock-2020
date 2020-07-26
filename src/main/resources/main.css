@@ -14,7 +14,7 @@
 }
 
 .exam-holder.started {
-    -fx-background-color: #00ff0022;
+    -fx-background-color: linear-gradient(to left, rgba(255, 0, 0, 0.13) 0%, rgba(255, 0, 0, 0.13) 0%, rgba(0, 255, 0, 0.13) 0%, rgba(0, 255, 0, 0.13) 100%);
 }
 
 .exam-holder.ended {

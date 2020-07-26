@@ -1,17 +1,15 @@
 package sg.edu.appventure.examclock.model;
 
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
 import sg.edu.appventure.examclock.MainController;
 import sg.edu.appventure.examclock.PreferenceController;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -22,11 +20,13 @@ public class ExamHolder extends HBox {
     private static final DateTimeFormatter FORMAT_24_HOURS = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final DateTimeFormatter FORMAT_12_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("hh:mm a");
     private static final DateTimeFormatter FORMAT_24_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("HH:mm");
-    private final Label examName;
-    private final Label examDate;
-    private final Label examStartTime;
-    private final Label examEndTime;
-    private final Label timeLeft;
+    @FXML
+    private Label nameLabel;
+    @FXML
+    private Label timeLabel;
+    @FXML
+    private Label countLabel;
+
     private LocalDate date;
     private LocalTime start;
     private LocalTime end;
@@ -35,56 +35,17 @@ public class ExamHolder extends HBox {
 
     public ExamHolder(MainController controller) {
         this.controller = controller;
-        VBox infoPane = new VBox();
-        infoPane.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(infoPane, Priority.SOMETIMES);
-        examName = new Label();
-        examName.getStyleClass().add("exam-name");
-        examName.setMaxWidth(Double.MAX_VALUE);
-        examName.setWrapText(true);
-        HBox.setHgrow(examName, Priority.ALWAYS);
-        MenuButton menu = new MenuButton();
-        menu.getStyleClass().add("constant-size");
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/exam_holder.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
 
-        MenuItem deleteButton = new MenuItem("Delete");
-        deleteButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.TRASH));
-        menu.getItems().add(deleteButton);
-        deleteButton.setOnAction(e -> delete());
+        try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
 
-        MenuItem editButton = new MenuItem("Edit");
-        editButton.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.EDIT));
-        menu.getItems().add(editButton);
-        editButton.setOnAction(e -> edit());
-        infoPane.getChildren().add(new HBox(examName, menu) {{
-            setSpacing(5);
-        }});
-
-        examDate = new Label();
-        examStartTime = new Label();
-        examStartTime.setAlignment(Pos.CENTER);
-        examStartTime.setMaxWidth(Double.MAX_VALUE);
-        examEndTime = new Label();
-        examEndTime.setAlignment(Pos.CENTER);
-        examEndTime.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(examStartTime, Priority.ALWAYS);
-        HBox.setHgrow(examEndTime, Priority.ALWAYS);
-
-        infoPane.setSpacing(5);
-        infoPane.getChildren().add(new HBox(examDate, examStartTime, new Label("", new Glyph("FontAwesome", FontAwesome.Glyph.ARROW_RIGHT)), examEndTime));
-        getChildren().add(infoPane);
-
-        timeLeft = new Label();
-        timeLeft.getStyleClass().addAll("time-left", "elevated");
-        timeLeft.setMaxHeight(Double.MAX_VALUE);
-        timeLeft.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
-        getChildren().add(timeLeft);
-
-        getStyleClass().add("exam-holder");
-        setMaxWidth(Double.MAX_VALUE);
-        setSpacing(5);
-        setPadding(new Insets(2, 4, 2, 4));
         setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-
         setOnMouseClicked(event -> {
             if (controller.selectedExamHolder != null) {
                 controller.selectedExamHolder.getStyleClass().remove("selected");
@@ -106,29 +67,38 @@ public class ExamHolder extends HBox {
     public void update(LocalDate today, LocalTime now) {
         if (today.isEqual(date)) {
             if (now.isBefore(start)) {
-                timeLeft.setText(String.format("%02d", ChronoUnit.HOURS.between(start, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(start, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(start, end) % 60));
+                countLabel.setText(String.format("%02d", ChronoUnit.HOURS.between(start, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(start, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(start, end) % 60));
                 getStyleClass().removeAll("started", "ended");
             } else if (now.isAfter(end)) {
-                timeLeft.setText("00:00:00");
+                countLabel.setText("00:00:00");
                 getStyleClass().removeAll("started", "ended");
                 getStyleClass().add("ended");
             } else {
-                timeLeft.setText(String.format("%02d", ChronoUnit.HOURS.between(now, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(now, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(now, end) % 60));
-                getStyleClass().removeAll("started", "ended");
-                getStyleClass().add("started");
+                float percentage = ChronoUnit.MILLIS.between(start, now) * 100f / ChronoUnit.MILLIS.between(start, end);
+                setStyle("-fx-background-color: linear-gradient(to left, rgba(255, 0, 0, 0.13) 0%, rgba(255, 0, 0, 0.13) " + (percentage - 1) + "%, rgba(0, 255, 0, 0.13) " + (percentage + 1) + "%, rgba(0, 255, 0, 0.13) 100%);");
+                if (PreferenceController.useSimplifiedCountdownForExamProperty.get()) {
+                    long hours = ChronoUnit.HOURS.between(now, end);
+                    long minutes = ChronoUnit.MINUTES.between(now, end);
+                    long seconds = ChronoUnit.MINUTES.between(now, end);
+                    if (hours > 0) countLabel.setText(hours + " hrs");
+                    else if (minutes > 0) countLabel.setText(minutes + " min");
+                    else if (seconds > 0) countLabel.setText(seconds + " sec");
+                    else countLabel.setText("STOP");
+                } else {
+                    countLabel.setText(String.format("%02d", ChronoUnit.HOURS.between(now, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(now, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(now, end) % 60));
+                    getStyleClass().removeAll("started", "ended");
+                    getStyleClass().add("started");
+                }
             }
         } else {
-            timeLeft.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
+            countLabel.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
             getStyleClass().removeAll("started", "ended");
         }
-        if (start.getSecond() == 0)
-            examStartTime.setText(start.format(PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS));
-        else
-            examStartTime.setText(start.format(PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
-        if (end.getSecond() == 0)
-            examEndTime.setText(end.format(PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS));
-        else
-            examEndTime.setText(end.format(PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
+        timeLabel.setText(
+                (exam.getDate().equals(LocalDate.now().toString()) ? "" : exam.getDate()) +
+                        start.format(start.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
+                        " → " +
+                        end.format(end.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
     }
 
     public Exam getExam() {
@@ -137,8 +107,7 @@ public class ExamHolder extends HBox {
 
     public ExamHolder setExam(Exam exam) {
         this.exam = exam;
-        examName.setText(exam.getName());
-        examDate.setText(exam.getDate().equals(LocalDate.now().toString()) ? "" : exam.getDate());
+        nameLabel.setText(exam.getName());
         date = LocalDate.parse(exam.getDate());
         start = LocalTime.parse(exam.getStart());
         end = LocalTime.parse(exam.getEnd());
@@ -153,12 +122,16 @@ public class ExamHolder extends HBox {
         return this;
     }
 
-    public void edit() {
+    public void onDupe(ActionEvent e) {
+        controller.exams.add(new Exam(exam.name, LocalDate.parse(exam.getDate()), exam.getStartTimeObj(), exam.getEndTimeObj()));
+    }
+
+    public void onEdit(ActionEvent e) {
         controller.exams.remove(exam);
         controller.showAddExamStage(exam);
     }
 
-    public void delete() {
+    public void onDelete(ActionEvent e) {
         controller.exams.remove(exam);
     }
 }

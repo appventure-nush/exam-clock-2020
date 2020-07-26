@@ -158,7 +158,7 @@ public class MainController {
             JSONArray root = (JSONArray) JSONValue.parse(examsStr);
             for (Object o : root) {
                 JSONObject exam = (JSONObject) o;
-                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime"))));
+                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
             }
         }
         String keyStr = preferences.get("keys", null);
@@ -272,12 +272,12 @@ public class MainController {
 
     @FXML
     public void editExamClicked(ActionEvent event) {
-        if (selectedExamHolder != null) selectedExamHolder.edit();
+        if (selectedExamHolder != null) selectedExamHolder.onEdit(event);
     }
 
     @FXML
     public void deleteExamClicked(ActionEvent event) {
-        if (selectedExamHolder != null) selectedExamHolder.delete();
+        if (selectedExamHolder != null) selectedExamHolder.onDelete(event);
     }
 
     @FXML
@@ -356,7 +356,7 @@ public class MainController {
             JSONArray root = (JSONArray) JSONValue.parse(examsStr);
             for (Object o : root) {
                 JSONObject exam = (JSONObject) o;
-                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime"))));
+                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
             }
         }
     }
@@ -382,7 +382,7 @@ public class MainController {
             exams.clear();
             for (Object o : root) {
                 JSONObject exam = (JSONObject) o;
-                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("examDate")), LocalTime.parse(exam.getAsString("startTime")), LocalTime.parse(exam.getAsString("endTime"))));
+                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
             }
         } catch (IOException e) {
             e.printStackTrace();

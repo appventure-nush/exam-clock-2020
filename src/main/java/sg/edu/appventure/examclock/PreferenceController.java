@@ -2,6 +2,7 @@ package sg.edu.appventure.examclock;
 
 import com.dlsc.preferencesfx.PreferencesFx;
 import com.dlsc.preferencesfx.model.Category;
+import com.dlsc.preferencesfx.model.Group;
 import com.dlsc.preferencesfx.model.Setting;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -29,6 +30,7 @@ public class PreferenceController {
     public static final SimpleObjectProperty<Color> secondHandColorProperty = new SimpleObjectProperty<>(Color.RED);
     public static final SimpleBooleanProperty analogueShadowProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty use12HourFormatProperty = new SimpleBooleanProperty(false);
+    public static final SimpleBooleanProperty useSimplifiedCountdownForExamProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty digitalAboveAnalogProperty = new SimpleBooleanProperty(false);
     public static final SimpleBooleanProperty digitalBackgroundProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty digitalClockEffectsProperty = new SimpleBooleanProperty(false);
@@ -88,17 +90,20 @@ public class PreferenceController {
         panelPortProperty.addListener((observable, oldValue, newValue) -> panelAddressProperty.set("http://" + getAddress() + ":" + panelPortProperty.get()));
         preferencesFx = PreferencesFx.of(ExamClock.class,
                 Category.of("Display",
-                        com.dlsc.preferencesfx.model.Group.of("General",
+                        Group.of("General",
                                 Setting.of("Night Mode", nightMode),
                                 Setting.of("Font Size", fontScaleProperty, 8, 40),
                                 Setting.of("Use 12 Hour Format", use12HourFormatProperty),
                                 Setting.of("Show Toilet", showToiletProperty)
                         ),
-                        com.dlsc.preferencesfx.model.Group.of("Analogue Clock",
+                        Group.of("Exam Holder",
+                                Setting.of("Use simplified countdown", useSimplifiedCountdownForExamProperty)
+                        ),
+                        Group.of("Analogue Clock",
                                 Setting.of("Second Hand", secondHandColorProperty),
                                 Setting.of("Shadow effect", analogueShadowProperty)
                         ),
-                        com.dlsc.preferencesfx.model.Group.of("Digital Clock",
+                        Group.of("Digital Clock",
                                 Setting.of("Show above analogue", digitalAboveAnalogProperty),
                                 Setting.of("Show background", digitalBackgroundProperty),
                                 Setting.of("Shadow effect", digitalClockEffectsProperty),
@@ -108,13 +113,13 @@ public class PreferenceController {
                         )
                 ),
                 Category.of("Web Panel",
-                        com.dlsc.preferencesfx.model.Group.of(
+                        Group.of(
                                 Setting.of("Display Name", lanNameProperty)
                         ),
-                        com.dlsc.preferencesfx.model.Group.of("Central Server",
+                        Group.of("Central Server",
                                 Setting.of("Open to requests", openToRequestsProperty)
                         ),
-                        com.dlsc.preferencesfx.model.Group.of("Lan",
+                        Group.of("Lan",
                                 Setting.of("Localhost Control Panel", controlPanelEnabledProperty),
                                 Setting.of("Port", panelPortProperty),
                                 Setting.of("Panel IP", panelAddressProperty)
