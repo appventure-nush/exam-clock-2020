@@ -242,7 +242,7 @@ public class MainController {
         addExamStage = new Stage();
         scene.getStylesheets().add("/main.css");
         scene.getStylesheets().add("/theme.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "theme.dark.css" : "/theme.light.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         addExamStage.setTitle("Add Exam");
         addExamStage.initModality(Modality.APPLICATION_MODAL);
         addExamStage.setScene(scene);
@@ -256,7 +256,7 @@ public class MainController {
         connectStage = new Stage();
         scene.getStylesheets().add("/main.css");
         scene.getStylesheets().add("/theme.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "theme.dark.css" : "/theme.light.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         connectStage.setTitle("Connection");
         connectStage.setResizable(false);
         connectStage.initModality(Modality.APPLICATION_MODAL);

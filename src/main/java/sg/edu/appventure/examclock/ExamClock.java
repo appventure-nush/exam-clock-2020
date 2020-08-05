@@ -28,7 +28,7 @@ public class ExamClock extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/main.css");
         scene.getStylesheets().add("/theme.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "theme.dark.css" : "/theme.light.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         primaryStage.titleProperty().bind(Bindings.concat("Exam Clock " + Version.getVersion() + " : ", PreferenceController.connectivityStateProperty));
 
         primaryStage.setScene(scene);
