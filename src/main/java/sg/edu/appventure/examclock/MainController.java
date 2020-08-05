@@ -154,14 +154,7 @@ public class MainController {
             JSONArray array = keys.stream().map(Key::toJsonObject).collect(Collectors.toCollection(JSONArray::new));
             preferences.put("keys", array.toJSONString());
         });
-        String examsStr = preferences.get("exams", null);
-        if (examsStr != null) {
-            JSONArray root = (JSONArray) JSONValue.parse(examsStr);
-            for (Object o : root) {
-                JSONObject exam = (JSONObject) o;
-                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
-            }
-        }
+        load(null);
         String keyStr = preferences.get("keys", null);
         if (keyStr != null) {
             JSONArray root = (JSONArray) JSONValue.parse(keyStr);
@@ -359,7 +352,11 @@ public class MainController {
             JSONArray root = (JSONArray) JSONValue.parse(examsStr);
             for (Object o : root) {
                 JSONObject exam = (JSONObject) o;
-                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
+                try {
+                    exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
+                } catch (Exception e) {
+                    System.out.println("Version incompatibility, skipped exam!");
+                }
             }
         }
     }
@@ -385,7 +382,11 @@ public class MainController {
             exams.clear();
             for (Object o : root) {
                 JSONObject exam = (JSONObject) o;
-                exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
+                try {
+                    exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
+                } catch (Exception e) {
+                    System.out.println("Version incompatibility, skipped exam!");
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
