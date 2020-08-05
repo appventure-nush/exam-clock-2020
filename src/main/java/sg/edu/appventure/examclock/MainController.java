@@ -38,6 +38,7 @@ import sg.edu.appventure.examclock.display.ClockController;
 import sg.edu.appventure.examclock.model.Exam;
 import sg.edu.appventure.examclock.model.ExamHolder;
 import sg.edu.appventure.examclock.model.Key;
+import sg.edu.appventure.examclock.updater.Updater;
 
 import java.awt.*;
 import java.io.File;
@@ -197,6 +198,8 @@ public class MainController {
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
         fileChooser.getExtensionFilters().add(extFilter);
         play();
+
+        Updater.checkUpdates();
     }
 
     public ExamHolder getExamHolder(Exam exam) {

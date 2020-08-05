@@ -56,8 +56,8 @@ public class ClientSocket {
         opts.webSocketFactory = okHttpClient;
         try {
             opts.query = "clock=" + URLEncoder.encode(identifySelf(), String.valueOf(StandardCharsets.UTF_8));
-            socket = IO.socket("https://exam-clock-nush.tk", opts);
-//            socket = IO.socket("http://localhost:3000", opts);
+//            socket = IO.socket("https://exam-clock-nush.tk", opts);
+            socket = IO.socket("http://localhost:3000", opts);
             socket.on(Socket.EVENT_CONNECT, args -> {
                 System.out.println("Connected to Server!");
                 Platform.runLater(() -> PreferenceController.connectivityStateProperty.set("Connected"));
