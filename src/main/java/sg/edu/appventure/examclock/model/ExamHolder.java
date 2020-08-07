@@ -1,8 +1,14 @@
 package sg.edu.appventure.examclock.model;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -14,8 +20,18 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
 public class ExamHolder extends HBox {
+
+    public static final SimpleBooleanProperty showCountDownForExamProperty = new SimpleBooleanProperty(true);
+    public static final SimpleBooleanProperty useSimplifiedCountdownForExamProperty = new SimpleBooleanProperty(false);
+    public static final SimpleBooleanProperty showExamsProperty = new SimpleBooleanProperty(false);
+    public static final SimpleListProperty<Orientation> displayOrientationList = new SimpleListProperty<>(
+            FXCollections.observableArrayList(Arrays.asList(Orientation.HORIZONTAL, Orientation.VERTICAL))
+    );
+    public static final ObjectProperty<Orientation> displayOrientationProperty = new SimpleObjectProperty<>(Orientation.HORIZONTAL);
+
     private static final DateTimeFormatter FORMAT_12_HOURS = DateTimeFormatter.ofPattern("hh:mm:ss a");
     private static final DateTimeFormatter FORMAT_24_HOURS = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final DateTimeFormatter FORMAT_12_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("hh:mm a");
@@ -44,6 +60,9 @@ public class ExamHolder extends HBox {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+
+        countLabel.visibleProperty().bind(showCountDownForExamProperty);
+        countLabel.managedProperty().bind(countLabel.visibleProperty());
 
         setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         setOnMouseClicked(event -> {
@@ -76,7 +95,7 @@ public class ExamHolder extends HBox {
             } else {
                 float percentage = ChronoUnit.MILLIS.between(start, now) * 100f / ChronoUnit.MILLIS.between(start, end);
                 setStyle("-fx-background-color: linear-gradient(to left, rgba(255, 0, 0, 0.13) 0%, rgba(255, 0, 0, 0.13) " + (percentage - 1) + "%, rgba(0, 255, 0, 0.13) " + (percentage + 1) + "%, rgba(0, 255, 0, 0.13) 100%);");
-                if (PreferenceController.useSimplifiedCountdownForExamProperty.get()) {
+                if (useSimplifiedCountdownForExamProperty.get()) {
                     long hours = ChronoUnit.HOURS.between(now, end);
                     long minutes = ChronoUnit.MINUTES.between(now, end);
                     long seconds = ChronoUnit.MINUTES.between(now, end);

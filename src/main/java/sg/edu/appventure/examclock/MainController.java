@@ -18,8 +18,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.*;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
@@ -37,7 +38,6 @@ import sg.edu.appventure.examclock.addexam.AddExamController;
 import sg.edu.appventure.examclock.display.ClockController;
 import sg.edu.appventure.examclock.model.Exam;
 import sg.edu.appventure.examclock.model.ExamHolder;
-import sg.edu.appventure.examclock.model.Key;
 import sg.edu.appventure.examclock.updater.Updater;
 
 import java.awt.*;
@@ -50,24 +50,23 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
 
 public class MainController {
     public ObservableList<Exam> exams;
-    public SimpleBooleanProperty toiletOccupied = new SimpleBooleanProperty(false);
+    public SimpleBooleanProperty toiletFemaleOccupied = new SimpleBooleanProperty(false);
+    public SimpleBooleanProperty toiletMaleOccupied = new SimpleBooleanProperty(false);
     public Stage stage;
     public Stage addExamStage;
-    public ObservableList<Key> keys;
-    public final Key simpleKey;
+    //    public ObservableList<Key> keys;
+//    public final Key simpleKey;
     public ExamHolder selectedExamHolder;
     @FXML
     private SplitPane root;
     @FXML
-    private Pane clockRoot;
+    private StackPane clockRoot;
     @FXML
     private Group clockPane;
     @FXML
@@ -91,9 +90,11 @@ public class MainController {
     @FXML
     private VBox examList;
     @FXML
-    private ImageView toiletIcon;
+    private HBox toiletIconParent;
     @FXML
-    private StackPane toiletIconParent;
+    private ImageView toiletMale;
+    @FXML
+    private ImageView toiletFemale;
     private ClockController clockController;
     private PreferenceController preferenceController;
     public ConnectionController connectionController;
@@ -108,7 +109,7 @@ public class MainController {
     private MenuBar menuBar;
 
     public MainController() {
-        this.simpleKey = new Key(Key.KeyType.TOILET);
+//        this.simpleKey = new Key(Key.KeyType.TOILET);
     }
 
     private static String generateClockID() {
@@ -128,7 +129,7 @@ public class MainController {
         final String os = System.getProperty("os.name");
         if (os != null && os.startsWith("Mac")) menuBar.useSystemMenuBarProperty().set(true);
         exams = FXCollections.observableArrayList();
-        keys = FXCollections.observableArrayList();
+//        keys = FXCollections.observableArrayList();
         preferences = Preferences.userNodeForPackage(MainController.class);
         holderPool = new Stack<>();
         exams.addListener((ListChangeListener<Exam>) c -> {
@@ -150,32 +151,51 @@ public class MainController {
                 }
             }
         });
-        keys.addListener((ListChangeListener<Key>) c -> {
-            JSONArray array = keys.stream().map(Key::toJsonObject).collect(Collectors.toCollection(JSONArray::new));
-            preferences.put("keys", array.toJSONString());
-        });
+//        keys.addListener((ListChangeListener<Key>) c -> {
+//            JSONArray array = keys.stream().map(Key::toJsonObject).collect(Collectors.toCollection(JSONArray::new));
+//            preferences.put("keys", array.toJSONString());
+//        });
         load(null);
-        String keyStr = preferences.get("keys", null);
-        if (keyStr != null) {
-            JSONArray root = (JSONArray) JSONValue.parse(keyStr);
-            keys.addAll(root.stream().map(o -> Key.fromJsonObject((JSONObject) o)).collect(Collectors.toCollection(ArrayList::new)));
-        }
+//        String keyStr = preferences.get("keys", null);
+//        if (keyStr != null) {
+//            JSONArray root = (JSONArray) JSONValue.parse(keyStr);
+//            keys.addAll(root.stream().map(o -> Key.fromJsonObject((JSONObject) o)).collect(Collectors.toCollection(ArrayList::new)));
+//        }
         PreferenceController.clockID = preferences.get("clockID", generateClockID());
         preferences.put("clockID", PreferenceController.clockID);
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         preferenceController = new PreferenceController(this);
         root.setStyle("-fx-font-size: " + PreferenceController.fontScaleProperty.get() + "px;");
         PreferenceController.fontScaleProperty.addListener((observable, oldValue, newValue) -> root.setStyle("-fx-font-size: " + newValue + "px;"));
+        examList.visibleProperty().bind(ExamHolder.showExamsProperty);
+        root.orientationProperty().bind(ExamHolder.displayOrientationProperty);
         preferenceController.initPreferences();
 
         clockRoot.widthProperty().addListener((observable, oldValue, newValue) -> resize(clockRoot.getWidth(), clockRoot.getHeight()));
         clockRoot.heightProperty().addListener((observable, oldValue, newValue) -> resize(clockRoot.getWidth(), clockRoot.getHeight()));
+        rightPane.visibleProperty().bind(ExamHolder.showExamsProperty);
+        ExamHolder.showExamsProperty.addListener(((observable, oldValue, newValue) -> root.setDividerPositions(newValue ? 0.5 : 1)));
 
-        toiletOccupied.addListener((observable, oldValue, newValue) -> {
-            if (newValue) toiletIconParent.getStyleClass().add("occupied");
-            else toiletIconParent.getStyleClass().remove("occupied");
+        ColorAdjust redEffect = new ColorAdjust();
+        redEffect.setBrightness(0.5);
+        redEffect.setSaturation(1);
+        redEffect.setHue(0);
+        ColorAdjust greenEffect = new ColorAdjust();
+        greenEffect.setBrightness(0.5);
+        greenEffect.setSaturation(1);
+        greenEffect.setHue(0.5);
+        toiletMale.setEffect(greenEffect);
+        toiletFemale.setEffect(greenEffect);
+        toiletFemaleOccupied.addListener((observable, oldValue, newValue) -> {
+            if (newValue) toiletFemale.setEffect(redEffect);
+            else toiletFemale.setEffect(greenEffect);
         });
-        toiletIcon.setOnMouseClicked(e -> toiletOccupied.set(!toiletOccupied.get()));
+        toiletMaleOccupied.addListener((observable, oldValue, newValue) -> {
+            if (newValue) toiletMale.setEffect(redEffect);
+            else toiletMale.setEffect(greenEffect);
+        });
+        toiletMale.setOnMouseClicked(e -> toiletMaleOccupied.set(!toiletMaleOccupied.get()));
+        toiletFemale.setOnMouseClicked(e -> toiletFemaleOccupied.set(!toiletFemaleOccupied.get()));
         toiletIconParent.visibleProperty().bind(PreferenceController.showToiletProperty);
 
         try {

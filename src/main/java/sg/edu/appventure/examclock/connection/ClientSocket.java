@@ -85,15 +85,21 @@ public class ClientSocket {
                     c.getRemoved().forEach(exam -> socket.emit("delete_exam", exam.id));
                 }
             });
-            controller.toiletOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant"));
+            controller.toiletMaleOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant", "male"));
+            controller.toiletFemaleOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant", "female"));
             socket.open();
         } catch (URISyntaxException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
 
-    private void onToilet(Object object) {
-        Platform.runLater(() -> controller.toiletOccupied.set(!controller.toiletOccupied.get()));
+    private void onToilet(Object[] objects) {
+        String userId = String.valueOf(objects[0]);
+        String gender = String.valueOf(objects[1]);
+        if (gender.equalsIgnoreCase("male"))
+            Platform.runLater(() -> controller.toiletMaleOccupied.set(!controller.toiletMaleOccupied.get()));
+        else if (gender.equalsIgnoreCase("female"))
+            Platform.runLater(() -> controller.toiletFemaleOccupied.set(!controller.toiletFemaleOccupied.get()));
     }
 
     private void onRequest(Object[] objects) {

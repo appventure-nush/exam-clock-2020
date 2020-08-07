@@ -3,6 +3,10 @@
     -fx-font-size: 14px;
 }
 
+.preference {
+    -fx-font-size: 14px;
+}
+
 .constant-size {
     -fx-font-size: 14px;
 }

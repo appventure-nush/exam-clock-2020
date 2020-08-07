@@ -41,15 +41,6 @@
     -fx-font-size: 15px;
 }
 
-#toiletIconParent {
-    -fx-background-radius: 8px;
-    -fx-background-color: green;
-}
-
-#toiletIconParent.occupied {
-    -fx-background-color: red;
-}
-
 #keyRaw, #addressDisplay, #clockIDLabel {
     -fx-font-family: "Courier New";
 }
