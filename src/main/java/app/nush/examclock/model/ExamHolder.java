@@ -51,7 +51,7 @@ public class ExamHolder extends HBox {
 
     public ExamHolder(MainController controller) {
         this.controller = controller;
-        FXMLLoader fxmlLoader = new FXMLLoader(ClassLoader.getSystemClassLoader().getResource("/app/nush/examclock/res/exam_holder.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/exam_holder.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

@@ -242,28 +242,28 @@ public class MainController {
     }
 
     private void initAddExamStage() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ClassLoader.getSystemClassLoader().getResource("/app/nush/examclock/res/fxml_add_exam.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml_add_exam.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         addExamController = fxmlLoader.getController();
         addExamController.setMainController(this);
         addExamStage = new Stage();
-        scene.getStylesheets().add("/app/nush/examclock/res/main.css");
-        scene.getStylesheets().add("/app/nush/examclock/res/theme.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/app/nush/examclock/res/theme.dark.css" : "/app/nush/examclock/res/theme.light.css");
+        scene.getStylesheets().add("/main.css");
+        scene.getStylesheets().add("/theme.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         addExamStage.setTitle("Add Exam");
         addExamStage.initModality(Modality.APPLICATION_MODAL);
         addExamStage.setScene(scene);
     }
 
     private void initConnectionStage() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ClassLoader.getSystemClassLoader().getResource("/app/nush/examclock/res/fxml_connect.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml_connect.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         ConnectionController connectionController = fxmlLoader.getController();
         connectionController.setMainController(this);
         connectStage = new Stage();
-        scene.getStylesheets().add("/app/nush/examclock/res/main.css");
-        scene.getStylesheets().add("/app/nush/examclock/res/theme.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/app/nush/examclock/res/theme.dark.css" : "/app/nush/examclock/res/theme.light.css");
+        scene.getStylesheets().add("/main.css");
+        scene.getStylesheets().add("/theme.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         connectStage.setTitle("Connection");
         connectStage.setResizable(false);
         connectStage.initModality(Modality.APPLICATION_MODAL);
@@ -410,7 +410,7 @@ public class MainController {
     public void about(ActionEvent actionEvent) {
         try {
             Stage stage = new Stage();
-            Group logo = FXMLLoader.load(ClassLoader.getSystemClassLoader().getResource("/app/nush/examclock/res/logo_light.fxml"));
+            Group logo = FXMLLoader.load(getClass().getResource("/logo_light.fxml"));
 
             Label title = new Label("Exam Clock", new Label(Version.getVersion()) {{
                 setFont(Font.font("monospaced", 14));

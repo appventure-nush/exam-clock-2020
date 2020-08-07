@@ -197,15 +197,15 @@
 //                }
 //            }
 //        }
-//        return newChunkedResponse(Response.Status.NOT_FOUND, MIME_HTML, ClassLoader.getSystemClassLoader().getResourceAsStream("/web/404.html"));
+//        return newChunkedResponse(Response.Status.NOT_FOUND, MIME_HTML, getClass().getResourceAsStream("/web/404.html"));
 //    }
 //
 //    public Response serve(String uri) {
 //        if (uri.isEmpty()) uri = "/";
 //        if (uri.endsWith("/")) uri = uri + "index.html";
-//        InputStream stream =ClassLoader.getSystemClassLoader().getResourceAsStream("/web" + uri);
+//        InputStream stream = getClass().getResourceAsStream("/web" + uri);
 //        if (stream != null) return newChunkedResponse(Response.Status.OK, getMimeTypeForFile(uri), stream);
 //        else
-//            return newChunkedResponse(Response.Status.NOT_FOUND, MIME_HTML, ClassLoader.getSystemClassLoader().getResourceAsStream("/web/404.html"));
+//            return newChunkedResponse(Response.Status.NOT_FOUND, MIME_HTML, getClasS().getResourceAsStream("/web/404.html"));
 //    }
 //}

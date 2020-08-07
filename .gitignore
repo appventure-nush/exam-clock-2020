@@ -1,5 +1,6 @@
 .idea
 .gradle
+gradle/
 **/build/
 !src/**/build/
 gradle-app.setting

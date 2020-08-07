@@ -28,16 +28,16 @@ public class ExamClock extends Application {
     public void start(Stage primaryStage) throws IOException {
         instance = this;
         preferences = Preferences.userNodeForPackage(ExamClock.class);
-        URL resource = getClass().getResource("./res/fxml_main.fxml");
+        URL resource = getClass().getResource("/fxml_main.fxml");
         System.out.println(resource);
         FXMLLoader loader = new FXMLLoader(resource);
         Parent root = loader.load();
         controller = loader.getController();
         controller.setStage(primaryStage);
         Scene scene = new Scene(root);
-        scene.getStylesheets().add("/app/nush/examclock/res/main.css");
-        scene.getStylesheets().add("/app/nush/examclock/res/theme.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/app/nush/examclock/res/theme.dark.css" : "/app/nush/examclock/res/theme.light.css");
+        scene.getStylesheets().add("/main.css");
+        scene.getStylesheets().add("/theme.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         primaryStage.titleProperty().bind(Bindings.concat("Exam Clock " + Version.getVersion() + " : ", PreferenceController.connectivityStateProperty));
 
         primaryStage.setScene(scene);
