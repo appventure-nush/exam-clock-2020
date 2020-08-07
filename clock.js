@@ -1,3 +1,5 @@
+const {logger} = require('./logger');
+
 let io;
 
 class Clock {
@@ -34,7 +36,12 @@ class Clock {
     new_exam(exam, socket) {
         if (this.acceptsSocket(socket)) {
             io.to(this.socketID).emit("new_exam", socket.request.user.id, exam.name, exam.date, exam.start, exam.end);
-            console.log("[ADD]", socket.request.user.id, "->", this.clockID, "(" + this.clockName + "):", exam.name);
+            logger.info(`[ADD] ${socket.request.user.id} -> ${this.clockID} (${this.clockName}): ${exam.name}`, {
+                type: "add_request",
+                clockID: this.clockID,
+                controllerID: socket.request.user.id,
+                exam: exam
+            });
         }
     }
 
@@ -46,21 +53,39 @@ class Clock {
             this.exams[index].date = exam.date;
             this.exams[index].start = exam.start;
             this.exams[index].end = exam.end;
-            console.log("[EDIT]", socket.request.user.id, "->", this.clockID, "(" + this.clockName + "):", exam.name);
+
+            logger.info(`[EDIT] ${socket.request.user.id} -> ${this.clockID} (${this.clockName}): ${exam.name}`, {
+                type: "edit_request",
+                clockID: this.clockID,
+                controllerID: socket.request.user.id,
+                exam: exam
+            });
         }
     }
 
     delete_exam(examID, socket) {
         if (this.acceptsSocket(socket)) {
             io.to(this.socketID).emit("delete_exam", socket.request.user.id, examID);
-            console.log("[DELETE]", socket.request.user.id, "->", this.clockID, "(" + this.clockName + "):", examID);
+            logger.info(`[DELETE] ${socket.request.user.id} -> ${this.clockID} (${this.clockName}): ${examID}`, {
+                type: "delete_request",
+                clockID: this.clockID,
+                controllerID: socket.request.user.id,
+                examID: examID
+            });
+            console.log();
         }
     }
 
-    toilet(socket) {
+    toilet(socket, gender) {
         if (this.acceptsSocket(socket)) {
-            io.to(this.socketID).emit("toilet", socket.request.user.id);
-            console.log("[TOILET]", socket.request.user.id, "->", this.clockID, "(" + this.clockName + ")");
+            io.to(this.socketID).emit("toilet", socket.request.user.id, gender);
+            logger.info(`[TOILET] ${socket.request.user.id} -> ${this.clockID} (${this.clockName})`, {
+                type: "toilet_request",
+                clockID: this.clockID,
+                controllerID: socket.request.user.id,
+                gender: gender
+            });
+            console.log();
         }
     }
 

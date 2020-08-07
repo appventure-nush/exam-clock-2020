@@ -1,7 +1,7 @@
+require('dotenv').config();
 const CLOCKS = require("./clocks.js");
 
 const path = require('path');
-const logger = require('morgan');
 const express = require('express');
 const server = require('socket.io');
 const passport = require('passport');
@@ -13,10 +13,14 @@ const MemoryStore = require('memorystore')(session)
 const passportSocketIo = require("passport.socketio");
 const MicrosoftStrategy = require('passport-microsoft').Strategy;
 
+const {logger, expressLogger} = require('./logger.js');
+
 const indexRouter = require('./routes/index');
 const loginRouter = require('./routes/login');
 
 const app = express();
+
+app.use(expressLogger);
 
 // view engine setup
 app.engine('.hbs', exphbs({extname: '.hbs'}));
@@ -74,7 +78,7 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res) {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -108,20 +112,50 @@ function initSocket(http) {
             let clock = JSON.parse(decodeURIComponent(socket.handshake.query.clock));
             if (CLOCKS.hasOwnProperty(clock.clockID)) {
                 CLOCKS[clock.clockID].socketID = socket.id;
-                console.log(`[CONNECTION] clock "${clock.clockID}" reconnected via "${socket.id}"`);
+                logger.info(`[CONNECTION] clock "${clock.clockID}" reconnected via "${socket.id}"`, {
+                    meta: {
+                        meta: {
+                            type: "clock_reconnected",
+                            clockID: clock.clockID
+                        }
+                    }
+                });
             } else { // A **NEW** FULLY VERIFIED CLOCK
-                console.log(`[CONNECTION] clock "${clock.clockID}" connected via "${socket.id}"`);
+                logger.info(`[CONNECTION] clock "${clock.clockID}" connected via "${socket.id}"`, {
+                    meta: {
+                        meta: {
+                            type: "clock_connected",
+                            clockID: clock.clockID
+                        }
+                    }
+                });
                 socket.join("clocks");
                 let exams = clock.exams;
                 clock = CLOCKS[clock.clockID] = new Clock(clock.clockID, socket.id, clock.clockName, exams);
                 io.emit("new_clock", JSON.stringify({id: clock.clockID, name: clock.clockName}));
                 socket.on('disconnect', () => {
-                    console.log(`[CONNECTION] clock "${clock.clockID}" disconnected`);
+                    logger.info(`[CONNECTION] clock "${clock.clockID}" disconnected`, {
+                        meta: {
+                            meta: {
+                                type: "clock_disconnected",
+                                clockID: clock.clockID
+                            }
+                        }
+                    });
                     io.emit("clock_died", clock.clockID);
                     delete CLOCKS[clock.clockID];
                 });
                 socket.on('request_callback', (controllerID, response) => {
-                    console.log(`[REQUEST] clock "${clock.clockID}" ${response} request from ${controllerID}`);
+                    logger.info(`[REQUEST] clock "${clock.clockID}" ${response} request from ${controllerID}`, {
+                        meta: {
+                            meta: {
+                                type: "clock_request_response",
+                                clockID: clock.clockID,
+                                controllerID: controllerID,
+                                response: response
+                            }
+                        }
+                    });
                     if (response === "accepted") {
                         clock.request_callback(controllerID);
                         CONTROLLERS[controllerID].join('c_' + clock.clockID);
@@ -129,31 +163,84 @@ function initSocket(http) {
                     }
                     io.to(CONTROLLERS[controllerID].id).emit('request_callback', response);
                 });
-                socket.on('toilet', occupied => {
-                    console.log(`[CLOCK TOILET] ${clock.clockID} toilet status = ${occupied}`);
-                    io.to('c_' + clock.clockID).emit("toilet", clock.clockID, occupied);
+                socket.on('toilet', (occupied, gender) => {
+                    logger.info(`[CLOCK TOILET] ${clock.clockID} toilet (${gender}) status = ${occupied}`, {
+                        meta: {
+                            meta: {
+                                type: "clock_toilet_update",
+                                clockID: clock.clockID,
+                                occupied: occupied,
+                                gender: gender
+                            }
+                        }
+                    });
+                    io.to('c_' + clock.clockID).emit("toilet", clock.clockID, occupied, gender);
                 });
                 socket.on('new_exam', json => {
-                    clock.newExam(JSON.parse(json));
+                    let exam = JSON.parse(json);
+                    clock.newExam(exam);
+                    logger.info(`[NEW EXAM] ${clock.clockID} exam = ${json}`, {
+                        meta: {
+                            meta: {
+                                type: "clock_add_exam",
+                                clockID: clock.clockID,
+                                exam: exam
+                            }
+                        }
+                    });
                     io.to('c_' + clock.clockID).emit("new_exam", clock.clockID, json);
                 });
                 socket.on('delete_exam', examID => {
                     clock.deleteExam(examID);
+                    logger.info(`[DELETE EXAM] ${clock.clockID} examID = ${examID}`, {
+                        meta: {
+                            meta: {
+                                type: "clock_add_exam",
+                                clockID: clock.clockID,
+                                examID: examID
+                            }
+                        }
+                    });
                     io.to('c_' + clock.clockID).emit("delete_exam", clock.clockID, examID);
                 });
                 socket.on('exam_update', exams => {
-                    clock.exams = JSON.parse(exams);
+                    exams = JSON.parse(exams);
+                    logger.info(`[FORCED UPDATE EXAM] ${clock.clockID} totalExams = ${clock.exams.length}`, {
+                        meta: {
+                            meta: {
+                                type: "clock_add_exam",
+                                clockID: clock.clockID,
+                                oldExams: Object.assign({}, clock.exams), // it will die lol, so clone it
+                                newExams: exams
+                            }
+                        }
+                    });
+                    clock.exams = exams;
                     io.to('c_' + clock.clockID).emit("exam_update", clock.clockID, exams);
                 });
             }
         } catch (err) {
-            // ignore, idk, maybe i should handle it
+            logger.error(`[SERVER ERROR] ${err.message}`, {
+                meta: {
+                    meta: {
+                        type: "clock_server_error",
+                        error: err,
+                    }
+                }
+            });
         }
     });
     io.on('connection', socket => {
         socket.join("controllers");
         let controllerID = socket.request.user.id;
-        console.log(`[CONNECTION] controller "${controllerID}" connected via "${socket.id}"`);
+        logger.info(`[CONNECTION] controller "${controllerID}" connected via "${socket.id}"`, {
+            meta: {
+                meta: {
+                    type: "controller_connected",
+                    controllerID: controllerID,
+                }
+            }
+        });
         CONTROLLERS[controllerID] = socket;
         if (!CONTROLLER_ROOMS[controllerID]) CONTROLLER_ROOMS[controllerID] = [];
         CONTROLLER_ROOMS[controllerID].forEach(room => socket.join(room));
@@ -171,9 +258,9 @@ function initSocket(http) {
             if (!CLOCKS[clockID] || !CLOCKS[clockID].acceptsSocket(socket)) return;
             CLOCKS[clockID].delete_exam(examID, socket);
         });
-        socket.on('toilet', clockID => {
+        socket.on('toilet', (clockID, gender) => {
             if (!CLOCKS[clockID] || !CLOCKS[clockID].acceptsSocket(socket)) return;
-            CLOCKS[clockID].toilet(socket);
+            CLOCKS[clockID].toilet(socket, gender);
         });
         socket.on("request", (clockID, nick) => {
             if (!CLOCKS[clockID]) {
@@ -181,7 +268,17 @@ function initSocket(http) {
                 return;
             }
             nick = nick + (socket.request.user.emails[0] ? ` (${socket.request.user.emails[0].value})` : "");
-            console.log("[REQUEST]", nick, clockID, "accepts =", CLOCKS[clockID].accepts(controllerID));
+            logger.info(`[REQUEST] ${nick}=>${clockID} current accepts = ${CLOCKS[clockID].accepts(controllerID)}`, {
+                meta: {
+                    meta: {
+                        type: "request",
+                        nick: nick,
+                        email: socket.request.user.emails[0].value,
+                        controllerID: controllerID,
+                        clockID: clockID
+                    }
+                }
+            });
             CLOCKS[clockID].request(nick, socket);
         });
     });

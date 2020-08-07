@@ -87,7 +87,8 @@
         <button id="addBtn" type="button" class="btn btn-primary">Add</button>
         <button id="editBtn" type="button" class="btn btn-primary" disabled>Edit</button>
         <button id="cancelBtn" type="button" class="btn btn-light" style="display: none;">Cancel</button>
-        <button id="toilet" type="button" class="btn btn-success">Toilet</button>
+        <button id="toilet_m" type="button" class="btn btn-success">Toilet M</button>
+        <button id="toilet_f" type="button" class="btn btn-success">Toilet F</button>
     </div>
 </form>
 <script>
@@ -106,7 +107,8 @@
     const addBtn = document.getElementById("addBtn");
     const editBtn = document.getElementById("editBtn");
     const cancelBtn = document.getElementById("cancelBtn");
-    const toilet = document.getElementById("toilet");
+    const toilet_f = document.getElementById("toilet_f");
+    const toilet_m = document.getElementById("toilet_m");
     let toiletState = "vacant";
     const examsUI = document.getElementById("exams");
     const date = new Date();
@@ -124,7 +126,8 @@
         start: startIN.value,
         end: endIN.value
     })));
-    toilet.onclick = () => socket.emit("toilet", CLOCK_ID);
+    toilet_m.onclick = () => socket.emit("toilet", CLOCK_ID, "male");
+    toilet_f.onclick = () => socket.emit("toilet", CLOCK_ID, "female");
     editBtn.onclick = () => {
         addBtn.disabled = false;
         editBtn.disabled = true;
@@ -206,13 +209,14 @@
         if (document.getElementById("e_" + examID)) document.getElementById("e_" + examID).remove();
         EXAMS.splice(EXAMS.map(exam => exam.id).indexOf(examID), 1);
     });
-    socket.on('toilet', (clockID, status) => {
+    socket.on('toilet', (clockID, status, gender) => {
         if (clockID !== CLOCK_ID) return;
         console.log("Received toilet update from remote");
         toiletState = status;
-        toilet.classList.remove("btn-success");
-        toilet.classList.remove("btn-danger");
-        toilet.classList.add(status === "occupied" ? "btn-danger" : "btn-success");
+        let button = gender === "female" ? toilet_f : toilet_m;
+        button.classList.remove("btn-success");
+        button.classList.remove("btn-danger");
+        button.classList.add(status === "occupied" ? "btn-danger" : "btn-success");
     });
 
     function refreshExams() {
