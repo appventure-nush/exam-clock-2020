@@ -1,5 +1,6 @@
-package sg.edu.appventure.examclock.display;
+package app.nush.examclock.display;
 
+import app.nush.examclock.PreferenceController;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.effect.DropShadow;
@@ -7,7 +8,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
-import sg.edu.appventure.examclock.PreferenceController;
 
 public class DigitalClock extends Parent {
     public final double width;

@@ -1,6 +1,6 @@
-package sg.edu.appventure.examclock.model;
+package app.nush.examclock.model;
 
-import sg.edu.appventure.examclock.connection.Base64;
+import app.nush.examclock.connection.Base64;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

@@ -1,4 +1,4 @@
-import sg.edu.appventure.examclock.Version;
+import app.nush.examclock.Version;
 
 public class TestVersion {
     public static void main(String... args) {

@@ -1,5 +1,6 @@
-package sg.edu.appventure.examclock.display;
+package app.nush.examclock.display;
 
+import app.nush.examclock.PreferenceController;
 import javafx.scene.Group;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
@@ -8,7 +9,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import sg.edu.appventure.examclock.PreferenceController;
 
 import java.util.Calendar;
 

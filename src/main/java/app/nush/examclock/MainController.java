@@ -1,5 +1,11 @@
-package sg.edu.appventure.examclock;
+package app.nush.examclock;
 
+import app.nush.examclock.addexam.AddExamController;
+import app.nush.examclock.display.ClockController;
+import app.nush.examclock.model.Exam;
+import app.nush.examclock.model.ExamHolder;
+import app.nush.examclock.updater.Updater;
+import com.google.gson.Gson;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -15,8 +21,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.*;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
@@ -31,20 +35,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
-import sg.edu.appventure.examclock.addexam.AddExamController;
-import sg.edu.appventure.examclock.display.ClockController;
-import sg.edu.appventure.examclock.model.Exam;
-import sg.edu.appventure.examclock.model.ExamHolder;
-import sg.edu.appventure.examclock.updater.Updater;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -55,6 +48,7 @@ import java.util.Stack;
 import java.util.prefs.Preferences;
 
 public class MainController {
+    public static final Gson gson = new Gson();
     public ObservableList<Exam> exams;
     public SimpleBooleanProperty toiletFemaleOccupied = new SimpleBooleanProperty(false);
     public SimpleBooleanProperty toiletMaleOccupied = new SimpleBooleanProperty(false);
@@ -212,7 +206,7 @@ public class MainController {
         fileChooser.getExtensionFilters().add(extFilter);
         play();
 
-        Updater.checkUpdates();
+        Updater.asyncUpdate();
     }
 
     public ExamHolder getExamHolder(Exam exam) {
@@ -248,28 +242,28 @@ public class MainController {
     }
 
     private void initAddExamStage() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml_add_exam.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ClassLoader.getSystemClassLoader().getResource("/app/nush/examclock/res/fxml_add_exam.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         addExamController = fxmlLoader.getController();
         addExamController.setMainController(this);
         addExamStage = new Stage();
-        scene.getStylesheets().add("/main.css");
-        scene.getStylesheets().add("/theme.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
+        scene.getStylesheets().add("/app/nush/examclock/res/main.css");
+        scene.getStylesheets().add("/app/nush/examclock/res/theme.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/app/nush/examclock/res/theme.dark.css" : "/app/nush/examclock/res/theme.light.css");
         addExamStage.setTitle("Add Exam");
         addExamStage.initModality(Modality.APPLICATION_MODAL);
         addExamStage.setScene(scene);
     }
 
     private void initConnectionStage() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml_connect.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ClassLoader.getSystemClassLoader().getResource("/app/nush/examclock/res/fxml_connect.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         ConnectionController connectionController = fxmlLoader.getController();
         connectionController.setMainController(this);
         connectStage = new Stage();
-        scene.getStylesheets().add("/main.css");
-        scene.getStylesheets().add("/theme.css");
-        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
+        scene.getStylesheets().add("/app/nush/examclock/res/main.css");
+        scene.getStylesheets().add("/app/nush/examclock/res/theme.css");
+        scene.getStylesheets().add(PreferenceController.nightMode.get() ? "/app/nush/examclock/res/theme.dark.css" : "/app/nush/examclock/res/theme.light.css");
         connectStage.setTitle("Connection");
         connectStage.setResizable(false);
         connectStage.initModality(Modality.APPLICATION_MODAL);
@@ -360,24 +354,16 @@ public class MainController {
 
     @FXML
     public void save(ActionEvent event) {
-        JSONArray array = new JSONArray();
-        array.addAll(exams);
-        preferences.put("exams", array.toJSONString());
+        preferences.put("exams", gson.toJson(exams));
     }
 
     @FXML
     public void load(ActionEvent event) {
         String examsStr = preferences.get("exams", null);
-        if (examsStr != null) {
-            JSONArray root = (JSONArray) JSONValue.parse(examsStr);
-            for (Object o : root) {
-                JSONObject exam = (JSONObject) o;
-                try {
-                    exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
-                } catch (Exception e) {
-                    System.out.println("Version incompatibility, skipped exam!");
-                }
-            }
+        if (examsStr != null) try {
+            exams.addAll(gson.fromJson(examsStr, Exam[].class));
+        } catch (Exception e) {
+            System.out.println("Version incompatibility, skipped exam!");
         }
     }
 
@@ -398,15 +384,11 @@ public class MainController {
         try {
             String str = new String(Files.readAllBytes(Paths.get(file.toURI())));
             System.out.println("Read from File\n" + str);
-            JSONArray root = (JSONArray) JSONValue.parse(str);
             exams.clear();
-            for (Object o : root) {
-                JSONObject exam = (JSONObject) o;
-                try {
-                    exams.add(new Exam(exam.getAsString("id"), exam.getAsString("name"), LocalDate.parse(exam.getAsString("date")), LocalTime.parse(exam.getAsString("start")), LocalTime.parse(exam.getAsString("end"))));
-                } catch (Exception e) {
-                    System.out.println("Version incompatibility, skipped exam!");
-                }
+            try {
+                exams.addAll(gson.fromJson(str, Exam[].class));
+            } catch (Exception e) {
+                System.out.println("Version incompatibility, skipped exam!");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -418,7 +400,7 @@ public class MainController {
         File file = fileChooser.showSaveDialog(stage);
         if (file == null) return;
         try {
-            Files.write(Paths.get(file.toURI()), JSONArray.toJSONString(exams).getBytes());
+            Files.write(Paths.get(file.toURI()), gson.toJson(exams).getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -428,7 +410,7 @@ public class MainController {
     public void about(ActionEvent actionEvent) {
         try {
             Stage stage = new Stage();
-            Group logo = FXMLLoader.load(getClass().getResource("/logo_light.fxml"));
+            Group logo = FXMLLoader.load(ClassLoader.getSystemClassLoader().getResource("/app/nush/examclock/res/logo_light.fxml"));
 
             Label title = new Label("Exam Clock", new Label(Version.getVersion()) {{
                 setFont(Font.font("monospaced", 14));
@@ -437,15 +419,7 @@ public class MainController {
             title.setFont(Font.font(30));
             VBox vbox = new VBox(title,
                     new Hyperlink("GitHub Repo") {{
-                        setOnAction(e -> {
-                            if (Desktop.isDesktopSupported()) {
-                                try {
-                                    Desktop.getDesktop().browse(new URI("https://github.com/appventure-nush/exam-clock-2020"));
-                                } catch (IOException | URISyntaxException e1) {
-                                    e1.printStackTrace();
-                                }
-                            }
-                        });
+                        setOnAction(e -> ExamClock.getInstance().getHostServices().showDocument("https://github.com/appventure-nush/exam-clock-2020"));
                     }},
                     new TitledPane("Created by",
                             new Label("Zhao Yun (h1710169)\nWang HengYue (h1710149)\nJamie Pang (h1510104)")

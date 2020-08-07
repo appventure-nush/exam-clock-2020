@@ -5,7 +5,7 @@
 <?import tornadofx.control.*?>
 <Form fx:id="form" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
       prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="sg.edu.appventure.examclock.addexam.AddExamController">
+      fx:controller="app.nush.examclock.addexam.AddExamController">
     <Fieldset inputGrow="SOMETIMES" text="Exam Details">
         <Field text="Name">
             <TextField fx:id="name_input"/>

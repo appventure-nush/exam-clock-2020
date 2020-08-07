@@ -1,5 +1,6 @@
-package sg.edu.appventure.examclock;
+package app.nush.examclock;
 
+import app.nush.examclock.model.ExamHolder;
 import com.dlsc.preferencesfx.PreferencesFx;
 import com.dlsc.preferencesfx.model.Category;
 import com.dlsc.preferencesfx.model.Group;
@@ -11,7 +12,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import sg.edu.appventure.examclock.model.ExamHolder;
 
 import java.io.IOException;
 import java.net.*;
@@ -132,7 +132,7 @@ public class PreferenceController {
 //                        )
                 )
         );
-        preferencesFx.getView().getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
+        preferencesFx.getView().getScene().getStylesheets().addAll("/app/nush/examclock/res/theme.css", nightMode.get() ? "/app/nush/examclock/res/theme.dark.css" : "/app/nush/examclock/res/theme.light.css");
         preferencesFx.getView().getStyleClass().add("preference");
         Stage window = (Stage) preferencesFx.getView().getScene().getWindow();
         window.setMaxHeight(500);
@@ -148,10 +148,10 @@ public class PreferenceController {
 //            e.printStackTrace();
 //        }
         nightMode.addListener((observable, oldValue, newValue) -> {
-            controller.stage.getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
-            controller.stage.getScene().getStylesheets().add(newValue ? "/theme.dark.css" : "/theme.light.css");
-            preferencesFx.getView().getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
-            preferencesFx.getView().getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
+            controller.stage.getScene().getStylesheets().removeAll("/app/nush/examclock/res/theme.dark.css", "/app/nush/examclock/res/theme.light.css");
+            controller.stage.getScene().getStylesheets().add(newValue ? "/app/nush/examclock/res/theme.dark.css" : "/app/nush/examclock/res/theme.light.css");
+            preferencesFx.getView().getScene().getStylesheets().removeAll("/app/nush/examclock/res/theme.dark.css", "/app/nush/examclock/res/theme.light.css");
+            preferencesFx.getView().getScene().getStylesheets().addAll("/app/nush/examclock/res/theme.css", nightMode.get() ? "/app/nush/examclock/res/theme.dark.css" : "/app/nush/examclock/res/theme.light.css");
         });
 //        controlPanelEnabledProperty.addListener((observable, oldValue, newValue) -> {
 //            if (newValue) try {

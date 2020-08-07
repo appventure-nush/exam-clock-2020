@@ -1,4 +1,4 @@
-package sg.edu.appventure.examclock.connection;
+package app.nush.examclock.connection;
 
 public class Base64 {
     static private final char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".toCharArray();

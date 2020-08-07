@@ -1,5 +1,7 @@
-package sg.edu.appventure.examclock.model;
+package app.nush.examclock.model;
 
+import app.nush.examclock.MainController;
+import app.nush.examclock.PreferenceController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -12,8 +14,6 @@ import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import sg.edu.appventure.examclock.MainController;
-import sg.edu.appventure.examclock.PreferenceController;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -51,7 +51,7 @@ public class ExamHolder extends HBox {
 
     public ExamHolder(MainController controller) {
         this.controller = controller;
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/exam_holder.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ClassLoader.getSystemClassLoader().getResource("/app/nush/examclock/res/exam_holder.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

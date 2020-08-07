@@ -9,7 +9,7 @@
 <?import javafx.scene.shape.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
             prefWidth="740.0" xmlns="http://javafx.com/javafx/8.0.171"
-            fx:controller="sg.edu.appventure.examclock.MainController">
+            fx:controller="app.nush.examclock.MainController">
     <center>
         <SplitPane fx:id="root" dividerPositions="0.5">
             <StackPane fx:id="clockRoot">

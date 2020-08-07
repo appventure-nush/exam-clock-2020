@@ -1,17 +1,16 @@
-package sg.edu.appventure.examclock.connection;
+package app.nush.examclock.connection;
 
+import app.nush.examclock.MainController;
+import app.nush.examclock.PreferenceController;
+import app.nush.examclock.model.Exam;
+import com.google.gson.JsonObject;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import okhttp3.OkHttpClient;
-import sg.edu.appventure.examclock.MainController;
-import sg.edu.appventure.examclock.PreferenceController;
-import sg.edu.appventure.examclock.model.Exam;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -73,18 +72,11 @@ public class ClientSocket {
             socket.on("request", this::onRequest);
             controller.exams.addListener((ListChangeListener<Exam>) c -> {
                 while (c.next()) {
-                    c.getAddedSubList().forEach(exam -> {
-                        JSONObject examObj = new JSONObject();
-                        examObj.put("id", exam.id);
-                        examObj.put("name", exam.name);
-                        examObj.put("date", exam.getDate());
-                        examObj.put("start", exam.getStart());
-                        examObj.put("end", exam.getEnd());
-                        socket.emit("new_exam", examObj.toJSONString());
-                    });
+                    c.getAddedSubList().forEach(exam -> socket.emit("new_exam", MainController.gson.toJson(exam)));
                     c.getRemoved().forEach(exam -> socket.emit("delete_exam", exam.id));
                 }
             });
+            PreferenceController.lanNameProperty.addListener(((observable, oldValue, newValue) -> socket.emit("rename", newValue)));
             controller.toiletMaleOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant", "male"));
             controller.toiletFemaleOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant", "female"));
             socket.open();
@@ -94,7 +86,6 @@ public class ClientSocket {
     }
 
     private void onToilet(Object[] objects) {
-        String userId = String.valueOf(objects[0]);
         String gender = String.valueOf(objects[1]);
         if (gender.equalsIgnoreCase("male"))
             Platform.runLater(() -> controller.toiletMaleOccupied.set(!controller.toiletMaleOccupied.get()));
@@ -169,13 +160,11 @@ public class ClientSocket {
     }
 
     private String identifySelf() {
-        JSONObject obj = new JSONObject();
-        obj.put("clockID", PreferenceController.clockID);
-        obj.put("clockName", PreferenceController.lanNameProperty.get());
-        JSONArray array = new JSONArray();
-        array.addAll(controller.exams);
-        obj.put("exams", array);
-        return obj.toJSONString();
+        JsonObject obj = new JsonObject();
+        obj.addProperty("clockID", PreferenceController.clockID);
+        obj.addProperty("clockName", PreferenceController.lanNameProperty.get());
+        obj.add("exams", MainController.gson.toJsonTree(controller.exams));
+        return obj.toString();
     }
 
     public void onClockIDClash(Object... args) {
@@ -193,10 +182,6 @@ public class ClientSocket {
     }
 
     public void resend() {
-        JSONObject obj = new JSONObject();
-        JSONArray array = new JSONArray();
-        array.addAll(controller.exams);
-        obj.put("exams", array);
-        socket.emit("exam_", obj.toJSONString());
+        socket.emit("exam_update", MainController.gson.toJsonTree(controller.exams));
     }
 }

@@ -1,5 +1,7 @@
-package sg.edu.appventure.examclock.updater;
+package app.nush.examclock.updater;
 
+import app.nush.examclock.ExamClock;
+import app.nush.examclock.Version;
 import com.google.gson.Gson;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -7,21 +9,23 @@ import javafx.scene.control.ButtonType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import sg.edu.appventure.examclock.Version;
 
-import javax.xml.bind.DatatypeConverter;
-import java.awt.*;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Objects;
 
 public class Updater {
     public static final Gson gson = new Gson();
     public static final OkHttpClient client = new OkHttpClient();
+
+    public static void asyncUpdate() {
+        new Thread(Updater::checkUpdates).start();
+    }
 
     public static void checkUpdates() {
         Request request = new Request.Builder()
@@ -30,7 +34,7 @@ public class Updater {
         try {
             Response response = client.newCall(request).execute();
             Release[] releases = gson.fromJson(new InputStreamReader(Objects.requireNonNull(response.body()).byteStream()), Release[].class);
-            Arrays.sort(releases, Comparator.comparing(r -> DatatypeConverter.parseDateTime(r.published_at)));
+            Arrays.sort(releases, Comparator.comparing(r -> Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(r.published_at)))));
             Release release = releases[releases.length - 1];
             int i = release.tag_name.substring(1).compareTo(Version.getVersion());
             if (i > 0) {
@@ -39,11 +43,8 @@ public class Updater {
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION, release.name + " (" + release.tag_name + ")\n" + release.body + "\n\nUpdate?", ButtonType.NO, ButtonType.YES);
                     alert.setTitle("New Version");
                     alert.showAndWait();
-                    if (alert.getResult() == ButtonType.YES && Desktop.isDesktopSupported()) try {
-                        Desktop.getDesktop().browse(new URI(release.assets[0].browser_download_url));
-                    } catch (IOException | URISyntaxException e1) {
-                        e1.printStackTrace();
-                    }
+                    if (alert.getResult() == ButtonType.YES)
+                        ExamClock.getInstance().getHostServices().showDocument(release.assets[0].browser_download_url);
                 });
             } else if (i == 0) {
                 System.out.println("Latest version in use!");

@@ -1,10 +1,10 @@
-package sg.edu.appventure.examclock;
+package app.nush.examclock;
 
+import app.nush.examclock.connection.ClientSocket;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.stage.WindowEvent;
-import sg.edu.appventure.examclock.connection.ClientSocket;
 
 public class ConnectionController {
     //    @FXML

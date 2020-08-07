@@ -1,5 +1,7 @@
-package sg.edu.appventure.examclock.addexam;
+package app.nush.examclock.addexam;
 
+import app.nush.examclock.MainController;
+import app.nush.examclock.model.Exam;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -7,8 +9,6 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
-import sg.edu.appventure.examclock.MainController;
-import sg.edu.appventure.examclock.model.Exam;
 import tornadofx.control.Form;
 
 import java.time.LocalDate;
