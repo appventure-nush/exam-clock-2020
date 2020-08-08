@@ -12,18 +12,25 @@ mainClassName = 'app.nush.examclock.Main'
 repositories {
     jcenter()
     mavenCentral()
+//    maven { url 'https://jitpack.io' }
+//    flatDir {
+//        dirs 'libs'
+//    }
 }
 
-sourceCompatibility = 1.11
-targetCompatibility = 1.11
+sourceCompatibility = 1.14
+targetCompatibility = 1.8
 
 dependencies {
+//    annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.2.0'
+//    implementation name: 'jfxrt'
+//    implementation name: 'jfxswt'
     implementation "org.openjfx:javafx-graphics:11:win"
     implementation "org.openjfx:javafx-graphics:11:mac"
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'no.tornado:tornadofx-controls:1.0.4'
     implementation 'io.socket:socket.io-client:1.0.0'
-    implementation group: 'com.dlsc.preferencesfx', name: 'preferencesfx-core', version: '11.6.0'
+    implementation group: 'com.dlsc.preferencesfx', name: 'preferencesfx-core', version: '8.6.0'
 }
 javafx {
     modules = ['javafx.controls', 'javafx.fxml']
@@ -38,7 +45,11 @@ task generateTestSources {
         versionFile.text = """package app.nush.examclock;public class Version {public static String getVersion() {return "$project.version";}}"""
     }
 }
-
+compileJava {
+    options.compilerArgs = [
+            "--release", "8"
+    ]
+}
 compileJava.dependsOn generateTestSources
 
 sourceSets.main.java {
