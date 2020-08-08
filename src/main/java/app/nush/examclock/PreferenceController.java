@@ -5,10 +5,7 @@ import com.dlsc.preferencesfx.PreferencesFx;
 import com.dlsc.preferencesfx.model.Category;
 import com.dlsc.preferencesfx.model.Group;
 import com.dlsc.preferencesfx.model.Setting;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -23,6 +20,7 @@ public class PreferenceController {
     public static final SimpleStringProperty connectivityStateProperty = new SimpleStringProperty("Not connected");
 
     public static final SimpleIntegerProperty fontScaleProperty = new SimpleIntegerProperty(20);
+    public static final SimpleDoubleProperty toiletScaleProperty = new SimpleDoubleProperty(1);
     public static final SimpleBooleanProperty nightMode = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty showToiletProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty controlPanelEnabledProperty = new SimpleBooleanProperty(true);
@@ -96,16 +94,20 @@ public class PreferenceController {
                                 Setting.of("Night Mode", nightMode),
                                 Setting.of("Font Size", fontScaleProperty, 8, 40),
                                 Setting.of("Use 12 Hour Format", use12HourFormatProperty),
-                                Setting.of("Show Toilet", showToiletProperty)
+                                Setting.of("Show Toilet", showToiletProperty),
+                                Setting.of("Toilet Scale", toiletScaleProperty, 0.1, 3, 2)
                         )
                 ).expand().subCategories(
-                        Category.of("Exams", Group.of(
-                                Setting.of("Show exams", ExamHolder.showExamsProperty),
-                                Setting.of("Orientation", ExamHolder.displayOrientationList, ExamHolder.displayOrientationProperty)
-                        ), Group.of("Exam holder",
-                                Setting.of("Show countdown", ExamHolder.showCountDownForExamProperty),
-                                Setting.of("Use simplified countdown", ExamHolder.useSimplifiedCountdownForExamProperty)
-                        )),
+                        Category.of("Exams",
+                                Group.of(
+                                        Setting.of("Show exams", ExamHolder.showExamsProperty),
+                                        Setting.of("Orientation", ExamHolder.displayOrientationList, ExamHolder.displayOrientationProperty)
+                                ), Group.of("Exam holder",
+                                        Setting.of("Progress gradient feather", ExamHolder.gradientFeatherProperty, 0, 5, 1),
+                                        Setting.of("Show countdown", ExamHolder.showCountDownForExamProperty),
+                                        Setting.of("Use simplified countdown", ExamHolder.useSimplifiedCountdownForExamProperty)
+                                )
+                        ),
                         Category.of("Analogue Clock", Group.of(
                                 Setting.of("Second Hand", secondHandColorProperty),
                                 Setting.of("Shadow effect", analogueShadowProperty)

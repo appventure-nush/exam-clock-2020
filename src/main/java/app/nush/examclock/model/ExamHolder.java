@@ -2,10 +2,7 @@ package app.nush.examclock.model;
 
 import app.nush.examclock.MainController;
 import app.nush.examclock.PreferenceController;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -26,6 +23,7 @@ public class ExamHolder extends HBox {
 
     public static final SimpleBooleanProperty showCountDownForExamProperty = new SimpleBooleanProperty(true);
     public static final SimpleBooleanProperty useSimplifiedCountdownForExamProperty = new SimpleBooleanProperty(false);
+    public static final SimpleDoubleProperty gradientFeatherProperty = new SimpleDoubleProperty(1);
     public static final SimpleBooleanProperty showExamsProperty = new SimpleBooleanProperty(false);
     public static final SimpleListProperty<Orientation> displayOrientationList = new SimpleListProperty<>(
             FXCollections.observableArrayList(Arrays.asList(Orientation.HORIZONTAL, Orientation.VERTICAL))
@@ -94,7 +92,9 @@ public class ExamHolder extends HBox {
                 getStyleClass().add("ended");
             } else {
                 float percentage = ChronoUnit.MILLIS.between(start, now) * 100f / ChronoUnit.MILLIS.between(start, end);
-                setStyle("-fx-background-color: linear-gradient(to left, rgba(255, 0, 0, 0.13) 0%, rgba(255, 0, 0, 0.13) " + (percentage - 1) + "%, rgba(0, 255, 0, 0.13) " + (percentage + 1) + "%, rgba(0, 255, 0, 0.13) 100%);");
+                setStyle("-fx-background-color: linear-gradient(to left, rgba(255, 0, 0, 0.13) 0%, " +
+                        "rgba(255, 0, 0, 0.13) " + String.format("%f", percentage - gradientFeatherProperty.get()) + "%, " +
+                        "rgba(0, 255, 0, 0.13) " + String.format("%f", percentage + gradientFeatherProperty.get()) + "%, rgba(0, 255, 0, 0.13) 100%);");
                 if (useSimplifiedCountdownForExamProperty.get()) {
                     long hours = ChronoUnit.HOURS.between(now, end);
                     long minutes = ChronoUnit.MINUTES.between(now, end);
@@ -113,11 +113,9 @@ public class ExamHolder extends HBox {
             countLabel.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
             getStyleClass().removeAll("started", "ended");
         }
-        timeLabel.setText(
-                (exam.getDate().equals(LocalDate.now().toString()) ? "" : exam.getDate()) +
-                        start.format(start.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
-                        " → " +
-                        end.format(end.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
+        timeLabel.setText(start.format(start.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
+                " → " +
+                end.format(end.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
     }
 
     public Exam getExam() {

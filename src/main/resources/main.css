@@ -26,14 +26,13 @@
 }
 
 .exam-name {
-    -fx-font-size: 1.2em;
+    -fx-font-size: 1.5em;
     -fx-padding: 0 0 0 5px;
 }
 
 .time-left {
-    -fx-font-family: monospace;
     -fx-font-weight: bold;
-    -fx-font-size: 1.5em;
+    -fx-font-size: 1.7em;
     -fx-padding: 3px;
 }
 

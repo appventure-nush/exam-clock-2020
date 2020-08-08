@@ -191,6 +191,10 @@ public class MainController {
         toiletMale.setOnMouseClicked(e -> toiletMaleOccupied.set(!toiletMaleOccupied.get()));
         toiletFemale.setOnMouseClicked(e -> toiletFemaleOccupied.set(!toiletFemaleOccupied.get()));
         toiletIconParent.visibleProperty().bind(PreferenceController.showToiletProperty);
+        PreferenceController.toiletScaleProperty.addListener(((observable, oldValue, newValue) -> {
+            toiletMale.setFitHeight(150 * (double) newValue);
+            toiletFemale.setFitHeight(150 * (double) newValue);
+        }));
 
         try {
             initAddExamStage();

@@ -39,18 +39,18 @@
                     <Circle radius="5.0" strokeType="INSIDE" styleClass="clock-element-empty"/>
                 </Group>
                 <HBox fx:id="toiletIconParent" alignment="BOTTOM_RIGHT" opacity="0.8" spacing="4.0">
-                    <ImageView fx:id="toiletFemale" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true"
-                               preserveRatio="true">
-                        <Image url="@toilet_female.png"/>
-                    </ImageView>
                     <ImageView fx:id="toiletMale" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true"
                                preserveRatio="true">
                         <Image url="@toilet_male.png"/>
                     </ImageView>
+                    <ImageView fx:id="toiletFemale" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true"
+                               preserveRatio="true">
+                        <Image url="@toilet_female.png"/>
+                    </ImageView>
                 </HBox>
             </StackPane>
-            <VBox fx:id="rightPane" alignment="TOP_RIGHT" minWidth="0.0">
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+            <VBox fx:id="rightPane" alignment="TOP_RIGHT" minHeight="0.0" minWidth="0.0">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                     <VBox fx:id="examList"/>
                 </ScrollPane>
             </VBox>
