@@ -8,7 +8,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.prefs.Preferences;
 
 public class ExamClock extends Application {
@@ -28,9 +27,7 @@ public class ExamClock extends Application {
     public void start(Stage primaryStage) throws IOException {
         instance = this;
         preferences = Preferences.userNodeForPackage(ExamClock.class);
-        URL resource = getClass().getResource("/fxml_main.fxml");
-        System.out.println(resource);
-        FXMLLoader loader = new FXMLLoader(resource);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_main.fxml"));
         Parent root = loader.load();
         controller = loader.getController();
         controller.setStage(primaryStage);

@@ -1,23 +1,32 @@
 plugins {
+    id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
+    id 'org.openjfx.javafxplugin' version '0.0.9'
 }
 
 group 'app.nush'
 version '1.3.6-beta'
-mainClassName = 'app.nush.examclock.ExamClock'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+mainClassName = 'app.nush.examclock.Main'
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
+
 dependencies {
+    implementation "org.openjfx:javafx-graphics:11:win"
+    implementation "org.openjfx:javafx-graphics:11:mac"
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'no.tornado:tornadofx-controls:1.0.4'
     implementation 'io.socket:socket.io-client:1.0.0'
-    implementation group: 'com.dlsc.preferencesfx', name: 'preferencesfx-core', version: '8.6.0'
+    implementation group: 'com.dlsc.preferencesfx', name: 'preferencesfx-core', version: '11.6.0'
+}
+javafx {
+    modules = ['javafx.controls', 'javafx.fxml']
 }
 
 task generateTestSources {
@@ -43,6 +52,6 @@ shadowJar.doLast {
 }
 jar {
     manifest {
-        attributes 'Main-Class': 'app.nush.examclock.ExamClock'
+        attributes 'Main-Class': "$mainClassName"
     }
 }

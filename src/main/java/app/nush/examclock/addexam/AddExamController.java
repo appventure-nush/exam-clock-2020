@@ -64,7 +64,7 @@ public class AddExamController {
 
         start_time_input.textProperty().addListener((observable, newv, oldv) -> {
             try {
-                LocalTime parsed = parseTime(start_time_input.getText().toUpperCase(), 0);
+                LocalTime parsed = parseTime(start_time_input.getText().toLowerCase(), 0);
                 start_time_input.setUserData(parsed);
                 end_time_input.setText(timeFormatters[0].format(parsed.plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
             } catch (DateTimeParseException e) {
@@ -74,7 +74,7 @@ public class AddExamController {
         });
         end_time_input.textProperty().addListener((observable, newv, oldv) -> {
             try {
-                LocalTime parsed = parseTime(end_time_input.getText().toUpperCase(), 0);
+                LocalTime parsed = parseTime(end_time_input.getText().toLowerCase(), 0);
                 end_time_input.setUserData(parsed);
                 LocalTime start = (LocalTime) start_time_input.getUserData();
                 int minutes = (int) start.until(parsed, ChronoUnit.MINUTES);
@@ -98,7 +98,7 @@ public class AddExamController {
     @FXML
     public void add(ActionEvent event) {
         try {
-            Exam exam = new Exam(name_input.getText(), date_input.getValue(), parseTime(start_time_input.getText().toUpperCase(), 0), parseTime(end_time_input.getText().toUpperCase(), 0));
+            Exam exam = new Exam(name_input.getText(), date_input.getValue(), parseTime(start_time_input.getText().toLowerCase(), 0), parseTime(end_time_input.getText().toLowerCase(), 0));
             mainController.addCallback(exam);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
