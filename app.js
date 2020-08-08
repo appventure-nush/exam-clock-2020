@@ -120,7 +120,8 @@ function initSocket(http) {
                         }
                     }
                 });
-            } else { // A **NEW** FULLY VERIFIED CLOCK
+            } else {
+                // A **NEW** FULLY VERIFIED CLOCK
                 logger.info(`[CONNECTION] clock "${clock.clockID}" connected via "${socket.id}"`, {
                     meta: {
                         meta: {
@@ -129,96 +130,101 @@ function initSocket(http) {
                         }
                     }
                 });
-                socket.join("clocks");
-                let exams = clock.exams;
-                clock = CLOCKS[clock.clockID] = new Clock(clock.clockID, socket.id, clock.clockName, exams);
-                io.emit("new_clock", JSON.stringify({id: clock.clockID, name: clock.clockName}));
-                socket.on('disconnect', () => {
-                    logger.info(`[CONNECTION] clock "${clock.clockID}" disconnected`, {
-                        meta: {
-                            meta: {
-                                type: "clock_disconnected",
-                                clockID: clock.clockID
-                            }
-                        }
-                    });
-                    io.emit("clock_died", clock.clockID);
-                    delete CLOCKS[clock.clockID];
-                });
-                socket.on('request_callback', (controllerID, response) => {
-                    logger.info(`[REQUEST] clock "${clock.clockID}" ${response} request from ${controllerID}`, {
-                        meta: {
-                            meta: {
-                                type: "clock_request_response",
-                                clockID: clock.clockID,
-                                controllerID: controllerID,
-                                response: response
-                            }
-                        }
-                    });
-                    if (response === "accepted") {
-                        clock.request_callback(controllerID);
-                        CONTROLLERS[controllerID].join('c_' + clock.clockID);
-                        CONTROLLER_ROOMS[controllerID].push('c_' + clock.clockID);
-                    }
-                    io.to(CONTROLLERS[controllerID].id).emit('request_callback', response);
-                });
-                socket.on('toilet', (occupied, gender) => {
-                    logger.info(`[CLOCK TOILET] ${clock.clockID} toilet (${gender}) status = ${occupied}`, {
-                        meta: {
-                            meta: {
-                                type: "clock_toilet_update",
-                                clockID: clock.clockID,
-                                occupied: occupied,
-                                gender: gender
-                            }
-                        }
-                    });
-                    io.to('c_' + clock.clockID).emit("toilet", clock.clockID, occupied, gender);
-                });
-                socket.on('new_exam', json => {
-                    let exam = JSON.parse(json);
-                    clock.newExam(exam);
-                    logger.info(`[NEW EXAM] ${clock.clockID} exam = ${json}`, {
-                        meta: {
-                            meta: {
-                                type: "clock_add_exam",
-                                clockID: clock.clockID,
-                                exam: exam
-                            }
-                        }
-                    });
-                    io.to('c_' + clock.clockID).emit("new_exam", clock.clockID, json);
-                });
-                socket.on('delete_exam', examID => {
-                    clock.deleteExam(examID);
-                    logger.info(`[DELETE EXAM] ${clock.clockID} examID = ${examID}`, {
-                        meta: {
-                            meta: {
-                                type: "clock_add_exam",
-                                clockID: clock.clockID,
-                                examID: examID
-                            }
-                        }
-                    });
-                    io.to('c_' + clock.clockID).emit("delete_exam", clock.clockID, examID);
-                });
-                socket.on('exam_update', exams => {
-                    exams = JSON.parse(exams);
-                    logger.info(`[FORCED UPDATE EXAM] ${clock.clockID} totalExams = ${clock.exams.length}`, {
-                        meta: {
-                            meta: {
-                                type: "clock_add_exam",
-                                clockID: clock.clockID,
-                                oldExams: Object.assign({}, clock.exams), // it will die lol, so clone it
-                                newExams: exams
-                            }
-                        }
-                    });
-                    clock.exams = exams;
-                    io.to('c_' + clock.clockID).emit("exam_update", clock.clockID, exams);
-                });
             }
+            socket.join("clocks");
+            let exams = clock.exams;
+            clock = CLOCKS[clock.clockID] = new Clock(clock.clockID, socket.id, clock.clockName, exams);
+            io.emit("new_clock", JSON.stringify({id: clock.clockID, name: clock.clockName}));
+            socket.on('disconnect', () => {
+                logger.info(`[CONNECTION] clock "${clock.clockID}" disconnected`, {
+                    meta: {
+                        meta: {
+                            type: "clock_disconnected",
+                            clockID: clock.clockID
+                        }
+                    }
+                });
+                io.emit("clock_died", clock.clockID);
+                delete CLOCKS[clock.clockID];
+            });
+            socket.on('rename', name => {
+                console.log(`[CLOCK RENAME] ${clock.clockName} => ${name}`);
+                clock.clockName = name;
+                io.emit('clock_name_change', clock.clockID, name);
+            });
+            socket.on('request_callback', (controllerID, response) => {
+                logger.info(`[REQUEST] clock "${clock.clockID}" ${response} request from ${controllerID}`, {
+                    meta: {
+                        meta: {
+                            type: "clock_request_response",
+                            clockID: clock.clockID,
+                            controllerID: controllerID,
+                            response: response
+                        }
+                    }
+                });
+                if (response === "accepted") {
+                    clock.request_callback(controllerID);
+                    CONTROLLERS[controllerID].join('c_' + clock.clockID);
+                    CONTROLLER_ROOMS[controllerID].push('c_' + clock.clockID);
+                }
+                io.to(CONTROLLERS[controllerID].id).emit('request_callback', response);
+            });
+            socket.on('toilet', (occupied, gender) => {
+                logger.info(`[CLOCK TOILET] ${clock.clockID} toilet (${gender}) status = ${occupied}`, {
+                    meta: {
+                        meta: {
+                            type: "clock_toilet_update",
+                            clockID: clock.clockID,
+                            occupied: occupied,
+                            gender: gender
+                        }
+                    }
+                });
+                io.to('c_' + clock.clockID).emit("toilet", clock.clockID, occupied, gender);
+            });
+            socket.on('new_exam', json => {
+                let exam = JSON.parse(json);
+                clock.newExam(exam);
+                logger.info(`[NEW EXAM] ${clock.clockID} exam = ${json}`, {
+                    meta: {
+                        meta: {
+                            type: "clock_add_exam",
+                            clockID: clock.clockID,
+                            exam: exam
+                        }
+                    }
+                });
+                io.to('c_' + clock.clockID).emit("new_exam", clock.clockID, json);
+            });
+            socket.on('delete_exam', examID => {
+                clock.deleteExam(examID);
+                logger.info(`[DELETE EXAM] ${clock.clockID} examID = ${examID}`, {
+                    meta: {
+                        meta: {
+                            type: "clock_add_exam",
+                            clockID: clock.clockID,
+                            examID: examID
+                        }
+                    }
+                });
+                io.to('c_' + clock.clockID).emit("delete_exam", clock.clockID, examID);
+            });
+            socket.on('exam_update', exams => {
+                exams = JSON.parse(exams);
+                logger.info(`[FORCED UPDATE EXAM] ${clock.clockID} totalExams = ${clock.exams.length}`, {
+                    meta: {
+                        meta: {
+                            type: "clock_add_exam",
+                            clockID: clock.clockID,
+                            oldExams: Object.assign({}, clock.exams), // it will die lol, so clone it
+                            newExams: exams
+                        }
+                    }
+                });
+                clock.exams = exams;
+                io.to('c_' + clock.clockID).emit("exam_update", clock.clockID, exams);
+            });
         } catch (err) {
             logger.error(`[SERVER ERROR] ${err.message}`, {
                 meta: {

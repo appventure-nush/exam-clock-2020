@@ -72,6 +72,7 @@
         console.log("Session ID", "{{sessionID}}");
     });
     let respondedAndAccepted = false;
+    let timeout;
     const connectBtn = document.getElementById("connect");
     const inputNK = document.getElementById("nick");
     const inputCID = document.getElementById("clockID");
@@ -86,6 +87,7 @@
 
     socket.on('request_callback', response => {
         console.log("Request has been responsed with", response);
+        if (timeout) clearTimeout(timeout);
         if (response === "accepted") {
             respondedAndAccepted = true;
             $('form').submit();
@@ -102,6 +104,10 @@
             let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
             if (spinner) spinner.remove();
         }
+    });
+    socket.on('clock_name_change', (clockID, name) => {
+        let clock = document.getElementById('c_' + clockID);
+        if (clock) clock.innerHTML = `${clockID} (${name})`;
     });
     socket.on('new_clock', clockJSON => {
         let clock = JSON.parse(clockJSON);
@@ -120,7 +126,8 @@
             socket.emit("request", inputCID.value, inputNK.value);
             connectBtn.innerHTML = "<span class=\"spinner-border spinner-border-sm\" role=\"status\" aria-hidden=\"true\"></span>\n" + connectBtn.innerHTML;
             connectBtn.disabled = true;
-            setTimeout(() => {
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => {
                 connectBtn.disabled = false;
                 let spinner = connectBtn.getElementsByClassName("spinner-border")[0];
                 if (spinner) spinner.remove();
