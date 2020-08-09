@@ -68,6 +68,7 @@ public class ExamClock extends Application {
                 alert.setTitle("Error");
                 alert.setHeaderText("Exam clock is unable to start!");
                 alert.showAndWait();
+                Platform.exit();
             });
         }
     }
