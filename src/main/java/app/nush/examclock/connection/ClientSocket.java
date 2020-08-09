@@ -1,12 +1,14 @@
 package app.nush.examclock.connection;
 
-import app.nush.examclock.MainController;
-import app.nush.examclock.PreferenceController;
+import app.nush.examclock.controllers.AddExamController;
+import app.nush.examclock.controllers.MainController;
+import app.nush.examclock.controllers.PreferenceController;
 import app.nush.examclock.model.Exam;
 import com.google.gson.JsonObject;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -22,28 +24,27 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * The type Client socket.
+ */
 public class ClientSocket {
-    private Socket socket;
-    private final MainController controller;
+
+    /**
+     * The connectivity state property. Changes when connection state changes
+     */
+    public static final SimpleStringProperty connectivityStateProperty = new SimpleStringProperty("Not connected");
+    /**
+     * The constant dateFormatter used for date data transfer (machine friendly, use just numbers)
+     */
     public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter[] timeFormatters = {
-            DateTimeFormatter.ofPattern("hh:mma"),
-            DateTimeFormatter.ofPattern("HH:mm"),
-            DateTimeFormatter.ofPattern("h:mma"),
-            DateTimeFormatter.ofPattern("H:mm"),
-            DateTimeFormatter.ofPattern("hha"),
-            DateTimeFormatter.ofPattern("ha")
-    };
+    private final MainController controller;
+    private Socket socket;
 
-    private static LocalTime parseTime(String time, int index) {
-        if (index >= timeFormatters.length) throw new DateTimeParseException("Invalid date/time!", time, 0);
-        try {
-            return LocalTime.parse(time.replace(" ", ""), timeFormatters[index]);
-        } catch (DateTimeException e) {
-            return parseTime(time, index + 1);
-        }
-    }
-
+    /**
+     * Instantiates a new Client socket.
+     *
+     * @param controller the controller
+     */
     public ClientSocket(MainController controller) {
         this.controller = controller;
         OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
@@ -59,11 +60,10 @@ public class ClientSocket {
 //            socket = IO.socket("http://localhost:3000", opts);
             socket.on(Socket.EVENT_CONNECT, args -> {
                 System.out.println("Connected to Server!");
-                Platform.runLater(() -> PreferenceController.connectivityStateProperty.set("Connected"));
-                identifySelf();
-            }).on(Socket.EVENT_CONNECT_TIMEOUT, args -> Platform.runLater(() -> PreferenceController.connectivityStateProperty.set("Connection time out")))
-                    .on(Socket.EVENT_RECONNECTING, args -> Platform.runLater(() -> PreferenceController.connectivityStateProperty.set("Reconnecting")))
-                    .on(Socket.EVENT_DISCONNECT, args -> Platform.runLater(() -> PreferenceController.connectivityStateProperty.set("Disconnected")));
+                Platform.runLater(() -> connectivityStateProperty.set("Connected"));
+            }).on(Socket.EVENT_CONNECT_TIMEOUT, args -> Platform.runLater(() -> connectivityStateProperty.set("Connection time out")))
+                    .on(Socket.EVENT_RECONNECTING, args -> Platform.runLater(() -> connectivityStateProperty.set("Reconnecting")))
+                    .on(Socket.EVENT_DISCONNECT, args -> Platform.runLater(() -> connectivityStateProperty.set("Disconnected")));
             socket.on("clock_id_clash", this::onClockIDClash);
             socket.on("new_exam", this::onNewExam);
             socket.on("edit_exam", this::onEditExam);
@@ -76,12 +76,22 @@ public class ClientSocket {
                     c.getRemoved().forEach(exam -> socket.emit("delete_exam", exam.id));
                 }
             });
-            PreferenceController.lanNameProperty.addListener(((observable, oldValue, newValue) -> socket.emit("rename", newValue)));
+            PreferenceController.nameProperty.addListener(((observable, oldValue, newValue) -> socket.emit("rename", newValue)));
             controller.toiletMaleOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant", "male"));
             controller.toiletFemaleOccupied.addListener((observable, oldValue, newValue) -> socket.emit("toilet", newValue ? "occupied" : "vacant", "female"));
             socket.open();
         } catch (URISyntaxException | UnsupportedEncodingException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static LocalTime parseTime(String time, int index) {
+        if (index >= AddExamController.timeFormatters.length)
+            throw new DateTimeParseException("Invalid date/time!", time, 0);
+        try {
+            return LocalTime.parse(time.replace(" ", ""), AddExamController.timeFormatters[index]);
+        } catch (DateTimeException e) {
+            return parseTime(time, index + 1);
         }
     }
 
@@ -162,26 +172,30 @@ public class ClientSocket {
     private String identifySelf() {
         JsonObject obj = new JsonObject();
         obj.addProperty("clockID", PreferenceController.clockID);
-        obj.addProperty("clockName", PreferenceController.lanNameProperty.get());
+        obj.addProperty("clockName", PreferenceController.nameProperty.get());
         obj.add("exams", MainController.gson.toJsonTree(controller.exams));
         return obj.toString();
     }
 
-    public void onClockIDClash(Object... args) {
+    private void onClockIDClash(Object... args) {
         System.out.println("So somehow there's a clash of clock id");
         controller.regenClockID();
-        identifySelf();
+        socket.emit("clock_id_un_clash", identifySelf());
     }
 
-    public void close() {
-        socket.close();
-    }
-
+    /**
+     * Gets socket
+     *
+     * @return the socket
+     */
     public Socket getSocket() {
         return socket;
     }
 
-    public void resend() {
+    /**
+     * Updates the server's exam cache, do this if you encounter desync
+     */
+    public void forceExamUpdate() {
         socket.emit("exam_update", MainController.gson.toJsonTree(controller.exams));
     }
 }

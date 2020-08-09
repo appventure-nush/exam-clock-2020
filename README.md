@@ -1,7 +1,5 @@
 # Exam Clock
 
-## Basic functionality completed!
-
 ### How to use!
 1. Run the attached jar file with **Java 8**
    - You should see a sample exam that is meant to test the program
@@ -20,3 +18,4 @@
 6. Hopefully you are being redirected to the actual control panel
 
 #### [Releases](https://github.com/appventure-nush/exam-clock-2020/releases)
+#### [Suggest new feature!](https://github.com/appventure-nush/exam-clock-2020/issues/new)

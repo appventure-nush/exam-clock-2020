@@ -6,7 +6,9 @@ plugins {
 }
 
 group 'app.nush'
-version '1.3.6-beta'
+version '1.3.7-beta'
+
+applicationName = 'Exam Clock'
 mainClassName = 'app.nush.examclock.Main'
 
 repositories {
@@ -18,19 +20,22 @@ repositories {
 //    }
 }
 
+double jdkVersion = 1.14
+println "JDK version = ${jdkVersion}"
+
 sourceCompatibility = 1.14
-targetCompatibility = 1.8
+targetCompatibility = jdkVersion
+
+String preferenceFx = jdkVersion == 1.8d ? '8.6.0' : '11.6.0'
+println "PreferenceFX version = ${preferenceFx}"
 
 dependencies {
-//    annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.2.0'
-//    implementation name: 'jfxrt'
-//    implementation name: 'jfxswt'
     implementation "org.openjfx:javafx-graphics:11:win"
     implementation "org.openjfx:javafx-graphics:11:mac"
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'no.tornado:tornadofx-controls:1.0.4'
     implementation 'io.socket:socket.io-client:1.0.0'
-    implementation group: 'com.dlsc.preferencesfx', name: 'preferencesfx-core', version: '8.6.0'
+    implementation group: 'com.dlsc.preferencesfx', name: 'preferencesfx-core', version: preferenceFx
 }
 javafx {
     modules = ['javafx.controls', 'javafx.fxml']
@@ -55,6 +60,11 @@ compileJava.dependsOn generateTestSources
 sourceSets.main.java {
     srcDir "$buildDir/generated"
 }
+shadowJar {
+    baseName = 'exam-clock'
+    classifier = targetCompatibility
+    archiveVersion = version
+}
 shadowJar.doLast {
     println "Deploying..."
     exec {
@@ -63,6 +73,11 @@ shadowJar.doLast {
 }
 jar {
     manifest {
-        attributes 'Main-Class': "$mainClassName"
+        attributes('Main-Class': "$mainClassName",
+                'Name': 'app/nush/examclock/',
+                'Specification-Title': "Exam Clock",
+                'Specification-Version': "$version",
+                'Specification-Vendor': "Appventure@NUSHIGH")
+
     }
 }

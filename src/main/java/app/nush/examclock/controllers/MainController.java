@@ -1,9 +1,9 @@
-package app.nush.examclock;
+package app.nush.examclock.controllers;
 
-import app.nush.examclock.addexam.AddExamController;
-import app.nush.examclock.display.ClockController;
+import app.nush.examclock.ExamClock;
+import app.nush.examclock.Version;
+import app.nush.examclock.display.ExamHolder;
 import app.nush.examclock.model.Exam;
-import app.nush.examclock.model.ExamHolder;
 import app.nush.examclock.updater.Updater;
 import com.google.gson.Gson;
 import javafx.animation.KeyFrame;
@@ -27,7 +27,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
@@ -47,16 +46,33 @@ import java.util.List;
 import java.util.Stack;
 import java.util.prefs.Preferences;
 
+/**
+ * The type Main controller.
+ */
 public class MainController {
     public static final Gson gson = new Gson();
+    private static final ColorAdjust redEffect = new ColorAdjust(0, 1, 0.5, 0);
+    private static final ColorAdjust greenEffect = new ColorAdjust(0.5, 1, 0.5, 0);
+    /**
+     * Exams, observable so changes are reflected across entire program
+     */
     public ObservableList<Exam> exams;
+    /**
+     * if female toilet is occupied.
+     */
     public SimpleBooleanProperty toiletFemaleOccupied = new SimpleBooleanProperty(false);
+    /**
+     * if male toilet is occupied.
+     */
     public SimpleBooleanProperty toiletMaleOccupied = new SimpleBooleanProperty(false);
+    /**
+     * The Stage.
+     */
     public Stage stage;
+    /**
+     * The Add exam stage.
+     */
     public Stage addExamStage;
-    //    public ObservableList<Key> keys;
-//    public final Key simpleKey;
-    public ExamHolder selectedExamHolder;
     @FXML
     private SplitPane root;
     @FXML
@@ -65,8 +81,6 @@ public class MainController {
     private Group clockPane;
     @FXML
     private Group clockFace;
-    @FXML
-    private Circle clockDisc;
     @FXML
     private Group hourGroup;
     @FXML
@@ -89,95 +103,83 @@ public class MainController {
     private ImageView toiletMale;
     @FXML
     private ImageView toiletFemale;
-    private ClockController clockController;
+    /**
+     * The Selected exam holder.
+     */
+    public ExamHolder selectedExamHolder;
     private PreferenceController preferenceController;
-    public ConnectionController connectionController;
+    /**
+     * The Preferences.
+     */
+    public Preferences preferences;
+
     private Stage connectStage;
-    private Stack<ExamHolder> holderPool;
+    /**
+     * Link to instances of other controllers
+     */
+    private ClockController clockController;
     private Timeline timeline;
     private AddExamController addExamController;
-
-    public Preferences preferences;
     private FileChooser fileChooser;
-    @FXML
-    private MenuBar menuBar;
+    private ConnectionController connectionController;
+    private Stack<ExamHolder> examHolderPool;
 
+    /**
+     * Instantiates a new Main controller.
+     */
     public MainController() {
-//        this.simpleKey = new Key(Key.KeyType.TOILET);
     }
 
     private static String generateClockID() {
-        char[] set = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789".toCharArray();
+        char[] set = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789".toCharArray(); // stripped of  I l and O
         char[] res = new char[7];
         for (int i = 0; i < 7; i++) res[i] = set[(int) (set.length * Math.random())];
         return new String(res);
     }
 
+    /**
+     * Regen clock id.
+     */
     public void regenClockID() {
         PreferenceController.clockID = generateClockID();
     }
 
+    /**
+     * Initialize.
+     */
     @FXML
-    public void initialize() {
+    public void initialize() throws IOException {
         System.out.println("initialize");
-        final String os = System.getProperty("os.name");
-        if (os != null && os.startsWith("Mac")) menuBar.useSystemMenuBarProperty().set(true);
         exams = FXCollections.observableArrayList();
-//        keys = FXCollections.observableArrayList();
-        preferences = Preferences.userNodeForPackage(MainController.class);
-        holderPool = new Stack<>();
         exams.addListener((ListChangeListener<Exam>) c -> {
             while (c.next()) {
                 List<? extends Exam> removed = c.getRemoved();
                 examList.getChildren().removeIf(node -> {
                     ExamHolder examHolder = (ExamHolder) node;
                     boolean contains = removed.contains(examHolder.getExam());
-                    if (contains) holderPool.push(examHolder.reset());
+                    if (contains) examHolderPool.push(examHolder.reset());
                     return contains;
                 });
-                for (int i = c.getFrom(); i < c.getTo(); i++) {
-                    if (holderPool.empty()) examList.getChildren().add(i, new ExamHolder(this, c.getList().get(i)));
-                    else {
-                        ExamHolder element = holderPool.pop().setExam(c.getList().get(i));
-                        examList.getChildren().add(i, element);
-                        element.reset();
-                    }
-                }
+                for (int i = c.getFrom(); i < c.getTo(); i++)
+                    examList.getChildren().add(i, examHolderPool.empty() ? new ExamHolder(this, c.getList().get(i)) : examHolderPool.pop().setExam(c.getList().get(i)));
             }
         });
-//        keys.addListener((ListChangeListener<Key>) c -> {
-//            JSONArray array = keys.stream().map(Key::toJsonObject).collect(Collectors.toCollection(JSONArray::new));
-//            preferences.put("keys", array.toJSONString());
-//        });
-        load(null);
-//        String keyStr = preferences.get("keys", null);
-//        if (keyStr != null) {
-//            JSONArray root = (JSONArray) JSONValue.parse(keyStr);
-//            keys.addAll(root.stream().map(o -> Key.fromJsonObject((JSONObject) o)).collect(Collectors.toCollection(ArrayList::new)));
-//        }
-        PreferenceController.clockID = preferences.get("clockID", generateClockID());
-        preferences.put("clockID", PreferenceController.clockID);
+        examHolderPool = new Stack<>();
+        preferences = Preferences.userNodeForPackage(MainController.class);
+        preferences.put("clockID", PreferenceController.clockID = preferences.get("clockID", generateClockID())); // set if unset
+
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         preferenceController = new PreferenceController(this);
+
         root.setStyle("-fx-font-size: " + PreferenceController.fontScaleProperty.get() + "px;");
         PreferenceController.fontScaleProperty.addListener((observable, oldValue, newValue) -> root.setStyle("-fx-font-size: " + newValue + "px;"));
         examList.visibleProperty().bind(ExamHolder.showExamsProperty);
         root.orientationProperty().bind(ExamHolder.displayOrientationProperty);
-        preferenceController.initPreferences();
-
-        clockRoot.widthProperty().addListener((observable, oldValue, newValue) -> resize(clockRoot.getWidth(), clockRoot.getHeight()));
-        clockRoot.heightProperty().addListener((observable, oldValue, newValue) -> resize(clockRoot.getWidth(), clockRoot.getHeight()));
+        clockRoot.widthProperty().addListener((observable, oldValue, newValue) -> clockController.resize(clockRoot.getWidth(), clockRoot.getHeight()));
+        clockRoot.heightProperty().addListener((observable, oldValue, newValue) -> clockController.resize(clockRoot.getWidth(), clockRoot.getHeight()));
         rightPane.visibleProperty().bind(ExamHolder.showExamsProperty);
         ExamHolder.showExamsProperty.addListener(((observable, oldValue, newValue) -> root.setDividerPositions(newValue ? 0.5 : 1)));
 
-        ColorAdjust redEffect = new ColorAdjust();
-        redEffect.setBrightness(0.5);
-        redEffect.setSaturation(1);
-        redEffect.setHue(0);
-        ColorAdjust greenEffect = new ColorAdjust();
-        greenEffect.setBrightness(0.5);
-        greenEffect.setSaturation(1);
-        greenEffect.setHue(0.5);
         toiletMale.setEffect(greenEffect);
         toiletFemale.setEffect(greenEffect);
         toiletFemaleOccupied.addListener((observable, oldValue, newValue) -> {
@@ -191,28 +193,32 @@ public class MainController {
         toiletMale.setOnMouseClicked(e -> toiletMaleOccupied.set(!toiletMaleOccupied.get()));
         toiletFemale.setOnMouseClicked(e -> toiletFemaleOccupied.set(!toiletFemaleOccupied.get()));
         toiletIconParent.visibleProperty().bind(PreferenceController.showToiletProperty);
-        PreferenceController.toiletScaleProperty.addListener(((observable, oldValue, newValue) -> {
-            toiletMale.setFitHeight(150 * (double) newValue);
-            toiletFemale.setFitHeight(150 * (double) newValue);
-        }));
+        toiletMale.fitHeightProperty().bind(PreferenceController.toiletScaleProperty.multiply(150));
+        toiletFemale.fitHeightProperty().bind(PreferenceController.toiletScaleProperty.multiply(150));
 
-        try {
-            initAddExamStage();
-            initConnectionStage();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json"));
+
+        initAddExamStage();
+        initConnectionStage();
+
+        preferenceController.initPreferences(); // load preferences after adding listeners
+        loadExams(null); // load exams from disk
+        Updater.asyncUpdate(); // check updates
+
+        // Start main render loop
         timeline = new Timeline();
         timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), event1 -> refresh()));
-        fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
-        fileChooser.getExtensionFilters().add(extFilter);
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(16), e -> refresh()));
         play();
-
-        Updater.asyncUpdate();
     }
 
+    /**
+     * Gets exam holder by exam
+     *
+     * @param exam the exam
+     * @return the exam holder
+     */
     public ExamHolder getExamHolder(Exam exam) {
         for (Node child : examList.getChildren()) {
             ExamHolder holder = (ExamHolder) child;
@@ -223,20 +229,24 @@ public class MainController {
         return null;
     }
 
+    /**
+     * Refresh display
+     */
     public void refresh() {
         clockController.refresh();
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
-        examList.getChildren().forEach(node -> {
+        for (Node node : examList.getChildren()) {
             ExamHolder examHolder = (ExamHolder) node;
             examHolder.update(today, now);
-        });
+        }
     }
 
-    public void resize(double width, double height) {
-        clockController.resize(width, height);
-    }
-
+    /**
+     * Show add exam stage.
+     *
+     * @param exam the exam
+     */
     public void showAddExamStage(Exam exam) {
         addExamController.name_input.setText(exam.name);
         addExamController.date_input.setValue(LocalDate.parse(exam.date));
@@ -274,7 +284,7 @@ public class MainController {
         connectStage.setScene(scene);
     }
 
-    public void addCallback(Exam exam) {
+    public void addExam(Exam exam) {
         exams.add(exam);
         addExamStage.hide();
     }
@@ -348,21 +358,23 @@ public class MainController {
         examList.getChildren().forEach(node -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam()));
     }
 
-
     @FXML
     public void reset(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure? This will remove everything!", ButtonType.NO, ButtonType.YES);
         alert.showAndWait();
-        if (alert.getResult() == ButtonType.YES) exams.clear();
+        if (alert.getResult() == ButtonType.YES) {
+            exams.clear();
+            saveExams(null);
+        }
     }
 
     @FXML
-    public void save(ActionEvent event) {
+    public void saveExams(ActionEvent event) {
         preferences.put("exams", gson.toJson(exams));
     }
 
     @FXML
-    public void load(ActionEvent event) {
+    public void loadExams(ActionEvent event) {
         String examsStr = preferences.get("exams", null);
         if (examsStr != null) try {
             exams.addAll(gson.fromJson(examsStr, Exam[].class));
@@ -450,16 +462,23 @@ public class MainController {
         }
     }
 
+    @FXML
+    public void help(ActionEvent actionEvent) {
+        ExamClock.getInstance().getHostServices().showDocument("https://github.com/appventure-nush/exam-clock-2020/blob/master/README.md");
+    }
+
     public void setStage(Stage stage) {
         this.stage = stage;
     }
 
     public void onClose(WindowEvent event) {
         stop();
-        preferenceController.onClose(event);
         connectionController.onClose(event);
     }
 
+    /**
+     * Play clock animation, updates etc
+     */
     public void play() {
         timeline.stop();
         timeline.play();
@@ -467,5 +486,9 @@ public class MainController {
 
     public void stop() {
         timeline.stop();
+    }
+
+    public void setConnectionController(ConnectionController connectionController) {
+        this.connectionController = connectionController;
     }
 }

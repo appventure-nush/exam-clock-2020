@@ -9,13 +9,13 @@
 <?import javafx.scene.shape.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
             prefWidth="740.0" xmlns="http://javafx.com/javafx/8.0.171"
-            fx:controller="app.nush.examclock.MainController">
+            fx:controller="app.nush.examclock.controllers.MainController">
     <center>
         <SplitPane fx:id="root" dividerPositions="0.5">
             <StackPane fx:id="clockRoot">
                 <Group fx:id="clockPane">
                     <Group fx:id="clockFace">
-                        <Circle fx:id="clockDisc" radius="200.0" strokeType="OUTSIDE" strokeWidth="2"
+                        <Circle radius="200.0" strokeType="OUTSIDE" strokeWidth="2"
                                 styleClass="clock-element-empty"/>
                     </Group>
                     <Group fx:id="hourGroup">
@@ -57,53 +57,53 @@
         </SplitPane>
     </center>
     <top>
-        <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+        <MenuBar BorderPane.alignment="CENTER" useSystemMenuBar="true">
             <Menu mnemonicParsing="false" text="File">
                 <MenuItem onAction="#reset" text="New">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                     </accelerator>
                 </MenuItem>
                 <SeparatorMenuItem mnemonicParsing="false"/>
-                <MenuItem mnemonicParsing="false" onAction="#save" text="Save">
+                <MenuItem mnemonicParsing="false" onAction="#saveExams" text="Save">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                     </accelerator>
                 </MenuItem>
-                <MenuItem mnemonicParsing="false" onAction="#load" text="Revert to saved"/>
+                <MenuItem mnemonicParsing="false" onAction="#loadExams" text="Revert to saved"/>
                 <SeparatorMenuItem mnemonicParsing="false"/>
                 <MenuItem mnemonicParsing="false" onAction="#importExams" text="Import..."/>
                 <MenuItem mnemonicParsing="false" onAction="#exportExams" text="Export..."/>
                 <SeparatorMenuItem mnemonicParsing="false"/>
                 <MenuItem mnemonicParsing="false" onAction="#showSettings" text="Settings">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="E" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                     </accelerator>
                 </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#showConnection" text="Connection">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="C" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="C" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                     </accelerator>
                 </MenuItem>
             </Menu>
-            <Menu mnemonicParsing="false" text="Edit">
+            <Menu mnemonicParsing="false" text="Exam">
                 <MenuItem mnemonicParsing="false" onAction="#addExamClicked" text="Add">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="A" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="A" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                     </accelerator>
                 </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#editExamClicked" text="Edit"/>
                 <MenuItem mnemonicParsing="false" onAction="#deleteExamClicked" text="Delete">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="BACK_SPACE" control="DOWN" meta="UP" shift="UP"
-                                            shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="BACK_SPACE" control="UP" meta="UP" shift="UP"
+                                            shortcut="DOWN"/>
                     </accelerator>
                 </MenuItem>
                 <SeparatorMenuItem mnemonicParsing="false"/>
                 <MenuItem mnemonicParsing="false" onAction="#startSelectedExams" text="Start Selected"/>
                 <MenuItem mnemonicParsing="false" onAction="#startAllExams" text="Start All">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="DOWN" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
                     </accelerator>
                 </MenuItem>
                 <SeparatorMenuItem mnemonicParsing="false"/>
@@ -116,6 +116,7 @@
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
                 <MenuItem mnemonicParsing="false" onAction="#about" text="About"/>
+                <MenuItem mnemonicParsing="false" onAction="#help" text="How to use?"/>
             </Menu>
         </MenuBar>
     </top>

@@ -1,6 +1,8 @@
-package app.nush.examclock.display;
+package app.nush.examclock.controllers;
 
-import app.nush.examclock.PreferenceController;
+import app.nush.examclock.display.DigitalClock;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
@@ -12,10 +14,22 @@ import javafx.scene.text.Text;
 
 import java.util.Calendar;
 
+/**
+ * The Clock controller.
+ */
 public class ClockController {
-    private static final double speed = 20;
-    private static final double min = Math.pow(2, -speed);
-    private static final double scale = 1 / (1 - min);
+    /**
+     * Some parameters for the interpolation function
+     */
+    public static final SimpleDoubleProperty speed = new SimpleDoubleProperty(20);
+    private static final SimpleDoubleProperty min = new SimpleDoubleProperty(Math.pow(2, -speed.get()));
+    private static final SimpleDoubleProperty scale = new SimpleDoubleProperty(1 / (1 - min.get()));
+
+    static {
+        scale.bind(Bindings.divide(1, Bindings.subtract(1, min)));
+        min.bind(Bindings.createDoubleBinding(() -> Math.pow(2, -speed.get()), speed));
+    }
+
     private final Group parent;
     private final Group clockFace;
     private final Group hour;
@@ -23,8 +37,23 @@ public class ClockController {
     private final Group second;
     private final Calendar calendar;
     private final DigitalClock digitalClock;
-    int lastSecond = 0;
+    /**
+     * Second displayed in the last frame, used to reduce unneeded refresh attempts
+     */
+    private int lastFrameSeconds = 0;
 
+    /**
+     * Instantiates a new Clock controller.
+     *
+     * @param parent     the parent
+     * @param clockFace  the clock face
+     * @param hour       the hour
+     * @param minute     the minute
+     * @param second     the second
+     * @param hourHand   the hour hand
+     * @param minuteHand the minute hand
+     * @param secondHand the second hand
+     */
     public ClockController(Group parent, Group clockFace, Group hour, Group minute, Group second, Polygon hourHand, Polygon minuteHand, Polygon secondHand) {
         this.hour = hour;
         this.minute = minute;
@@ -54,11 +83,28 @@ public class ClockController {
         });
     }
 
+    /**
+     * Interpolate double.
+     * This function accepts any double value interpolate: R => R
+     * Steep acceleration and deceleration of the decimal component
+     * Whole number component should be kept unchanged
+     * <p>
+     * Interpolates R => [0,1]
+     * When speed approach 0, this function gets smoother and smoother
+     * When speed gets larger, this function behaves like a step function at x = 0.5
+     * _|‾
+     * When speed is 0, result is not well defined so return original value
+     * </p>
+     *
+     * @param value the value to interpolate
+     * @return the interpolated value
+     */
     public static double interpolate(double value) {
+        if (speed.get() == 0) return value;
         if (value > 1) return Math.floor(value) + interpolate(value % 1);
         if (value < 0) return Math.ceil(value) - interpolate(-(value % 1));
-        if (value <= 0.5f) return ((float) Math.pow(2, speed * (value * 2 - 1)) - min) * scale / 2;
-        return (2 - ((float) Math.pow(2, -speed * (value * 2 - 1)) - min) * scale) / 2;
+        if (value <= 0.5f) return (Math.pow(2, speed.get() * (value * 2 - 1)) - min.get()) * scale.get() / 2;
+        return 1 - (Math.pow(2, -speed.get() * (value * 2 - 1)) - min.get()) * scale.get() / 2;
     }
 
     private void createClockLabels() {
@@ -87,21 +133,31 @@ public class ClockController {
         }
     }
 
+    /**
+     * Refresh clock
+     * The calculations are questionable but they work so I guess its fine
+     */
     public void refresh() {
         calendar.setTimeInMillis(System.currentTimeMillis());
         int hours = calendar.get(Calendar.HOUR_OF_DAY);
         int minutes = calendar.get(Calendar.MINUTE);
         int seconds = calendar.get(Calendar.SECOND);
         int millis = calendar.get(Calendar.MILLISECOND);
-        second.setRotate(360d * ((interpolate(seconds + millis / 1000d - .5) / 60 + 1) % 1));
-        minute.setRotate(360d * (minutes + seconds / 60d + millis / 60000d) / 60);
-        hour.setRotate(360d * (hours + minutes / 60d + seconds / 3600d) / 12);
-        if (lastSecond != seconds) {
-            lastSecond = seconds;
+        second.setRotate(360d * ((interpolate(seconds + millis / 1000d - .5) / 60 + 1) % 1)); // the % 1 here for angle out of 360 degrees
+        minute.setRotate(6d * (minutes + seconds / 60d + millis / 60000d));
+        hour.setRotate(30d * (hours + minutes / 60d + seconds / 3600d));
+        if (lastFrameSeconds != seconds) {
+            lastFrameSeconds = seconds;
             digitalClock.refreshClocks(hours, minutes, seconds);
         }
     }
 
+    /**
+     * Resize.
+     *
+     * @param width  the width
+     * @param height the height
+     */
     public void resize(double width, double height) {
         double radius = 0.95 * Math.min(width / 2, height / 2);
         parent.setScaleX(radius / 200);

@@ -19,14 +19,24 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * Automatic updater
+ * Check if a new version has been released
+ */
 public class Updater {
     public static final Gson gson = new Gson();
     public static final OkHttpClient client = new OkHttpClient();
 
+    /**
+     * Async update.
+     */
     public static void asyncUpdate() {
         new Thread(Updater::checkUpdates).start();
     }
 
+    /**
+     * Check updates.
+     */
     public static void checkUpdates() {
         Request request = new Request.Builder()
                 .url("https://api.github.com/repos/appventure-nush/exam-clock-2020/releases")
@@ -40,11 +50,12 @@ public class Updater {
             if (i > 0) {
                 System.out.println("A new version found!");
                 Platform.runLater(() -> {
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, release.name + " (" + release.tag_name + ")\n" + release.body + "\n\nUpdate?", ButtonType.NO, ButtonType.YES);
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, release.body + "\n\nUpdate?", ButtonType.NO, ButtonType.YES);
                     alert.setTitle("New Version");
+                    alert.setHeaderText(release.name + " (" + release.tag_name + ")");
                     alert.showAndWait();
                     if (alert.getResult() == ButtonType.YES)
-                        ExamClock.getInstance().getHostServices().showDocument(release.assets[0].browser_download_url);
+                        ExamClock.getInstance().getHostServices().showDocument(release.assets[0].url);
                 });
             } else if (i == 0) {
                 System.out.println("Latest version in use!");
@@ -56,23 +67,53 @@ public class Updater {
         }
     }
 
+//    public static void replaceCurrentJar() {
+//        try {
+//            File currentJar = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+//            // do stuff idk
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     public static class Release {
-        public String url, assets_url, upload_url, html_url;
+        public String url,
+                assets_url,
+                upload_url,
+                html_url;
         public int id;
-        public String node_id, tag_name, target_commitish, name;
+        public String node_id,
+                tag_name,
+                target_commitish,
+                name;
         public boolean draft;
         public User author;
         public boolean prerelease;
-        public String created_at, published_at;
+        public String created_at,
+                published_at;
         public Asset[] assets;
-        public String tarball_url, zipball_url, body;
+        public String tarball_url,
+                zipball_url,
+                body;
     }
 
     public static class User {
         public String login;
         public int id;
-        public String node_id, avatar_url, gravatar_id, url, html_url, followers_url, following_url, gists_url,
-                starred_url, subscriptions_url, organizations_url, repos_url, events_url, received_events_url, type;
+        public String node_id,
+                avatar_url,
+                gravatar_id,
+                url,
+                html_url,
+                followers_url,
+                following_url,
+                gists_url,
+                starred_url,
+                subscriptions_url,
+                organizations_url,
+                repos_url,
+                events_url,
+                received_events_url, type;
         public boolean site_admin;
     }
 

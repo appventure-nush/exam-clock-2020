@@ -1,6 +1,5 @@
-package app.nush.examclock.addexam;
+package app.nush.examclock.controllers;
 
-import app.nush.examclock.MainController;
 import app.nush.examclock.model.Exam;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,8 +16,17 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * The controller for add exam prompt
+ */
 public class AddExamController {
+    /**
+     * The constant dateFormatter used for date picker (user friendly, shows jan feb etc)
+     */
     public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy MMM dd");
+    /**
+     * The time formatters that will be supported by start and end fields
+     */
     public static final DateTimeFormatter[] timeFormatters = {
             DateTimeFormatter.ofPattern("hh:mma"),
             DateTimeFormatter.ofPattern("HH:mm"),
@@ -27,6 +35,16 @@ public class AddExamController {
             DateTimeFormatter.ofPattern("hha"),
             DateTimeFormatter.ofPattern("ha")
     };
+
+    public Form form;
+    public TextField name_input;
+    public DatePicker date_input;
+    public Spinner<Integer> duration_hours;
+    public Spinner<Integer> duration_minutes;
+    public TextField start_time_input;
+    public TextField end_time_input;
+
+    private MainController mainController;
 
     private static LocalTime parseTime(String time, int index) {
         if (index >= timeFormatters.length) throw new DateTimeParseException("No match found", time, 0);
@@ -37,16 +55,9 @@ public class AddExamController {
         }
     }
 
-    public TextField name_input;
-    public DatePicker date_input;
-    public Form form;
-
-    public Spinner<Integer> duration_hours;
-    public Spinner<Integer> duration_minutes;
-    private MainController mainController;
-    public TextField start_time_input;
-    public TextField end_time_input;
-
+    /**
+     * Initialize.
+     */
     @FXML
     public void initialize() {
         date_input.setConverter(new StringConverter<LocalDate>() {
@@ -95,22 +106,37 @@ public class AddExamController {
         });
     }
 
+    /**
+     * Add exam
+     *
+     * @param event the event
+     */
     @FXML
-    public void add(ActionEvent event) {
+    public void addExam(ActionEvent event) {
         try {
             Exam exam = new Exam(name_input.getText(), date_input.getValue(), parseTime(start_time_input.getText().toLowerCase(), 0), parseTime(end_time_input.getText().toLowerCase(), 0));
-            mainController.addCallback(exam);
+            mainController.addExam(exam);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
             alert.showAndWait();
         }
     }
 
+    /**
+     * Cancel adding exam
+     *
+     * @param event the event
+     */
     @FXML
     public void cancel(ActionEvent event) {
         mainController.addExamStage.hide();
     }
 
+    /**
+     * Sets main controller.
+     *
+     * @param mainController the main controller
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }

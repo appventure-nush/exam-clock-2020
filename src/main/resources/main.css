@@ -31,7 +31,7 @@
 }
 
 .time-left {
-    -fx-font-weight: bold;
+    -fx-font-family: "Arial Unicode MS";
     -fx-font-size: 1.7em;
     -fx-padding: 3px;
 }

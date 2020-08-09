@@ -1,7 +1,8 @@
-package app.nush.examclock.model;
+package app.nush.examclock.display;
 
-import app.nush.examclock.MainController;
-import app.nush.examclock.PreferenceController;
+import app.nush.examclock.controllers.MainController;
+import app.nush.examclock.controllers.PreferenceController;
+import app.nush.examclock.model.Exam;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -19,34 +20,62 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
+/**
+ * Exam holder.
+ * holds a exam, obviously
+ * <p>
+ * Reusable, Resettable, Renewable (3Rs)
+ */
 public class ExamHolder extends HBox {
 
+    /**
+     * The constant showCountDownForExamProperty.
+     */
     public static final SimpleBooleanProperty showCountDownForExamProperty = new SimpleBooleanProperty(true);
+    /**
+     * The constant useSimplifiedCountdownForExamProperty.
+     */
     public static final SimpleBooleanProperty useSimplifiedCountdownForExamProperty = new SimpleBooleanProperty(false);
+    /**
+     * The constant gradientFeatherProperty.
+     */
     public static final SimpleDoubleProperty gradientFeatherProperty = new SimpleDoubleProperty(1);
+    /**
+     * The constant showExamsProperty.
+     */
     public static final SimpleBooleanProperty showExamsProperty = new SimpleBooleanProperty(false);
+    /**
+     * The constant displayOrientationList.
+     */
     public static final SimpleListProperty<Orientation> displayOrientationList = new SimpleListProperty<>(
             FXCollections.observableArrayList(Arrays.asList(Orientation.HORIZONTAL, Orientation.VERTICAL))
     );
+    /**
+     * The constant displayOrientationProperty.
+     */
     public static final ObjectProperty<Orientation> displayOrientationProperty = new SimpleObjectProperty<>(Orientation.HORIZONTAL);
 
     private static final DateTimeFormatter FORMAT_12_HOURS = DateTimeFormatter.ofPattern("hh:mm:ss a");
     private static final DateTimeFormatter FORMAT_24_HOURS = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final DateTimeFormatter FORMAT_12_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("hh:mm a");
     private static final DateTimeFormatter FORMAT_24_HOURS_NO_SECONDS = DateTimeFormatter.ofPattern("HH:mm");
+    private final MainController controller;
     @FXML
     private Label nameLabel;
     @FXML
     private Label timeLabel;
     @FXML
     private Label countLabel;
-
     private LocalDate date;
     private LocalTime start;
     private LocalTime end;
     private Exam exam;
-    private final MainController controller;
 
+    /**
+     * Instantiates a new exam holder.
+     *
+     * @param controller the controller
+     */
     public ExamHolder(MainController controller) {
         this.controller = controller;
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/exam_holder.fxml"));
@@ -76,11 +105,23 @@ public class ExamHolder extends HBox {
         });
     }
 
+    /**
+     * Instantiates a new exam holder, with exam provided
+     *
+     * @param controller the controller
+     * @param exam       the exam
+     */
     public ExamHolder(MainController controller, Exam exam) {
         this(controller);
         setExam(exam);
     }
 
+    /**
+     * Update function
+     *
+     * @param today the today
+     * @param now   the now
+     */
     public void update(LocalDate today, LocalTime now) {
         if (today.isEqual(date)) {
             if (now.isBefore(start)) {
@@ -132,6 +173,7 @@ public class ExamHolder extends HBox {
     }
 
     public ExamHolder reset() {
+        this.exam = null;
         if (controller.selectedExamHolder == this) {
             controller.selectedExamHolder = null;
             getStyleClass().remove("selected");
@@ -144,8 +186,8 @@ public class ExamHolder extends HBox {
     }
 
     public void onEdit(ActionEvent e) {
-        controller.exams.remove(exam);
         controller.showAddExamStage(exam);
+        controller.exams.remove(exam);
     }
 
     public void onDelete(ActionEvent e) {
