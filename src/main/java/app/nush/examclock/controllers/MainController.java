@@ -66,10 +66,6 @@ public class MainController {
      */
     public SimpleBooleanProperty toiletMaleOccupied = new SimpleBooleanProperty(false);
     /**
-     * The Stage.
-     */
-    public Stage stage;
-    /**
      * The Add exam stage.
      */
     public Stage addExamStage;
@@ -201,6 +197,12 @@ public class MainController {
 
         initAddExamStage();
         initConnectionStage();
+        PreferenceController.nightMode.addListener((observable, oldValue, newValue) -> {
+            addExamStage.getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
+            addExamStage.getScene().getStylesheets().add(newValue ? "/theme.dark.css" : "/theme.light.css");
+            connectStage.getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
+            connectStage.getScene().getStylesheets().add(newValue ? "/theme.dark.css" : "/theme.light.css");
+        });
 
         preferenceController.initPreferences(); // load preferences after adding listeners
         loadExams(null); // load exams from disk
@@ -394,8 +396,8 @@ public class MainController {
     }
 
     @FXML
-    public void importExams(ActionEvent actionEvent) {
-        File file = fileChooser.showOpenDialog(stage);
+    public void importExams(ActionEvent event) {
+        File file = fileChooser.showOpenDialog(ExamClock.getStage());
         if (file == null) return;
         try {
             String str = new String(Files.readAllBytes(Paths.get(file.toURI())));
@@ -412,8 +414,8 @@ public class MainController {
     }
 
     @FXML
-    public void exportExams(ActionEvent actionEvent) {
-        File file = fileChooser.showSaveDialog(stage);
+    public void exportExams(ActionEvent event) {
+        File file = fileChooser.showSaveDialog(ExamClock.getStage());
         if (file == null) return;
         try {
             Files.write(Paths.get(file.toURI()), gson.toJson(exams).getBytes());
@@ -423,7 +425,7 @@ public class MainController {
     }
 
     @FXML
-    public void about(ActionEvent actionEvent) {
+    public void about(ActionEvent event) {
         try {
             Stage stage = new Stage();
             Group logo = FXMLLoader.load(getClass().getResource("/logo_light.fxml"));
@@ -463,12 +465,8 @@ public class MainController {
     }
 
     @FXML
-    public void help(ActionEvent actionEvent) {
+    public void help(ActionEvent event) {
         ExamClock.getInstance().getHostServices().showDocument("https://github.com/appventure-nush/exam-clock-2020/blob/master/README.md");
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
     }
 
     public void onClose(WindowEvent event) {

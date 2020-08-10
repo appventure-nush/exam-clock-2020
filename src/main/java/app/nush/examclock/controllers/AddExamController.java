@@ -1,5 +1,6 @@
 package app.nush.examclock.controllers;
 
+import app.nush.examclock.display.TimePicker;
 import app.nush.examclock.model.Exam;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -41,12 +42,12 @@ public class AddExamController {
     public DatePicker date_input;
     public Spinner<Integer> duration_hours;
     public Spinner<Integer> duration_minutes;
-    public TextField start_time_input;
-    public TextField end_time_input;
+    public TimePicker start_time_input;
+    public TimePicker end_time_input;
 
     private MainController mainController;
 
-    private static LocalTime parseTime(String time, int index) {
+    public static LocalTime parseTime(String time, int index) {
         if (index >= timeFormatters.length) throw new DateTimeParseException("No match found", time, 0);
         try {
             return LocalTime.parse(time.replace(" ", ""), timeFormatters[index]);
@@ -72,23 +73,10 @@ public class AddExamController {
             }
         });
         date_input.setValue(LocalDate.now());
-
-        start_time_input.textProperty().addListener((observable, newv, oldv) -> {
+        start_time_input.timeProperty.addListener((observable, oldValue, newValue) -> end_time_input.timeProperty.set(newValue.plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
+        end_time_input.timeProperty.addListener((observable, oldValue, newValue) -> {
             try {
-                LocalTime parsed = parseTime(start_time_input.getText().toLowerCase(), 0);
-                start_time_input.setUserData(parsed);
-                end_time_input.setText(timeFormatters[0].format(parsed.plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
-            } catch (DateTimeParseException e) {
-//                if (start_time_input.getUserData() != null)
-//                    start_time_input.setText(timeFormatter.format((LocalTime) start_time_input.getUserData()));
-            }
-        });
-        end_time_input.textProperty().addListener((observable, newv, oldv) -> {
-            try {
-                LocalTime parsed = parseTime(end_time_input.getText().toLowerCase(), 0);
-                end_time_input.setUserData(parsed);
-                LocalTime start = (LocalTime) start_time_input.getUserData();
-                int minutes = (int) start.until(parsed, ChronoUnit.MINUTES);
+                int minutes = (int) start_time_input.timeProperty.get().until(newValue, ChronoUnit.MINUTES);
                 duration_hours.getValueFactory().setValue(minutes / 60);
                 duration_minutes.getValueFactory().setValue(minutes % 60);
             } catch (DateTimeParseException e) {
@@ -96,14 +84,8 @@ public class AddExamController {
 //                    end_time_input.setText(timeFormatter.format((LocalTime) end_time_input.getUserData()));
             }
         });
-        duration_hours.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (start_time_input.getUserData() == null) return;
-            end_time_input.setText(timeFormatters[0].format(((LocalTime) start_time_input.getUserData()).plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
-        });
-        duration_minutes.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (start_time_input.getUserData() == null) return;
-            end_time_input.setText(timeFormatters[0].format(((LocalTime) start_time_input.getUserData()).plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
-        });
+        duration_hours.valueProperty().addListener((observable, oldValue, newValue) -> end_time_input.timeProperty.set(start_time_input.timeProperty.get().plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
+        duration_minutes.valueProperty().addListener((observable, oldValue, newValue) -> end_time_input.timeProperty.set(start_time_input.timeProperty.get().plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
     }
 
     /**

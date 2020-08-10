@@ -142,8 +142,8 @@ public class PreferenceController {
      */
     public void attachListeners() {
         nightMode.addListener((observable, oldValue, newValue) -> {
-            controller.stage.getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
-            controller.stage.getScene().getStylesheets().add(newValue ? "/theme.dark.css" : "/theme.light.css");
+            ExamClock.getStage().getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
+            ExamClock.getStage().getScene().getStylesheets().add(newValue ? "/theme.dark.css" : "/theme.light.css");
             preferencesFx.getView().getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
             preferencesFx.getView().getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         });

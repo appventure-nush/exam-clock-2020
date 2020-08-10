@@ -26,6 +26,17 @@
     -fx-padding: 0;
 }
 
+.list-item {
+    -fx-fill: white;
+    -fx-text-fill: -fx-fill;
+}
+
+.list-item .text {
+    -fx-fill: white;
+    -fx-text-fill: -fx-fill;
+}
+
+
 /* Fix scroll bar buttons arrows colors */
 .scroll-bar > .increment-button > .increment-arrow,
 .scroll-bar > .decrement-button > .decrement-arrow {

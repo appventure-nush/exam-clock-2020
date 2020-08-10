@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import app.nush.examclock.display.TimePicker?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import tornadofx.control.*?>
 <Form fx:id="form" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
       prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="app.nush.examclock.controllers.AddExamController">
-    <Fieldset inputGrow="SOMETIMES" text="Exam Details">
+    <Fieldset inputGrow="SOMETIMES" text="Exam Details" labelPosition="HORIZONTAL">
         <Field text="Name">
             <TextField fx:id="name_input"/>
         </Field>
@@ -19,10 +20,10 @@
             <Spinner fx:id="duration_minutes" editable="true" max="59" min="0"/>
         </Field>
         <Field text="Start Time">
-            <TextField fx:id="start_time_input" maxWidth="Infinity" promptText="hh:mm am/pm"/>
+            <TimePicker fx:id="start_time_input" maxWidth="Infinity"/>
         </Field>
         <Field text="End Time">
-            <TextField fx:id="end_time_input" maxWidth="Infinity" promptText="hh:mm am/pm"/>
+            <TimePicker fx:id="end_time_input" maxWidth="Infinity"/>
         </Field>
         <Field>
             <Button onAction="#addExam" text="Add" styleClass="primary-raised"/>

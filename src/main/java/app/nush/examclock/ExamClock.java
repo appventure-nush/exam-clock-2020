@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 public class ExamClock extends Application {
     public static Preferences preferences;
     private static ExamClock instance;
+    private static Stage stage;
     private MainController controller;
 
     public static void main(String[] args) {
@@ -39,15 +40,19 @@ public class ExamClock extends Application {
         return instance;
     }
 
+    public static Stage getStage() {
+        return stage;
+    }
+
     @Override
     public void start(Stage primaryStage) {
+        stage = primaryStage;
         try {
             instance = this;
             preferences = Preferences.userNodeForPackage(ExamClock.class);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_main.fxml"));
             Parent root = loader.load();
             controller = loader.getController();
-            controller.setStage(primaryStage);
             Scene scene = new Scene(root);
             scene.getStylesheets().add("/main.css");
             scene.getStylesheets().add("/theme.css");
