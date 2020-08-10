@@ -35,11 +35,11 @@
 }
 
 .list-item:hover {
-    -fx-background: -fx-background;
+    -fx-background-color: -fx-background;
 }
 
 .list-item:active {
-    -fx-background: -fx-accent;
+    -fx-background-color: -fx-accent;
 }
 
 

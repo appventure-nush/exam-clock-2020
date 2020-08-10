@@ -20,10 +20,10 @@ repositories {
 //    }
 }
 
-double jdkVersion = 1.14
+double jdkVersion = 1.8
 println "JDK version = ${jdkVersion}"
 
-sourceCompatibility = 1.14
+sourceCompatibility = 1.8
 targetCompatibility = jdkVersion
 
 String preferenceFx = jdkVersion == 1.8d ? '8.6.0' : '11.6.0'
