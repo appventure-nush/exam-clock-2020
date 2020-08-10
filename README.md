@@ -8,7 +8,7 @@
 4. You can customise the display in "Settings"
 
 ### Web Panel
-1. Goto https://exam-clock-nush.tk/
+1. Goto https://exam.nush.app
 2. Login with your microsoft account
 3. Fill in information
    * to check the clock's id, open connection page with `Ctrl-C`
