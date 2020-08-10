@@ -5,7 +5,6 @@
   "private": true,
   "dependencies": {
     "cookie-parser": "^1.4.5",
-    "debug": "^2.6.9",
     "dotenv": "^8.2.0",
     "express": "^4.16.4",
     "express-handlebars": "^5.0.0",
@@ -13,13 +12,11 @@
     "express-winston": "^4.0.5",
     "http-errors": "^1.8.0",
     "memorystore": "^1.6.2",
-    "mongodb": "^3.3.3",
     "passport": "^0.4.1",
     "passport-microsoft": "^0.1.0",
     "passport.socketio": "^3.7.0",
     "socket.io": "^2.3.0",
-    "winston": "^3.3.3",
-    "winston-mongodb": "^5.0.1"
+    "winston": "^3.3.3"
   },
   "devDependencies": {},
   "scripts": {
