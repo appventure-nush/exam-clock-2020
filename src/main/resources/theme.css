@@ -27,13 +27,19 @@
 }
 
 .list-item {
-    -fx-fill: white;
-    -fx-text-fill: -fx-fill;
+    -fx-background-color: -fx-control-inner-background;
 }
 
-.list-item .text {
-    -fx-fill: white;
-    -fx-text-fill: -fx-fill;
+.list-item * {
+    -fx-fill: -fx-foreground;
+}
+
+.list-item:hover {
+    -fx-background: -fx-background;
+}
+
+.list-item:active {
+    -fx-background: -fx-accent;
 }
 
 

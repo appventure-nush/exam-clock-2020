@@ -8,11 +8,16 @@ import javafx.scene.control.TextField;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 
 import static app.nush.examclock.controllers.AddExamController.parseTime;
 
 public class TimePicker extends TextField {
-    public static final DateTimeFormatter defaultFormatter = DateTimeFormatter.ofPattern("hh:mm a");
+    public static final DateTimeFormatter defaultFormatter = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .appendPattern("hh:mm a")
+            .toFormatter();
+
     private final TimePopup popup;
     public SimpleObjectProperty<LocalTime> timeProperty;
     public SimpleIntegerProperty hour;

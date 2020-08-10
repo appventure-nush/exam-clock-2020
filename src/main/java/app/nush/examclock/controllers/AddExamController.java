@@ -14,6 +14,7 @@ import tornadofx.control.Form;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
@@ -24,17 +25,17 @@ public class AddExamController {
     /**
      * The constant dateFormatter used for date picker (user friendly, shows jan feb etc)
      */
-    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy MMM dd");
+    public static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("yyyy MMM dd").toFormatter();
     /**
      * The time formatters that will be supported by start and end fields
      */
     public static final DateTimeFormatter[] timeFormatters = {
-            DateTimeFormatter.ofPattern("hh:mma"),
-            DateTimeFormatter.ofPattern("HH:mm"),
-            DateTimeFormatter.ofPattern("h:mma"),
-            DateTimeFormatter.ofPattern("H:mm"),
-            DateTimeFormatter.ofPattern("hha"),
-            DateTimeFormatter.ofPattern("ha")
+            new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("hh:mma").toFormatter(),
+            new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("HH:mm").toFormatter(),
+            new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("h:mma").toFormatter(),
+            new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("H:mm").toFormatter(),
+            new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("hha").toFormatter(),
+            new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("ha").toFormatter()
     };
 
     public Form form;
@@ -96,7 +97,7 @@ public class AddExamController {
     @FXML
     public void addExam(ActionEvent event) {
         try {
-            Exam exam = new Exam(name_input.getText(), date_input.getValue(), parseTime(start_time_input.getText().toLowerCase(), 0), parseTime(end_time_input.getText().toLowerCase(), 0));
+            Exam exam = new Exam(name_input.getText(), date_input.getValue(), parseTime(start_time_input.getText(), 0), parseTime(end_time_input.getText(), 0));
             mainController.addExam(exam);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
