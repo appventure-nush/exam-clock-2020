@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'app.nush'
-version '1.3.9-beta'
+version '1.3.A-beta'
 
 applicationName = 'Exam Clock'
 mainClassName = 'app.nush.examclock.Main'
@@ -20,7 +20,7 @@ repositories {
 //    }
 }
 
-double jdkVersion = 1.8
+double jdkVersion = 1.14
 println "JDK version = ${jdkVersion}"
 
 sourceCompatibility = 1.8
@@ -78,6 +78,5 @@ jar {
                 'Specification-Title': "Exam Clock",
                 'Specification-Version': "$version",
                 'Specification-Vendor': "Appventure@NUSHIGH")
-
     }
 }

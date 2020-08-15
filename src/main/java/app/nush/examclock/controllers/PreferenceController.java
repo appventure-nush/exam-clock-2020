@@ -7,8 +7,12 @@ import com.dlsc.preferencesfx.PreferencesFx;
 import com.dlsc.preferencesfx.model.Category;
 import com.dlsc.preferencesfx.model.Group;
 import com.dlsc.preferencesfx.model.Setting;
+import com.dlsc.preferencesfx.view.PreferencesFxView;
 import javafx.beans.property.*;
+import javafx.scene.Scene;
+import javafx.scene.control.DialogPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -65,6 +69,8 @@ public class PreferenceController {
     public static String clockID;
     private final MainController controller;
     private PreferencesFx preferencesFx;
+    private PreferencesFxView view;
+    private Stage stage;
 
     /**
      * Instantiates a new Preference controller.
@@ -127,14 +133,15 @@ public class PreferenceController {
                                 Setting.of("Open to requests", openToRequestsProperty)
                         )
                 )
-        );
-        preferencesFx.getView().getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
-        preferencesFx.getView().getStyleClass().add("preference");
-        Stage window = (Stage) preferencesFx.getView().getScene().getWindow();
-        window.setMaxHeight(500);
-        window.setWidth(600);
-        window.setHeight(500);
-        preferencesFx.persistWindowState(true);
+        ).persistWindowState(true);
+        view = preferencesFx.getView();
+        view.getStyleClass().add("preference");
+        ((DialogPane) view.getParent()).getChildren().remove(view);
+        stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        Scene scene = new Scene(view, 700, 400);
+        scene.getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
+        stage.setScene(scene);
     }
 
     /**
@@ -144,8 +151,8 @@ public class PreferenceController {
         nightMode.addListener((observable, oldValue, newValue) -> {
             ExamClock.getStage().getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
             ExamClock.getStage().getScene().getStylesheets().add(newValue ? "/theme.dark.css" : "/theme.light.css");
-            preferencesFx.getView().getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
-            preferencesFx.getView().getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
+            view.getScene().getStylesheets().removeAll("/theme.dark.css", "/theme.light.css");
+            view.getScene().getStylesheets().addAll("/theme.css", nightMode.get() ? "/theme.dark.css" : "/theme.light.css");
         });
     }
 
@@ -155,7 +162,7 @@ public class PreferenceController {
      * @param modal the modal
      */
     public void show(boolean modal) {
-        preferencesFx.show(modal);
+        stage.show();
     }
 
 }
