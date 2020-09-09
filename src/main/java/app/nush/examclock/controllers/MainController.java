@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -167,8 +168,7 @@ public class MainController {
         clockController = new ClockController(clockPane, clockFace, hourGroup, minuteGroup, secondGroup, hourHand, minuteHand, secondHand);
         preferenceController = new PreferenceController(this);
 
-        root.setStyle("-fx-font-size: " + PreferenceController.fontScaleProperty.get() + "px;");
-        PreferenceController.fontScaleProperty.addListener((observable, oldValue, newValue) -> root.setStyle("-fx-font-size: " + newValue + "px;"));
+        root.styleProperty().bind(Bindings.concat("-fx-font-size: ", PreferenceController.fontScaleProperty, "px;"));
         examList.visibleProperty().bind(ExamHolder.showExamsProperty);
         root.orientationProperty().bind(ExamHolder.displayOrientationProperty);
         clockRoot.widthProperty().addListener((observable, oldValue, newValue) -> clockController.resize(clockRoot.getWidth(), clockRoot.getHeight()));

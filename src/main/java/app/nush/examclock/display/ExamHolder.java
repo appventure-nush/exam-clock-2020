@@ -43,7 +43,7 @@ public class ExamHolder extends HBox {
     /**
      * The constant showExamsProperty.
      */
-    public static final SimpleBooleanProperty showExamsProperty = new SimpleBooleanProperty(false);
+    public static final SimpleBooleanProperty showExamsProperty = new SimpleBooleanProperty(true);
     /**
      * The constant displayOrientationList.
      */
