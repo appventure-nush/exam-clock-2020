@@ -68,7 +68,6 @@ public class PreferenceController {
      */
     public static String clockID;
     private final MainController controller;
-    private PreferencesFx preferencesFx;
     private PreferencesFxView view;
     private Stage stage;
 
@@ -86,7 +85,7 @@ public class PreferenceController {
      */
     public void initPreferences() {
         attachListeners();
-        preferencesFx = PreferencesFx.of(ExamClock.class,
+        PreferencesFx preferencesFx = PreferencesFx.of(ExamClock.class,
                 Category.of("Display",
                         Group.of("General",
                                 Setting.of("Night Mode", nightMode),
@@ -98,10 +97,15 @@ public class PreferenceController {
                 ).expand().subCategories(
                         Category.of("Exams",
                                 Group.of(
+                                        Setting.of("Auto Save", ExamHolder.autoSaveProperty),
                                         Setting.of("Show Exams", ExamHolder.showExamsProperty),
+                                        Setting.of("From other days", ExamHolder.showExamsFromOtherDaysProperty),
                                         Setting.of("Orientation", ExamHolder.displayOrientationList, ExamHolder.displayOrientationProperty)
                                 ), Group.of("Exam Holder",
                                         Setting.of("Progress Feather", ExamHolder.gradientFeatherProperty, 0, 5, 1),
+                                        Setting.of("Progress Color", ExamHolder.colorSpentProgressProperty),
+                                        Setting.of("Progress Color Alt", ExamHolder.colorRemainProgressProperty),
+                                        Setting.of("Progress Direction", ExamHolder.progressDirectionList, ExamHolder.progressDirectionProperty),
                                         Setting.of("Countdown", ExamHolder.showCountDownForExamProperty),
                                         Setting.of("Simplified Countdown", ExamHolder.useSimplifiedCountdownForExamProperty)
                                 )

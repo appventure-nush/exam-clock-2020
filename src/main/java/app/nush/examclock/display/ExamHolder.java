@@ -3,6 +3,7 @@ package app.nush.examclock.display;
 import app.nush.examclock.controllers.MainController;
 import app.nush.examclock.controllers.PreferenceController;
 import app.nush.examclock.model.Exam;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -29,31 +30,47 @@ import java.util.Arrays;
 public class ExamHolder extends HBox {
 
     /**
-     * The constant showCountDownForExamProperty.
+     * should exams be saved automatically
      */
-    public static final SimpleBooleanProperty showCountDownForExamProperty = new SimpleBooleanProperty(true);
+    public static final SimpleBooleanProperty autoSaveProperty = new SimpleBooleanProperty(true);
     /**
-     * The constant useSimplifiedCountdownForExamProperty.
-     */
-    public static final SimpleBooleanProperty useSimplifiedCountdownForExamProperty = new SimpleBooleanProperty(false);
-    /**
-     * The constant gradientFeatherProperty.
-     */
-    public static final SimpleDoubleProperty gradientFeatherProperty = new SimpleDoubleProperty(1);
-    /**
-     * The constant showExamsProperty.
+     * if exams are shown
      */
     public static final SimpleBooleanProperty showExamsProperty = new SimpleBooleanProperty(true);
     /**
-     * The constant displayOrientationList.
+     * if count down are shown, i.e. "00:23:23"
+     */
+    public static final SimpleBooleanProperty showCountDownForExamProperty = new SimpleBooleanProperty(true);
+    /**
+     * if exams that are on different days are shown
+     */
+    public static final SimpleBooleanProperty showExamsFromOtherDaysProperty = new SimpleBooleanProperty(true);
+    /**
+     * if count down should be simplified, i.e. "12min" instead of "00:12:04"
+     */
+    public static final SimpleBooleanProperty useSimplifiedCountdownForExamProperty = new SimpleBooleanProperty(false);
+    /**
+     * feather value (fade) of the prgress gradient
+     */
+    public static final SimpleDoubleProperty gradientFeatherProperty = new SimpleDoubleProperty(1);
+    /**
+     * this is used by the setting displayOrientationProperty
      */
     public static final SimpleListProperty<Orientation> displayOrientationList = new SimpleListProperty<>(
             FXCollections.observableArrayList(Arrays.asList(Orientation.HORIZONTAL, Orientation.VERTICAL))
     );
     /**
-     * The constant displayOrientationProperty.
+     * the orientation of the exam list and the clock, i.e. if clock is above exam list, or if its beside exam list
      */
     public static final ObjectProperty<Orientation> displayOrientationProperty = new SimpleObjectProperty<>(Orientation.HORIZONTAL);
+
+    public static final SimpleListProperty<String> progressDirectionList = new SimpleListProperty<>(
+            FXCollections.observableArrayList(Arrays.asList("Left", "Right", "Top", "Bottom"))
+    );
+    public static final SimpleObjectProperty<String> progressDirectionProperty = new SimpleObjectProperty<>("Left");
+
+    public static final ObjectProperty<Color> colorSpentProgressProperty = new SimpleObjectProperty<>(Color.rgb(255, 0, 0, 0.13));
+    public static final ObjectProperty<Color> colorRemainProgressProperty = new SimpleObjectProperty<>(Color.rgb(0, 255, 0, 0.13));
 
     private static final DateTimeFormatter FORMAT_12_HOURS = DateTimeFormatter.ofPattern("hh:mm:ss a");
     private static final DateTimeFormatter FORMAT_24_HOURS = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -92,6 +109,7 @@ public class ExamHolder extends HBox {
         countLabel.managedProperty().bind(countLabel.visibleProperty());
 
         setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        managedProperty().bind(visibleProperty());
         setOnMouseClicked(event -> {
             if (controller.selectedExamHolder != null) {
                 controller.selectedExamHolder.getStyleClass().remove("selected");
@@ -116,6 +134,18 @@ public class ExamHolder extends HBox {
         setExam(exam);
     }
 
+    private static String formatColor(Color color) {
+        int r = (int) Math.round(color.getRed() * 255.0);
+        int g = (int) Math.round(color.getGreen() * 255.0);
+        int b = (int) Math.round(color.getBlue() * 255.0);
+        int o = (int) Math.round(color.getOpacity() * 255.0);
+        return String.format("#%02x%02x%02x%02x", r, g, b, o);
+    }
+
+    public Exam getExam() {
+        return exam;
+    }
+
     /**
      * Update function
      *
@@ -133,9 +163,9 @@ public class ExamHolder extends HBox {
                 getStyleClass().add("ended");
             } else {
                 float percentage = ChronoUnit.MILLIS.between(start, now) * 100f / ChronoUnit.MILLIS.between(start, end);
-                setStyle("-fx-background-color: linear-gradient(to left, rgba(255, 0, 0, 0.13) 0%, " +
-                        "rgba(255, 0, 0, 0.13) " + String.format("%f", percentage - gradientFeatherProperty.get()) + "%, " +
-                        "rgba(0, 255, 0, 0.13) " + String.format("%f", percentage + gradientFeatherProperty.get()) + "%, rgba(0, 255, 0, 0.13) 100%);");
+                setStyle(String.format("-fx-background-color: linear-gradient(to %s, %s 0%%, %s %f%%, %s %f%%, %s 100%%);", progressDirectionProperty.get(), formatColor(colorSpentProgressProperty.get()),
+                        formatColor(colorSpentProgressProperty.get()), percentage - gradientFeatherProperty.get(),
+                        formatColor(colorRemainProgressProperty.get()), percentage + gradientFeatherProperty.get(), formatColor(colorRemainProgressProperty.get())));
                 if (useSimplifiedCountdownForExamProperty.get()) {
                     long hours = ChronoUnit.HOURS.between(now, end);
                     long minutes = ChronoUnit.MINUTES.between(now, end);
@@ -150,26 +180,16 @@ public class ExamHolder extends HBox {
                     getStyleClass().add("started");
                 }
             }
+            timeLabel.setText(start.format(start.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
+                    " → " +
+                    end.format(end.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
         } else {
             countLabel.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
+            timeLabel.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")) + ": " + start.format(start.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
+                    " → " +
+                    end.format(end.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
             getStyleClass().removeAll("started", "ended");
         }
-        timeLabel.setText(start.format(start.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
-                " → " +
-                end.format(end.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
-    }
-
-    public Exam getExam() {
-        return exam;
-    }
-
-    public ExamHolder setExam(Exam exam) {
-        this.exam = exam;
-        nameLabel.setText(exam.getName());
-        date = LocalDate.parse(exam.getDate());
-        start = LocalTime.parse(exam.getStart());
-        end = LocalTime.parse(exam.getEnd());
-        return this;
     }
 
     public ExamHolder reset() {
@@ -192,5 +212,16 @@ public class ExamHolder extends HBox {
 
     public void onDelete(ActionEvent e) {
         controller.exams.remove(exam);
+    }
+
+    public ExamHolder setExam(Exam exam) {
+        this.exam = exam;
+        nameLabel.setText(exam.getName());
+        date = LocalDate.parse(exam.getDate());
+        start = LocalTime.parse(exam.getStart());
+        end = LocalTime.parse(exam.getEnd());
+        if (visibleProperty().isBound()) visibleProperty().unbind();
+        visibleProperty().bind(Bindings.createBooleanBinding(() -> showExamsFromOtherDaysProperty.get() || date.equals(LocalDate.now()), showExamsFromOtherDaysProperty));
+        return this;
     }
 }

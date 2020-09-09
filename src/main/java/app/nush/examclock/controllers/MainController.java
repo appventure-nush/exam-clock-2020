@@ -160,6 +160,7 @@ public class MainController {
                 for (int i = c.getFrom(); i < c.getTo(); i++)
                     examList.getChildren().add(i, examHolderPool.empty() ? new ExamHolder(this, c.getList().get(i)) : examHolderPool.pop().setExam(c.getList().get(i)));
             }
+            if (ExamHolder.autoSaveProperty.get()) saveExams(null);
         });
         examHolderPool = new Stack<>();
         preferences = Preferences.userNodeForPackage(MainController.class);
@@ -169,12 +170,13 @@ public class MainController {
         preferenceController = new PreferenceController(this);
 
         root.styleProperty().bind(Bindings.concat("-fx-font-size: ", PreferenceController.fontScaleProperty, "px;"));
-        examList.visibleProperty().bind(ExamHolder.showExamsProperty);
         root.orientationProperty().bind(ExamHolder.displayOrientationProperty);
         clockRoot.widthProperty().addListener((observable, oldValue, newValue) -> clockController.resize(clockRoot.getWidth(), clockRoot.getHeight()));
         clockRoot.heightProperty().addListener((observable, oldValue, newValue) -> clockController.resize(clockRoot.getWidth(), clockRoot.getHeight()));
-        rightPane.visibleProperty().bind(ExamHolder.showExamsProperty);
-        ExamHolder.showExamsProperty.addListener(((observable, oldValue, newValue) -> root.setDividerPositions(newValue ? 0.5 : 1)));
+        ExamHolder.showExamsProperty.addListener((observable, oldValue, newValue) -> {
+            if (newValue) root.getItems().add(1, examList);
+            else root.getItems().remove(1);
+        });
 
         toiletMale.setEffect(greenEffect);
         toiletFemale.setEffect(greenEffect);
@@ -236,6 +238,7 @@ public class MainController {
      */
     public void refresh() {
         clockController.refresh();
+        if (!ExamHolder.showExamsProperty.get()) return;
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
         for (Node node : examList.getChildren()) {
