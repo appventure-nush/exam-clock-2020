@@ -16,7 +16,7 @@ const MicrosoftStrategy = require('passport-microsoft').Strategy;
 const {logger, expressLogger} = require('./logger.js');
 
 const indexRouter = require('./routes/index');
-const loginRouter = require('./routes/login');
+const clocksRouter = require('./routes/clocks');
 
 const app = express();
 
@@ -59,6 +59,7 @@ passport.use(new MicrosoftStrategy({
 }, (accessToken, refreshToken, profile, done) => process.nextTick(() => done(null, profile))));
 app.use(passport.initialize(null));
 app.use(passport.session(null));
+app.get('/login', (req, res) => res.render('login', {user: req.user}));
 app.get('/auth/microsoft', passport.authenticate('microsoft', null, null));
 app.get('/auth/microsoft/callback', passport.authenticate('microsoft', {failureRedirect: '/login'}, null), (req, res) => res.redirect('/'));
 app.get('/logout', (req, res) => {
@@ -70,11 +71,11 @@ app.get('/logout', (req, res) => {
 // *************************
 
 app.use('/', indexRouter);
-app.use('/login', loginRouter);
+app.use('/clock', clocksRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-    next(createError(404));
+    res.render('404', {layout: false});
 });
 
 // error handler
@@ -136,7 +137,7 @@ function initSocket(http) {
                 delete CLOCKS[clock.clockID];
             });
             socket.on('rename', name => {
-                console.log(`[CLOCK RENAME] ${clock.clockName} => ${name}`);
+                logger.info(`[CLOCK RENAME] ${clock.clockName} => ${name}`);
                 clock.clockName = name;
                 io.emit('clock_name_change', clock.clockID, name);
             });
@@ -152,7 +153,7 @@ function initSocket(http) {
                     CONTROLLERS[controllerID].join('c_' + clock.clockID);
                     CONTROLLER_ROOMS[controllerID].push('c_' + clock.clockID);
                 }
-                io.to(CONTROLLERS[controllerID].id).emit('request_callback', response);
+                io.to(CONTROLLERS[controllerID].id).emit('request_callback', response, clock.clockID, clock.clockName);
             });
             socket.on('toilet', (occupied, gender) => {
                 logger.info(`[CLOCK TOILET] ${clock.clockID} toilet (${gender}) status = ${occupied}`, {
@@ -191,7 +192,7 @@ function initSocket(http) {
                     newExams: exams
                 });
                 clock.exams = exams;
-                io.to('c_' + clock.clockID).emit("exam_update", clock.clockID, exams);
+                io.to('c_' + clock.clockID).emit("exam_update", clock.clockID, JSON.stringify(exams));
             });
         } catch (err) {
             logger.error(`[SERVER ERROR] ${err.message}`, {

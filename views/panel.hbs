@@ -1,25 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="/">
-        <img src="/images/favicon.256.png" width="30" height="30" class="d-inline-block align-top" alt="">
-        Control Panel
-    </a>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="/">Clocks</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/logout">Logout</a>
-            </li>
-        </ul>
-    </div>
-</nav>
 <style>
-    body {
-        padding-top: 50px;
-        font-size: 15px;
-    }
-
     .exam-form {
         padding: 20px;
     }
@@ -92,6 +71,7 @@
     </div>
 </form>
 <script>
+    setActive('clocks');
     const socket = io();
     socket.on('connect', () => { // initial connection
         // socket.emit('controller_connected', socket.id); // tell server ima controller
@@ -148,7 +128,7 @@
         exam_in_edit = null;
         editing = false;
         clearInputs();
-        refreshExams();
+        repaintExams();
     };
     cancelBtn.onclick = () => {
         addBtn.disabled = false;
@@ -183,7 +163,9 @@
             cancelBtn.style.display = "inline-block";
         }
     };
-    const deleteExam = (id) => socket.emit("delete_exam", CLOCK_ID, id);
+    const deleteExam = (id) => {
+        if (confirm("Are you sure about this?")) socket.emit("delete_exam", CLOCK_ID, id);
+    }
 
     socket.on('exam_update', (clockID, json) => {
         if (clockID !== CLOCK_ID) return;
@@ -192,7 +174,7 @@
         EXAMS.splice(0, EXAMS.length);
         for (let exam of examsRaw)
             EXAMS.push(new Exam(exam.id, exam.name, exam.date, exam.start, exam.end));
-        refreshExams();
+        repaintExams();
     });
     socket.on('new_exam', (clockID, json) => {
         if (clockID !== CLOCK_ID) return;
@@ -219,7 +201,7 @@
         button.classList.add(status === "occupied" ? "btn-danger" : "btn-success");
     });
 
-    function refreshExams() {
+    function repaintExams() {
         examsUI.innerHTML = "";
         for (let i = 0; i < EXAMS.length; i++) {
             let exam = EXAMS[i];
@@ -255,5 +237,5 @@ From <code>${this.start}</code> to <code>${this.end}</code>
         }
     }
 
-    refreshExams();
+    repaintExams();
 </script>

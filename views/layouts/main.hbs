@@ -12,18 +12,68 @@
             integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
             crossorigin="anonymous"></script>
     <style>
-        .container {
-            margin: 50px auto;
-            font-size: 15px;
-            background: #f7f7f7;
-            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-            padding: 10px;
-        }
+        /*.container {*/
+        /*    margin: 50px auto;*/
+        /*    font-size: 15px;*/
+        /*    background: #f7f7f7;*/
+        /*    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);*/
+        /*    padding: 10px;*/
+        /*}*/
     </style>
 </head>
 <body>
-
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">
+        <img src="/images/favicon.256.png" width="30" height="30"
+             class="rounded-circle d-inline-block align-top" alt="A">
+        Exam Clock Panel
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+            aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="nav_clocks" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">Clocks</a>
+                <div class="dropdown-menu" id="menu_clocks" aria-labelledby="nav_clocks">
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/help" id="nav_help">Help</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{#if user}}/logout{{else}}/login{{/if}}" id="nav_login">{{#if user}}
+                    Logout{{else}}Login{{/if}}</a>
+            </li>
+        </ul>
+        <span class="navbar-text">
+            {{#if user}}
+                Logged in as {{user.displayName}}
+            {{else}}
+                Not logged in
+            {{/if}}
+        </span>
+    </div>
+</nav>
 <div class="container">
+    <script>
+        const menu_clocks = document.getElementById('menu_clocks');
+
+        function setActive(id) {
+            document.getElementById('nav_' + id).classList.add('active');
+        }
+
+        let connection_history = localStorage.getItem("connection_history");
+        if (!connection_history) localStorage.setItem('connection_history', connection_history = '{}');
+        connection_history = JSON.parse(connection_history);
+
+        function refreshMenuClocks() {
+            menu_clocks.innerHTML = Object.keys(connection_history).map(id => `<a id='c_${id}' class="dropdown-item" href="/clock/${id}">${id} (${connection_history[id]})</a>`).join("\n");
+        }
+        refreshMenuClocks();
+    </script>
     {{{body}}}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"

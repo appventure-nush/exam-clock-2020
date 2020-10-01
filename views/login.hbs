@@ -1,17 +1,31 @@
+<script>
+    setActive('login');
+</script>
 <style>
-    .container {
+    .login-form {
         width: 340px;
+        margin: 50px auto;
+        font-size: 15px;
+    }
+
+    .login-form form {
+        margin-bottom: 15px;
+        background: #f7f7f7;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+    }
+
+    .login-form h2 {
+        margin: 0 0 15px;
     }
 </style>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="/">
-        <img src="/images/favicon.256.png" width="30" height="30" class="d-inline-block align-top" alt="">
-        Control Panel
-    </a>
-</nav>
-<form action="/" method="post" class="login-form">
-    <a class="btn btn-block btn-outline-primary" href="/auth/microsoft">
-        <img src="/images/microsoft.svg" width="24" height="24" alt="">
-        Sign in with Microsoft
-    </a>
-</form>
+<div class="login-form">
+    <form action="/" method="post" class="login-form">
+        <h2 class="form-group">Login</h2>
+        <p class="form-group">Please login to access the control panel</p>
+        <a class="btn btn-outline-primary btn-block" href="/auth/microsoft">
+            <img src="/images/microsoft.svg" width="24" height="24" alt="">
+            Sign in with Microsoft
+        </a>
+    </form>
+</div>

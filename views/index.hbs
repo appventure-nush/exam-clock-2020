@@ -1,23 +1,19 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="/">
-        <img src="/images/favicon.256.png" width="30" height="30" class="d-inline-block align-top" alt="">
-        Control Panel
-    </a>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="/logout">Logout</a>
-            </li>
-        </ul>
-    </div>
-</nav>
 <style>
-    .container {
+    .login-form {
         width: 340px;
+        margin: 50px auto;
+        font-size: 15px;
     }
 
-    .login-form {
-        padding: 15px;
+    .login-form form {
+        margin-bottom: 15px;
+        background: #f7f7f7;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+    }
+
+    .login-form h2 {
+        margin: 0 0 15px;
     }
 
     .form-control, .btn {
@@ -35,36 +31,48 @@
         content: "No clocks connected"
     }
 </style>
-<form action="/" method="post" class="login-form">
-    {{#if error}}
-        <div class="alert alert-danger" role="alert">
-            Your key is that of a clock of another universe
-        </div>
-    {{/if}}
-    <div class="form-group">
-        Logged in as {{user.displayName}}
-    </div>
-    <div class="form-group">
-        <label for="nick">Nickname</label>
-        <input aria-describedby="nickHelp" class="form-control" id="nick" name="nick" type="text"
-               value="{{user.displayName}}">
-        <small id="nickHelp" class="form-text text-muted">Nick name is used only for verification</small>
-    </div>
-    <div class="form-group">
-        <label for="clockID">Clock ID</label>
-        <div class="input-group">
-            <input class="form-control" id="clockID" name="clockID" type="text">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">Clocks
+<div class="login-form">
+    <form action="/" method="post">
+        {{#if error}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                Your key is that of a clock of another universe
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
-                <div class="dropdown-menu" id="clocks"></div>
+            </div>
+        {{/if}}
+        {{#if query.clockNotFound}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                That clock is not connected
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {{/if}}
+        <h4>Connect to the clock</h4>
+        <div class="form-group">
+            <label for="nick">Nickname</label>
+            <input aria-describedby="nickHelp" class="form-control" id="nick" name="nick" type="text"
+                   value="{{user.displayName}}">
+            <small id="nickHelp" class="form-text text-muted">Nick name is used only for verification</small>
+        </div>
+        <div class="form-group">
+            <label for="clockID">Clock ID</label>
+            <div class="input-group">
+                <input class="form-control" id="clockID" name="clockID" type="text">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">Clocks
+                    </button>
+                    <div class="dropdown-menu" id="clocks"></div>
+                </div>
             </div>
         </div>
-    </div>
-    <button id="connect" type="submit" class="btn btn-primary btn-block">Connect</button>
-</form>
+        <button id="connect" type="submit" class="btn btn-primary btn-block">Connect</button>
+    </form>
+</div>
 <script>
+    setActive('clocks');
     const socket = io();
     socket.on('connect', () => { // initial connection
         // socket.emit('controller_connected', socket.id); // tell server ima controller
@@ -79,17 +87,19 @@
     const clocksUI = document.getElementById("clocks");
     inputCID.value = localStorage.getItem("clockID");
 
-    fetch("/clocks").then(res => res.json()).then(clocks => {
+    fetch("/clock").then(res => res.json()).then(clocks => {
         clocksUI.innerHTML = "";
-        for (let clock of clocks)
-            clocksUI.innerHTML += `<a id='c_${clock.id}' class="dropdown-item" href="#" onclick="inputCID.value='${clock.id}'">${clock.id} (${clock.name})</a>`;
+        for (let clock of clocks) clocksUI.innerHTML += `<a id='c_${clock.id}' class="dropdown-item" href="#" onclick="inputCID.value='${clock.id}'">${clock.id} (${clock.name})</a>`;
     });
 
-    socket.on('request_callback', response => {
+    socket.on('request_callback', (response, clockID, clockName) => {
         console.log("Request has been responsed with", response);
         if (timeout) clearTimeout(timeout);
         if (response === "accepted") {
             respondedAndAccepted = true;
+            connection_history[clockID] = clockName;
+            localStorage.setItem('connection_history', JSON.stringify(connection_history));
+
             $('form').submit();
         } else if (response === "rejected") {
             respondedAndAccepted = false;
