@@ -6,6 +6,7 @@ import app.nush.examclock.display.ExamHolder;
 import app.nush.examclock.model.Exam;
 import app.nush.examclock.updater.Updater;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -42,7 +43,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Stack;
 import java.util.prefs.Preferences;
@@ -51,7 +51,15 @@ import java.util.prefs.Preferences;
  * The type Main controller.
  */
 public class MainController {
-    public static final Gson gson = new Gson();
+    public static final Gson gson;
+
+    static {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Exam.class, Exam.serializer);
+        gsonBuilder.registerTypeAdapter(Exam.class, Exam.deserializer);
+        gson = gsonBuilder.create();
+    }
+
     private static final ColorAdjust redEffect = new ColorAdjust(0, 1, 0.5, 0);
     private static final ColorAdjust greenEffect = new ColorAdjust(0.5, 1, 0.5, 0);
     /**
@@ -224,13 +232,7 @@ public class MainController {
      * @return the exam holder
      */
     public ExamHolder getExamHolder(Exam exam) {
-        for (Node child : examList.getChildren()) {
-            ExamHolder holder = (ExamHolder) child;
-            if (holder.getExam().id.equals(exam.id)) {
-                return holder;
-            }
-        }
-        return null;
+        return (ExamHolder) examList.getChildren().stream().filter(holder -> ((ExamHolder) holder).getExam().getID().equals(exam.getID())).findAny().orElse(null);
     }
 
     /**
@@ -253,10 +255,10 @@ public class MainController {
      * @param exam the exam
      */
     public void showAddExamStage(Exam exam) {
-        addExamController.name_input.setText(exam.name);
-        addExamController.date_input.setValue(LocalDate.parse(exam.date));
-        addExamController.start_time_input.setText(AddExamController.timeFormatters[0].format(LocalTime.parse(exam.start)));
-        addExamController.end_time_input.setText(AddExamController.timeFormatters[0].format(LocalTime.parse(exam.end)));
+        addExamController.name_input.setText(exam.getName());
+        addExamController.date_input.setValue(exam.getDate());
+        addExamController.start_time_input.setText(AddExamController.timeFormatters[0].format(exam.getStart()));
+        addExamController.end_time_input.setText(AddExamController.timeFormatters[0].format(exam.getEnd()));
         addExamStage.show();
     }
 
@@ -311,56 +313,30 @@ public class MainController {
 
     @FXML
     public void startSelectedExams(ActionEvent event) {
-        if (selectedExamHolder != null) {
-            LocalDate newDate = LocalDate.now();
-            LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
-            Exam exam = selectedExamHolder.getExam();
-            long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            exam.date = newDate.toString();
-            exam.start = newStartTime.toString();
-            exam.end = newStartTime.plusSeconds(seconds).toString();
-            selectedExamHolder.setExam(selectedExamHolder.getExam());
-        }
+        if (selectedExamHolder != null)
+            selectedExamHolder.setExam(selectedExamHolder.getExam().setStart(LocalDate.now(), LocalTime.now().withNano(0).plusSeconds(1)));
     }
 
     @FXML
     public void stopSelectedExams(ActionEvent event) {
-        if (selectedExamHolder != null) {
-            LocalDate newDate = LocalDate.now();
-            LocalTime newEndTime = LocalTime.now().withNano(0);
-            Exam exam = selectedExamHolder.getExam();
-            long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            exam.date = newDate.toString();
-            exam.start = newEndTime.minusSeconds(seconds).toString();
-            exam.end = newEndTime.toString();
-            selectedExamHolder.setExam(selectedExamHolder.getExam());
-        }
+        if (selectedExamHolder != null)
+            selectedExamHolder.setExam(selectedExamHolder.getExam().setEnd(LocalDate.now(), LocalTime.now().withNano(0).plusSeconds(1)));
     }
 
     @FXML
     public void startAllExams(ActionEvent event) {
         LocalDate newDate = LocalDate.now();
         LocalTime newStartTime = LocalTime.now().withNano(0).plusSeconds(1);
-        exams.forEach(exam -> {
-            long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            exam.date = newDate.toString();
-            exam.start = newStartTime.toString();
-            exam.end = newStartTime.plusSeconds(seconds).toString();
-        });
-        examList.getChildren().forEach(node -> Platform.runLater(() -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam())));
+        exams.forEach(exam -> exam.setStart(newDate, newStartTime));
+        Platform.runLater(() -> examList.getChildren().forEach(node -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam())));
     }
 
     @FXML
     public void stopAllExams(ActionEvent event) {
         LocalDate newDate = LocalDate.now();
         LocalTime newEndTime = LocalTime.now().withNano(0);
-        exams.forEach(exam -> {
-            long seconds = ChronoUnit.SECONDS.between(exam.getStartTimeObj(), exam.getEndTimeObj());
-            exam.date = newDate.toString();
-            exam.start = newEndTime.minusSeconds(seconds).toString();
-            exam.end = newEndTime.toString();
-        });
-        examList.getChildren().forEach(node -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam()));
+        exams.forEach(exam -> exam.setEnd(newDate, newEndTime));
+        Platform.runLater(() -> examList.getChildren().forEach(node -> ((ExamHolder) node).setExam(((ExamHolder) node).getExam())));
     }
 
     @FXML

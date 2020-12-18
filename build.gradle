@@ -20,7 +20,7 @@ repositories {
 //    }
 }
 
-double jdkVersion = 1.8
+double jdkVersion = 1.14
 println "JDK version = ${jdkVersion}"
 
 sourceCompatibility = 1.8

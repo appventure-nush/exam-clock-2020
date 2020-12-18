@@ -83,9 +83,7 @@ public class ExamHolder extends HBox {
     private Label timeLabel;
     @FXML
     private Label countLabel;
-    private LocalDate date;
-    private LocalTime start;
-    private LocalTime end;
+
     private Exam exam;
 
     /**
@@ -153,41 +151,41 @@ public class ExamHolder extends HBox {
      * @param now   the now
      */
     public void update(LocalDate today, LocalTime now) {
-        if (today.isEqual(date)) {
-            if (now.isBefore(start)) {
-                countLabel.setText(String.format("%02d", ChronoUnit.HOURS.between(start, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(start, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(start, end) % 60));
+        if (today.isEqual(exam.getDate())) {
+            if (now.isBefore(exam.getStart())) {
+                countLabel.setText(String.format("%02d", ChronoUnit.HOURS.between(exam.getStart(), exam.getEnd())) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(exam.getStart(), exam.getEnd()) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(exam.getStart(), exam.getEnd()) % 60));
                 getStyleClass().removeAll("started", "ended");
-            } else if (now.isAfter(end)) {
+            } else if (now.isAfter(exam.getEnd())) {
                 countLabel.setText("00:00:00");
                 getStyleClass().removeAll("started", "ended");
                 getStyleClass().add("ended");
             } else {
-                float percentage = ChronoUnit.MILLIS.between(start, now) * 100f / ChronoUnit.MILLIS.between(start, end);
+                float percentage = ChronoUnit.MILLIS.between(exam.getStart(), now) * 100f / ChronoUnit.MILLIS.between(exam.getStart(), exam.getEnd());
                 setStyle(String.format("-fx-background-color: linear-gradient(to %s, %s 0%%, %s %f%%, %s %f%%, %s 100%%);", progressDirectionProperty.get(), formatColor(colorSpentProgressProperty.get()),
                         formatColor(colorSpentProgressProperty.get()), percentage - gradientFeatherProperty.get(),
                         formatColor(colorRemainProgressProperty.get()), percentage + gradientFeatherProperty.get(), formatColor(colorRemainProgressProperty.get())));
                 if (useSimplifiedCountdownForExamProperty.get()) {
-                    long hours = ChronoUnit.HOURS.between(now, end);
-                    long minutes = ChronoUnit.MINUTES.between(now, end);
-                    long seconds = ChronoUnit.MINUTES.between(now, end);
+                    long hours = ChronoUnit.HOURS.between(now, exam.getEnd());
+                    long minutes = ChronoUnit.MINUTES.between(now, exam.getEnd());
+                    long seconds = ChronoUnit.MINUTES.between(now, exam.getEnd());
                     if (hours > 0) countLabel.setText(hours + " hrs");
                     else if (minutes > 0) countLabel.setText(minutes + " min");
                     else if (seconds > 0) countLabel.setText(seconds + " sec");
                     else countLabel.setText("STOP");
                 } else {
-                    countLabel.setText(String.format("%02d", ChronoUnit.HOURS.between(now, end)) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(now, end) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(now, end) % 60));
+                    countLabel.setText(String.format("%02d", ChronoUnit.HOURS.between(now, exam.getEnd())) + ":" + String.format("%02d", ChronoUnit.MINUTES.between(now, exam.getEnd()) % 60) + ":" + String.format("%02d", ChronoUnit.SECONDS.between(now, exam.getEnd()) % 60));
                     getStyleClass().removeAll("started", "ended");
                     getStyleClass().add("started");
                 }
             }
-            timeLabel.setText(start.format(start.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
+            timeLabel.setText(exam.getStart().format(exam.getStart().getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
                     " → " +
-                    end.format(end.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
+                    exam.getEnd().format(exam.getEnd().getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
         } else {
-            countLabel.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")));
-            timeLabel.setText(date.format(DateTimeFormatter.ofPattern("dd MMM")) + ": " + start.format(start.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
+            countLabel.setText(exam.getDate().format(DateTimeFormatter.ofPattern("dd MMM")));
+            timeLabel.setText(exam.getDate().format(DateTimeFormatter.ofPattern("dd MMM")) + ": " + exam.getStart().format(exam.getStart().getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS) +
                     " → " +
-                    end.format(end.getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
+                    exam.getEnd().format(exam.getEnd().getSecond() == 0 ? PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS_NO_SECONDS : FORMAT_24_HOURS_NO_SECONDS : PreferenceController.use12HourFormatProperty.get() ? FORMAT_12_HOURS : FORMAT_24_HOURS));
             getStyleClass().removeAll("started", "ended");
         }
     }
@@ -202,7 +200,7 @@ public class ExamHolder extends HBox {
     }
 
     public void onDupe(ActionEvent e) {
-        controller.exams.add(new Exam(exam.name, LocalDate.parse(exam.getDate()), exam.getStartTimeObj(), exam.getEndTimeObj()));
+        controller.exams.add(new Exam(exam.getName(), exam.getDate(), exam.getStart(), exam.getEnd()));
     }
 
     public void onEdit(ActionEvent e) {
@@ -217,11 +215,8 @@ public class ExamHolder extends HBox {
     public ExamHolder setExam(Exam exam) {
         this.exam = exam;
         nameLabel.setText(exam.getName());
-        date = LocalDate.parse(exam.getDate());
-        start = LocalTime.parse(exam.getStart());
-        end = LocalTime.parse(exam.getEnd());
         if (visibleProperty().isBound()) visibleProperty().unbind();
-        visibleProperty().bind(Bindings.createBooleanBinding(() -> showExamsFromOtherDaysProperty.get() || date.equals(LocalDate.now()), showExamsFromOtherDaysProperty));
+        visibleProperty().bind(Bindings.createBooleanBinding(() -> showExamsFromOtherDaysProperty.get() || exam.getDate().equals(LocalDate.now()), showExamsFromOtherDaysProperty));
         return this;
     }
 }

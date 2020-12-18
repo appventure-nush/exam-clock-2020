@@ -2,7 +2,7 @@ package app.nush.examclock.updater;
 
 import app.nush.examclock.ExamClock;
 import app.nush.examclock.Version;
-import com.google.gson.Gson;
+import app.nush.examclock.controllers.MainController;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -24,7 +24,6 @@ import java.util.Objects;
  * Check if a new version has been released
  */
 public class Updater {
-    public static final Gson gson = new Gson();
     public static final OkHttpClient client = new OkHttpClient();
 
     /**
@@ -43,7 +42,7 @@ public class Updater {
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            Release[] releases = gson.fromJson(new InputStreamReader(Objects.requireNonNull(response.body()).byteStream()), Release[].class);
+            Release[] releases = MainController.gson.fromJson(new InputStreamReader(Objects.requireNonNull(response.body()).byteStream()), Release[].class);
             Arrays.sort(releases, Comparator.comparing(r -> Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(r.published_at)))));
             Release release = releases[releases.length - 1];
             int i = release.tag_name.substring(1).compareTo(Version.getVersion());

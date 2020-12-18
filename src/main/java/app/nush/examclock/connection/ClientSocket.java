@@ -73,7 +73,7 @@ public class ClientSocket {
             controller.exams.addListener((ListChangeListener<Exam>) c -> {
                 while (c.next()) {
                     c.getAddedSubList().forEach(exam -> socket.emit("new_exam", MainController.gson.toJson(exam)));
-                    c.getRemoved().forEach(exam -> socket.emit("delete_exam", exam.id));
+                    c.getRemoved().forEach(exam -> socket.emit("delete_exam", exam.getID()));
                 }
             });
             PreferenceController.nameProperty.addListener(((observable, oldValue, newValue) -> socket.emit("rename", newValue)));
@@ -138,11 +138,11 @@ public class ClientSocket {
     private void onEditExam(Object... objects) {
         try {
             for (Exam exam : controller.exams) {
-                if (exam.id.equals(String.valueOf(objects[1]))) {
-                    exam.name = String.valueOf(objects[2]);
-                    exam.date = String.valueOf(objects[3]);
-                    exam.start = String.valueOf(objects[4]);
-                    exam.end = String.valueOf(objects[5]);
+                if (exam.getID().equals(String.valueOf(objects[1]))) {
+                    exam.setName(String.valueOf(objects[2]));
+                    exam.setDate(LocalDate.parse(String.valueOf(objects[3])));
+                    exam.setStart(LocalTime.parse(String.valueOf(objects[4])));
+                    exam.setEnd(LocalTime.parse(String.valueOf(objects[5])));
                     Platform.runLater(() -> controller.getExamHolder(exam).setExam(exam));
                     break;
                 }
@@ -159,13 +159,8 @@ public class ClientSocket {
     private void onDeleteExam(Object... objects) {
         String id = String.valueOf(objects[1]);
         Platform.runLater(() -> {
-            for (int i = 0; i < controller.exams.size(); i++) {
-                if (controller.exams.get(i).id.equals(id)) {
-                    controller.exams.remove(i);
-                    return;
-                }
-            }
-            socket.emit("clock_error", objects[0], "exam_not_found");
+            if (!controller.exams.removeIf(exam -> exam.getID().equals(id)))
+                socket.emit("clock_error", objects[0], "exam_not_found");
         });
     }
 
