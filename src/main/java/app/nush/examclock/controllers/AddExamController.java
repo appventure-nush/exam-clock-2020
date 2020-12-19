@@ -57,6 +57,8 @@ public class AddExamController {
         }
     }
 
+    boolean updateBlockingFlag = false;
+
     /**
      * Initialize.
      */
@@ -78,15 +80,23 @@ public class AddExamController {
         end_time_input.timeProperty.addListener((observable, oldValue, newValue) -> {
             try {
                 int minutes = (int) start_time_input.timeProperty.get().until(newValue, ChronoUnit.MINUTES);
+                updateBlockingFlag = true;
                 duration_hours.getValueFactory().setValue(minutes / 60);
                 duration_minutes.getValueFactory().setValue(minutes % 60);
+                updateBlockingFlag = false;
             } catch (DateTimeParseException e) {
 //                if (end_time_input.getUserData() != null)
 //                    end_time_input.setText(timeFormatter.format((LocalTime) end_time_input.getUserData()));
             }
         });
-        duration_hours.valueProperty().addListener((observable, oldValue, newValue) -> end_time_input.timeProperty.set(start_time_input.timeProperty.get().plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
-        duration_minutes.valueProperty().addListener((observable, oldValue, newValue) -> end_time_input.timeProperty.set(start_time_input.timeProperty.get().plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue())));
+        duration_hours.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (start_time_input.timeProperty.get() == null || updateBlockingFlag) return;
+            end_time_input.timeProperty.set(start_time_input.timeProperty.get().plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue()));
+        });
+        duration_minutes.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (start_time_input.timeProperty.get() == null || updateBlockingFlag) return;
+            end_time_input.timeProperty.set(start_time_input.timeProperty.get().plusHours(duration_hours.getValue()).plusMinutes(duration_minutes.getValue()));
+        });
     }
 
     /**

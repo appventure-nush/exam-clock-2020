@@ -30,8 +30,6 @@ public class TimePicker extends TextField {
 
         popup = new TimePopup(this);
 
-        CustomBinding.bindBidirectional(timeProperty, hour, LocalTime::getHour, hour -> LocalTime.of(hour.intValue(), minute.get()));
-        CustomBinding.bindBidirectional(timeProperty, minute, LocalTime::getMinute, minute -> LocalTime.of(hour.get(), minute.intValue()));
         CustomBinding.bindBidirectional(timeProperty, textProperty(), localTime -> localTime.format(defaultFormatter), text -> {
             try {
                 return parseTime(text, 0);
@@ -39,6 +37,12 @@ public class TimePicker extends TextField {
                 return timeProperty.get();
             }
         });
+        timeProperty.addListener((observable, oldValue, newValue) -> {
+            hour.set(newValue.getHour());
+            minute.set(newValue.getMinute());
+        });
+        hour.addListener((observable, oldValue, newValue) -> timeProperty.set(LocalTime.of(hour.intValue(), minute.get())));
+        minute.addListener((observable, oldValue, newValue) -> timeProperty.set(LocalTime.of(hour.intValue(), minute.get())));
 
         setPromptText("00:00 am");
         focusedProperty().addListener((observable, oldValue, newValue) -> {
