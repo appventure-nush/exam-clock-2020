@@ -3,7 +3,7 @@ package app.nush.examclock.controllers;
 import app.nush.examclock.connection.ClientSocket;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.stage.WindowEvent;
 
 /**
@@ -11,8 +11,9 @@ import javafx.stage.WindowEvent;
  */
 public class ConnectionController {
     @FXML
-    private Label clockIDLabel;
-    private MainController mainController;
+    public TextField clockNameLabel;
+    @FXML
+    private TextField clockIDLabel;
 
     private ClientSocket socket;
 
@@ -22,6 +23,7 @@ public class ConnectionController {
     @FXML
     public void initialize() {
         clockIDLabel.setText(PreferenceController.clockID);
+        clockNameLabel.textProperty().bindBidirectional(PreferenceController.nameProperty);
     }
 
     /**
@@ -61,7 +63,6 @@ public class ConnectionController {
      * @param mainController the main controller
      */
     public void setMainController(MainController mainController) {
-        this.mainController = mainController;
         mainController.setConnectionController(this);
         socket = new ClientSocket(mainController);
     }

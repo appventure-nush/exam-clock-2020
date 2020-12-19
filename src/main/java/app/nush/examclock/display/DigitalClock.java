@@ -67,6 +67,10 @@ public class DigitalClock extends Parent {
             if (newValue) setEffect(new DropShadow());
             else setEffect(null);
         });
+        PreferenceController.nightMode.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != newValue)
+                digitalClockBackgroundColorProperty.set(digitalClockBackgroundColorProperty.getValue().invert());
+        });
         for (int i = 0; i < 6; i++) {
             Digit digit = new Digit();
             digit.setLayoutX(i * Digit.DIGIT_SPACE + ((i + 1) % 2) * Digit.DIGIT_SPACE / 4);

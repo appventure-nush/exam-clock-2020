@@ -53,6 +53,10 @@
                 <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                     <VBox fx:id="examList"/>
                 </ScrollPane>
+                <HBox>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Button onAction="#addExamClicked">Add</Button>
+                </HBox>
             </VBox>
         </SplitPane>
     </center>

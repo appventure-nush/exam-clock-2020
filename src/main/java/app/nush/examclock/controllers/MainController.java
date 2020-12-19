@@ -25,10 +25,12 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
@@ -60,7 +62,12 @@ public class MainController {
         gson = gsonBuilder.create();
     }
 
-    private static final ColorAdjust redEffect = new ColorAdjust(0, 1, 0.5, 0);
+    private static final ColorAdjust redEffect = new ColorAdjust(0, 1, 0.2, 0);
+
+    static {
+        redEffect.setInput(new DropShadow(10, Color.RED));
+    }
+
     private static final ColorAdjust greenEffect = new ColorAdjust(0.5, 1, 0.5, 0);
     /**
      * Exams, observable so changes are reflected across entire program
